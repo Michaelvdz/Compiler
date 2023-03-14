@@ -1,0 +1,11 @@
+digraph AST {
+	Prog
+	Inst
+	"+"
+	5
+	"+" -> 5
+	10
+	"+" -> 10
+	Inst -> "+"
+	Prog -> Inst
+}

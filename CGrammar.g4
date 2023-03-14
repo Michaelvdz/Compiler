@@ -6,24 +6,40 @@ prog: instr+ EOF
 instr: expr ';'
 	;
 
-expr:   expr (MULTIPLICATION|DIVISION) expr
-	|	expr (ADDITION|SUBTRACTION) expr
-	|	expr ('=='|'>'|'<') expr
-	|	expr ('%') expr
-	|   UNARY_OPERATOR expr
-	|	expr ('&&' | '||') expr
-	|	('!') expr
-	|	expr ('>=' | '<=' | '!=') expr
-	|	INT
-	|	'(' expr ')'
-	;
-
-UNARY_OPERATOR:  '+'
+unary_operator:  '+'
     |   '-'
     ;
-MULTIPLICATION: '*';
-DIVISION:   '/';
-ADDITION:   '+';
-SUBTRACTION:    '-';
+parenthesis_expression: '(' expr ')'
+    ;
+
+unary_expression:   unary_operator constant
+    |   constant
+    |   parenthesis_expression
+    ;
+
+mul_div_expression: mul_div_expression op=('*'|'-') unary_expression
+    |   mul_div_expression ('%') unary_expression
+    |   unary_expression
+    ;
+add_sub_expression: add_sub_expression op=('+'|'-') mul_div_expression
+    |   mul_div_expression
+    ;
+
+relational_expression:  relational_expression ('<'|'>'|'=='|'<='|'>='|'!=') add_sub_expression
+    |   add_sub_expression
+    ;
+
+logical_expression:  logical_expression ('&&'|'||') logical_expression
+    |   '!' logical_expression
+    |   constant
+    ;
+
+
+expr:   relational_expression
+	;
+
+constant:   INT
+    ;
+
 INT: [0-9]+;
 WS: [ \n\t\r]+ -> skip;
