@@ -8,13 +8,17 @@ instr: expr ';'
 
 unary_operator:  '+'
     |   '-'
+    |   '*'
+    |   '&'
     ;
 parenthesis_expression: '(' expr ')'
     ;
 
-unary_expression:   unary_operator constant
+unary_expression:   unary_operator IDENTIFIER
+    |   unary_operator constant
     |   constant
     |   parenthesis_expression
+    |   IDENTIFIER
     ;
 
 mul_div_expression: mul_div_expression op=('*'|'/') unary_expression
@@ -34,12 +38,38 @@ logical_expression:  logical_expression op=('&&'|'||') logical_expression
     |   constant
     ;
 
+assignment_expression:  relational_expression
+    ;
 
-expr:   relational_expression
+declaration_specification:  type '*' IDENTIFIER
+    | type IDENTIFIER
+    | IDENTIFIER
+    ;
+
+declaration:    declaration_specification '=' assignment_expression
+    | declaration_specification
+    ;
+
+expr:   assignment_expression
+    | declaration
 	;
 
+
+
 constant:   INT
+    | FLOAT
+    ;
+
+type:   reserved_word type
+    |   'int'
+    |   'float'
+    |   'char'
+    ;
+
+reserved_word:  'const'
     ;
 
 INT: [0-9]+;
+FLOAT: [0-9]*? '.' [0-9]+;
+IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
 WS: [ \n\t\r]+ -> skip;

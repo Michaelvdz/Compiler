@@ -89,6 +89,33 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CGrammarParser#assignment_expression.
+    def enterAssignment_expression(self, ctx:CGrammarParser.Assignment_expressionContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#assignment_expression.
+    def exitAssignment_expression(self, ctx:CGrammarParser.Assignment_expressionContext):
+        pass
+
+
+    # Enter a parse tree produced by CGrammarParser#declaration_specification.
+    def enterDeclaration_specification(self, ctx:CGrammarParser.Declaration_specificationContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#declaration_specification.
+    def exitDeclaration_specification(self, ctx:CGrammarParser.Declaration_specificationContext):
+        pass
+
+
+    # Enter a parse tree produced by CGrammarParser#declaration.
+    def enterDeclaration(self, ctx:CGrammarParser.DeclarationContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#declaration.
+    def exitDeclaration(self, ctx:CGrammarParser.DeclarationContext):
+        pass
+
+
     # Enter a parse tree produced by CGrammarParser#expr.
     def enterExpr(self, ctx:CGrammarParser.ExprContext):
         pass
@@ -104,6 +131,24 @@ class CGrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by CGrammarParser#constant.
     def exitConstant(self, ctx:CGrammarParser.ConstantContext):
+        pass
+
+
+    # Enter a parse tree produced by CGrammarParser#type.
+    def enterType(self, ctx:CGrammarParser.TypeContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#type.
+    def exitType(self, ctx:CGrammarParser.TypeContext):
+        pass
+
+
+    # Enter a parse tree produced by CGrammarParser#reserved_word.
+    def enterReserved_word(self, ctx:CGrammarParser.Reserved_wordContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#reserved_word.
+    def exitReserved_word(self, ctx:CGrammarParser.Reserved_wordContext):
         pass
 
 

@@ -54,6 +54,21 @@ class CGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CGrammarParser#assignment_expression.
+    def visitAssignment_expression(self, ctx:CGrammarParser.Assignment_expressionContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CGrammarParser#declaration_specification.
+    def visitDeclaration_specification(self, ctx:CGrammarParser.Declaration_specificationContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CGrammarParser#declaration.
+    def visitDeclaration(self, ctx:CGrammarParser.DeclarationContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CGrammarParser#expr.
     def visitExpr(self, ctx:CGrammarParser.ExprContext):
         return self.visitChildren(ctx)
@@ -61,6 +76,16 @@ class CGrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by CGrammarParser#constant.
     def visitConstant(self, ctx:CGrammarParser.ConstantContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CGrammarParser#type.
+    def visitType(self, ctx:CGrammarParser.TypeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CGrammarParser#reserved_word.
+    def visitReserved_word(self, ctx:CGrammarParser.Reserved_wordContext):
         return self.visitChildren(ctx)
 
 
