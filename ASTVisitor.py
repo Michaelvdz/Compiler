@@ -11,20 +11,35 @@ class ASTVisitor(Visitor):
         self.ast = graphviz.Digraph('AST', filename='ast.gv')
 
     def VisitASTNode(self, currentNode):
-        self.ast.node(currentNode.name)
+        print("Node")
+        print(id(currentNode))
+        self.ast.node(str(id(currentNode)), currentNode.name)
         for child in currentNode.children:
             node = child.accept(self)
-            self.ast.edge(currentNode.name, str(node))
-        return currentNode.name
+            self.ast.edge(str(id(currentNode)), str(id(node)))
+        return currentNode
 
     def VisitBinaryOperation(self, currentNode):
-        self.ast.node(currentNode.operator)
+        print("Binary")
+        print(id(currentNode))
+        self.ast.node(str(id(currentNode)), currentNode.value)
         for child in currentNode.children:
             node = child.accept(self)
-            self.ast.edge(currentNode.operator, node)
-        return currentNode.operator
+            self.ast.edge(str(id(currentNode)), str(id(node)))
+        return currentNode
+
+    def VisitRelationOperation(self, currentNode):
+        print("Relation")
+        print(id(currentNode))
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        for child in currentNode.children:
+            node = child.accept(self)
+            self.ast.edge(str(id(currentNode)), str(id(node)))
+        return currentNode
 
     def VisitConstant(self, currentNode):
-        self.ast.node(currentNode.value)
-        return currentNode.value
+        print("Constant")
+        print(id(currentNode))
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        return currentNode
 

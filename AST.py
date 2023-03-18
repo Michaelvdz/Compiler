@@ -51,13 +51,13 @@ class BinaryOperation(ASTNode):
 
     name = ""
     children = []
-    operator = ""
+    value = ""
 
     def __init__(self, name):
         print("___init-BinaryOperation___");
         self.children = []
         self.name = "BinaryOperation"
-        self.operator = name
+        self.value = name
         print("___Node-Created-With-Name:"+ self.name + "___")
 
     def adopt(self, node):
@@ -69,12 +69,41 @@ class BinaryOperation(ASTNode):
             self.children.append(node)
 
     def print(self):
-        print("This is a binary operation node with operator: " + str(self.operator) + " and nodes:")
+        print("This is a binary operation node with operator: " + str(self.value) + " and nodes:")
         for node in self.children:
             node.print()
 
     def accept(self, visitor: Visitor):
         return visitor.VisitBinaryOperation(self)
+
+class RelationOperation(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+
+    def __init__(self, name):
+        print("___init-RelationOperation___");
+        self.children = []
+        self.name = "RelationOperation"
+        self.value = name
+        print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def print(self):
+        print("This is a relation operation node with operator: " + str(self.value) + " and nodes:")
+        for node in self.children:
+            node.print()
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitRelationOperation(self)
 
 
 class Constant(ASTNode):
@@ -95,6 +124,25 @@ class Constant(ASTNode):
 
     def accept(self, visitor: Visitor):
         return visitor.VisitConstant(self)
+
+class UnaryOperator(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+
+    def __init__(self, value):
+        print("___init-UnaryOperator__");
+        self.children = 0
+        self.name = "Operator"
+        self.value = value
+        print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def print(self):
+        print("Operator: " + self.value)
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitUnaryOperator(self)
 
 
 

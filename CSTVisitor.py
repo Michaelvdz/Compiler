@@ -44,25 +44,54 @@ class CSTVisitor(CGrammarVisitor):
     # Visit a parse tree produced by CGrammarParser#unary_operator.
     def visitUnary_operator(self, ctx: CGrammarParser.Unary_operatorContext):
         print("UnaryOperator")
-        return self.visitChildren(ctx)
+        op = UnaryOperator(ctx.getText())
+        return op
 
     # Visit a parse tree produced by CGrammarParser#parenthesis_expression.
     def visitParenthesis_expression(self, ctx: CGrammarParser.Parenthesis_expressionContext):
         print("ParenthesisExpression")
+        print("--------------------------------------------")
+        if len(ctx.children) == 3:
+            for child in ctx.children:
+                if not child.getText() == '(' and not child.getText() == ')':
+                    print("No parenthesis")
+                    node = self.visit(child)
+                    return node
+                else:
+                    print(child)
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by CGrammarParser#unary_expression.
     def visitUnary_expression(self, ctx: CGrammarParser.Unary_expressionContext):
         print("UnaryExpression")
-        return self.visitChildren(ctx)
+        if len(ctx.children) == 2:
+            op = 0
+            for child in ctx.children:
+                node = self.visit(child)
+                if isinstance(node, UnaryOperator):
+                    op = node
+                else:
+                    if op.value == "-":
+                        node.value = op.value + node.value
+                    return node
+        else:
+            return self.visitChildren(ctx)
 
     # Visit a parse tree produced by CGrammarParser#mul_div_expression.
     def visitMul_div_expression(self, ctx: CGrammarParser.Mul_div_expressionContext):
         print("MulDivExpression")
+        print("#children: " + str(ctx.getChildCount()))
         if ctx.getChildCount() > 1:
-            binOp = BinaryOperation(ctx.op)
-            self.stack.append(binOp)
-        return self.visitChildren(ctx)
+            binOp = BinaryOperation(ctx.op.text)
+            for child in ctx.children:
+                node = self.visit(child)
+                if isinstance(node, ASTNode):
+                    node.print()
+                    binOp.adopt(node)
+            binOp.print()
+            return binOp
+        else:
+            return self.visitChildren(ctx)
 
     # Visit a parse tree produced by CGrammarParser#add_sub_expression.
     def visitAdd_sub_expression(self, ctx: CGrammarParser.Add_sub_expressionContext):
@@ -84,7 +113,18 @@ class CSTVisitor(CGrammarVisitor):
     def visitRelational_expression(self, ctx: CGrammarParser.Relational_expressionContext):
         print("RelationalExpression")
         print("#children: " + str(ctx.getChildCount()))
-        return self.visitChildren(ctx)
+        print("#children: " + str(ctx.getChildCount()))
+        if ctx.getChildCount() > 1:
+            relOp = RelationOperation(ctx.op.text)
+            for child in ctx.children:
+                node = self.visit(child)
+                if isinstance(node, ASTNode):
+                    node.print()
+                    relOp.adopt(node)
+            relOp.print()
+            return relOp
+        else:
+            return self.visitChildren(ctx)
 
     # Visit a parse tree produced by CGrammarParser#logical_expression.
     def visitLogical_expression(self, ctx: CGrammarParser.Logical_expressionContext):

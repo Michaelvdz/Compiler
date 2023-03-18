@@ -10,7 +10,7 @@ else:
 
 def serializedATN():
     return [
-        4,1,18,100,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        4,1,19,100,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
         6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,1,0,4,0,24,8,0,11,0,12,0,25,
         1,0,1,0,1,1,1,1,1,1,1,2,1,2,1,3,1,3,1,3,1,3,1,4,1,4,1,4,1,4,1,4,
         3,4,44,8,4,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,5,5,55,8,5,10,5,12,
@@ -18,28 +18,28 @@ def serializedATN():
         1,7,1,7,1,7,1,7,1,7,5,7,77,8,7,10,7,12,7,80,9,7,1,8,1,8,1,8,1,8,
         3,8,86,8,8,1,8,1,8,1,8,5,8,91,8,8,10,8,12,8,94,9,8,1,9,1,9,1,10,
         1,10,1,10,0,4,10,12,14,16,11,0,2,4,6,8,10,12,14,16,18,20,0,4,1,0,
-        2,3,2,0,3,3,6,6,1,0,8,13,1,0,14,15,97,0,23,1,0,0,0,2,29,1,0,0,0,
-        4,32,1,0,0,0,6,34,1,0,0,0,8,43,1,0,0,0,10,45,1,0,0,0,12,59,1,0,0,
-        0,14,70,1,0,0,0,16,85,1,0,0,0,18,95,1,0,0,0,20,97,1,0,0,0,22,24,
-        3,2,1,0,23,22,1,0,0,0,24,25,1,0,0,0,25,23,1,0,0,0,25,26,1,0,0,0,
-        26,27,1,0,0,0,27,28,5,0,0,1,28,1,1,0,0,0,29,30,3,18,9,0,30,31,5,
-        1,0,0,31,3,1,0,0,0,32,33,7,0,0,0,33,5,1,0,0,0,34,35,5,4,0,0,35,36,
-        3,18,9,0,36,37,5,5,0,0,37,7,1,0,0,0,38,39,3,4,2,0,39,40,3,20,10,
-        0,40,44,1,0,0,0,41,44,3,20,10,0,42,44,3,6,3,0,43,38,1,0,0,0,43,41,
-        1,0,0,0,43,42,1,0,0,0,44,9,1,0,0,0,45,46,6,5,-1,0,46,47,3,8,4,0,
-        47,56,1,0,0,0,48,49,10,3,0,0,49,50,7,1,0,0,50,55,3,8,4,0,51,52,10,
-        2,0,0,52,53,5,7,0,0,53,55,3,8,4,0,54,48,1,0,0,0,54,51,1,0,0,0,55,
-        58,1,0,0,0,56,54,1,0,0,0,56,57,1,0,0,0,57,11,1,0,0,0,58,56,1,0,0,
-        0,59,60,6,6,-1,0,60,61,3,10,5,0,61,67,1,0,0,0,62,63,10,2,0,0,63,
-        64,7,0,0,0,64,66,3,10,5,0,65,62,1,0,0,0,66,69,1,0,0,0,67,65,1,0,
-        0,0,67,68,1,0,0,0,68,13,1,0,0,0,69,67,1,0,0,0,70,71,6,7,-1,0,71,
-        72,3,12,6,0,72,78,1,0,0,0,73,74,10,2,0,0,74,75,7,2,0,0,75,77,3,12,
-        6,0,76,73,1,0,0,0,77,80,1,0,0,0,78,76,1,0,0,0,78,79,1,0,0,0,79,15,
-        1,0,0,0,80,78,1,0,0,0,81,82,6,8,-1,0,82,83,5,16,0,0,83,86,3,16,8,
-        2,84,86,3,20,10,0,85,81,1,0,0,0,85,84,1,0,0,0,86,92,1,0,0,0,87,88,
+        2,3,1,0,6,7,1,0,9,14,1,0,15,16,97,0,23,1,0,0,0,2,29,1,0,0,0,4,32,
+        1,0,0,0,6,34,1,0,0,0,8,43,1,0,0,0,10,45,1,0,0,0,12,59,1,0,0,0,14,
+        70,1,0,0,0,16,85,1,0,0,0,18,95,1,0,0,0,20,97,1,0,0,0,22,24,3,2,1,
+        0,23,22,1,0,0,0,24,25,1,0,0,0,25,23,1,0,0,0,25,26,1,0,0,0,26,27,
+        1,0,0,0,27,28,5,0,0,1,28,1,1,0,0,0,29,30,3,18,9,0,30,31,5,1,0,0,
+        31,3,1,0,0,0,32,33,7,0,0,0,33,5,1,0,0,0,34,35,5,4,0,0,35,36,3,18,
+        9,0,36,37,5,5,0,0,37,7,1,0,0,0,38,39,3,4,2,0,39,40,3,20,10,0,40,
+        44,1,0,0,0,41,44,3,20,10,0,42,44,3,6,3,0,43,38,1,0,0,0,43,41,1,0,
+        0,0,43,42,1,0,0,0,44,9,1,0,0,0,45,46,6,5,-1,0,46,47,3,8,4,0,47,56,
+        1,0,0,0,48,49,10,3,0,0,49,50,7,1,0,0,50,55,3,8,4,0,51,52,10,2,0,
+        0,52,53,5,8,0,0,53,55,3,8,4,0,54,48,1,0,0,0,54,51,1,0,0,0,55,58,
+        1,0,0,0,56,54,1,0,0,0,56,57,1,0,0,0,57,11,1,0,0,0,58,56,1,0,0,0,
+        59,60,6,6,-1,0,60,61,3,10,5,0,61,67,1,0,0,0,62,63,10,2,0,0,63,64,
+        7,0,0,0,64,66,3,10,5,0,65,62,1,0,0,0,66,69,1,0,0,0,67,65,1,0,0,0,
+        67,68,1,0,0,0,68,13,1,0,0,0,69,67,1,0,0,0,70,71,6,7,-1,0,71,72,3,
+        12,6,0,72,78,1,0,0,0,73,74,10,2,0,0,74,75,7,2,0,0,75,77,3,12,6,0,
+        76,73,1,0,0,0,77,80,1,0,0,0,78,76,1,0,0,0,78,79,1,0,0,0,79,15,1,
+        0,0,0,80,78,1,0,0,0,81,82,6,8,-1,0,82,83,5,17,0,0,83,86,3,16,8,2,
+        84,86,3,20,10,0,85,81,1,0,0,0,85,84,1,0,0,0,86,92,1,0,0,0,87,88,
         10,3,0,0,88,89,7,3,0,0,89,91,3,16,8,4,90,87,1,0,0,0,91,94,1,0,0,
         0,92,90,1,0,0,0,92,93,1,0,0,0,93,17,1,0,0,0,94,92,1,0,0,0,95,96,
-        3,14,7,0,96,19,1,0,0,0,97,98,5,17,0,0,98,21,1,0,0,0,8,25,43,54,56,
+        3,14,7,0,96,19,1,0,0,0,97,98,5,18,0,0,98,21,1,0,0,0,8,25,43,54,56,
         67,78,85,92
     ]
 
@@ -54,14 +54,14 @@ class CGrammarParser ( Parser ):
     sharedContextCache = PredictionContextCache()
 
     literalNames = [ "<INVALID>", "';'", "'+'", "'-'", "'('", "')'", "'*'", 
-                     "'%'", "'<'", "'>'", "'=='", "'<='", "'>='", "'!='", 
-                     "'&&'", "'||'", "'!'" ]
+                     "'/'", "'%'", "'<'", "'>'", "'=='", "'<='", "'>='", 
+                     "'!='", "'&&'", "'||'", "'!'" ]
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                      "<INVALID>", "INT", "WS" ]
+                      "<INVALID>", "<INVALID>", "INT", "WS" ]
 
     RULE_prog = 0
     RULE_instr = 1
@@ -97,8 +97,9 @@ class CGrammarParser ( Parser ):
     T__13=14
     T__14=15
     T__15=16
-    INT=17
-    WS=18
+    T__16=17
+    INT=18
+    WS=19
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -162,7 +163,7 @@ class CGrammarParser ( Parser ):
                 self.state = 25 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & 131100) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & 262172) != 0)):
                     break
 
             self.state = 27
@@ -383,7 +384,7 @@ class CGrammarParser ( Parser ):
                 self.state = 39
                 self.constant()
                 pass
-            elif token in [17]:
+            elif token in [18]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 41
                 self.constant()
@@ -474,7 +475,7 @@ class CGrammarParser ( Parser ):
                         self.state = 49
                         localctx.op = self._input.LT(1)
                         _la = self._input.LA(1)
-                        if not(_la==3 or _la==6):
+                        if not(_la==6 or _la==7):
                             localctx.op = self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -492,7 +493,7 @@ class CGrammarParser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
 
                         self.state = 52
-                        self.match(CGrammarParser.T__6)
+                        self.match(CGrammarParser.T__7)
                         self.state = 53
                         self.unary_expression()
                         pass
@@ -602,6 +603,7 @@ class CGrammarParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
+            self.op = None # Token
 
         def add_sub_expression(self):
             return self.getTypedRuleContext(CGrammarParser.Add_sub_expressionContext,0)
@@ -658,9 +660,10 @@ class CGrammarParser ( Parser ):
                         from antlr4.error.Errors import FailedPredicateException
                         raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
                     self.state = 74
+                    localctx.op = self._input.LT(1)
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 16128) != 0)):
-                        self._errHandler.recoverInline(self)
+                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 32256) != 0)):
+                        localctx.op = self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
                         self.consume()
@@ -685,6 +688,7 @@ class CGrammarParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
+            self.op = None # Token
 
         def logical_expression(self, i:int=None):
             if i is None:
@@ -729,13 +733,13 @@ class CGrammarParser ( Parser ):
             self.state = 85
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [16]:
+            if token in [17]:
                 self.state = 82
-                self.match(CGrammarParser.T__15)
+                self.match(CGrammarParser.T__16)
                 self.state = 83
                 self.logical_expression(2)
                 pass
-            elif token in [17]:
+            elif token in [18]:
                 self.state = 84
                 self.constant()
                 pass
@@ -758,9 +762,10 @@ class CGrammarParser ( Parser ):
                         from antlr4.error.Errors import FailedPredicateException
                         raise FailedPredicateException(self, "self.precpred(self._ctx, 3)")
                     self.state = 88
+                    localctx.op = self._input.LT(1)
                     _la = self._input.LA(1)
-                    if not(_la==14 or _la==15):
-                        self._errHandler.recoverInline(self)
+                    if not(_la==15 or _la==16):
+                        localctx.op = self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
                         self.consume()
