@@ -10,7 +10,7 @@ else:
 
 def serializedATN():
     return [
-        4,1,27,145,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        4,1,28,145,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
         6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,
         2,14,7,14,2,15,7,15,1,0,4,0,34,8,0,11,0,12,0,35,1,0,1,0,1,1,1,1,
         1,1,1,2,1,2,1,3,1,3,1,3,1,3,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,
@@ -22,10 +22,10 @@ def serializedATN():
         11,1,11,1,11,3,11,127,8,11,1,12,1,12,3,12,131,8,12,1,13,1,13,1,14,
         1,14,1,14,1,14,1,14,1,14,3,14,141,8,14,1,15,1,15,1,15,0,4,10,12,
         14,16,16,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,0,6,1,0,2,5,
-        2,0,4,4,8,8,1,0,2,3,1,0,10,15,1,0,16,17,1,0,24,25,146,0,33,1,0,0,
-        0,2,39,1,0,0,0,4,42,1,0,0,0,6,44,1,0,0,0,8,57,1,0,0,0,10,59,1,0,
-        0,0,12,73,1,0,0,0,14,84,1,0,0,0,16,99,1,0,0,0,18,109,1,0,0,0,20,
-        119,1,0,0,0,22,126,1,0,0,0,24,130,1,0,0,0,26,132,1,0,0,0,28,140,
+        2,0,4,4,8,8,1,0,2,3,1,0,10,15,1,0,16,17,2,0,24,25,27,27,146,0,33,
+        1,0,0,0,2,39,1,0,0,0,4,42,1,0,0,0,6,44,1,0,0,0,8,57,1,0,0,0,10,59,
+        1,0,0,0,12,73,1,0,0,0,14,84,1,0,0,0,16,99,1,0,0,0,18,109,1,0,0,0,
+        20,119,1,0,0,0,22,126,1,0,0,0,24,130,1,0,0,0,26,132,1,0,0,0,28,140,
         1,0,0,0,30,142,1,0,0,0,32,34,3,2,1,0,33,32,1,0,0,0,34,35,1,0,0,0,
         35,33,1,0,0,0,35,36,1,0,0,0,36,37,1,0,0,0,37,38,5,0,0,1,38,1,1,0,
         0,0,39,40,3,24,12,0,40,41,5,1,0,0,41,3,1,0,0,0,42,43,7,0,0,0,43,
@@ -81,7 +81,7 @@ class CGrammarParser ( Parser ):
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                      "INT", "FLOAT", "IDENTIFIER", "WS" ]
+                      "INT", "FLOAT", "IDENTIFIER", "CHAR", "WS" ]
 
     RULE_prog = 0
     RULE_instr = 1
@@ -133,7 +133,8 @@ class CGrammarParser ( Parser ):
     INT=24
     FLOAT=25
     IDENTIFIER=26
-    WS=27
+    CHAR=27
+    WS=28
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -197,7 +198,7 @@ class CGrammarParser ( Parser ):
                 self.state = 35 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & 133169276) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & 267387004) != 0)):
                     break
 
             self.state = 37
@@ -791,7 +792,7 @@ class CGrammarParser ( Parser ):
                 self.state = 97
                 self.logical_expression(2)
                 pass
-            elif token in [24, 25]:
+            elif token in [24, 25, 27]:
                 self.state = 98
                 self.constant()
                 pass
@@ -1107,6 +1108,9 @@ class CGrammarParser ( Parser ):
         def FLOAT(self):
             return self.getToken(CGrammarParser.FLOAT, 0)
 
+        def CHAR(self):
+            return self.getToken(CGrammarParser.CHAR, 0)
+
         def getRuleIndex(self):
             return CGrammarParser.RULE_constant
 
@@ -1136,7 +1140,7 @@ class CGrammarParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 132
             _la = self._input.LA(1)
-            if not(_la==24 or _la==25):
+            if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 184549376) != 0)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)

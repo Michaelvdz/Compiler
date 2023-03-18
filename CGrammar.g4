@@ -58,6 +58,7 @@ expr:   assignment_expression
 
 constant:   INT
     | FLOAT
+    | CHAR
     ;
 
 type:   reserved_word type
@@ -72,4 +73,5 @@ reserved_word:  'const'
 INT: [0-9]+;
 FLOAT: [0-9]*? '.' [0-9]+;
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
+CHAR: ['] . ['];
 WS: [ \n\t\r]+ -> skip;
