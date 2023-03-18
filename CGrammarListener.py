@@ -152,5 +152,23 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CGrammarParser#comment.
+    def enterComment(self, ctx:CGrammarParser.CommentContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#comment.
+    def exitComment(self, ctx:CGrammarParser.CommentContext):
+        pass
+
+
+    # Enter a parse tree produced by CGrammarParser#printf.
+    def enterPrintf(self, ctx:CGrammarParser.PrintfContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#printf.
+    def exitPrintf(self, ctx:CGrammarParser.PrintfContext):
+        pass
+
+
 
 del CGrammarParser

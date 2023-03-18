@@ -4,6 +4,8 @@ prog: instr+ EOF
 	;
 
 instr: expr ';'
+    | comment
+    | printf ';'
 	;
 
 unary_operator:  '+'
@@ -70,6 +72,15 @@ type:   reserved_word type
 reserved_word:  'const'
     ;
 
+comment: BLOCKCOMMENT
+    |   SINGLE_LINE_COMMMENT
+    ;
+
+printf: 'printf' '(' (IDENTIFIER | constant) ')'
+    ;
+
+BLOCKCOMMENT: '/*' .*? '*/';
+SINGLE_LINE_COMMMENT: '//'~( '\r' | '\n' )*;
 INT: [0-9]+;
 FLOAT: [0-9]*? '.' [0-9]+;
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;

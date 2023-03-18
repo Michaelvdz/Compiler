@@ -89,5 +89,15 @@ class CGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CGrammarParser#comment.
+    def visitComment(self, ctx:CGrammarParser.CommentContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CGrammarParser#printf.
+    def visitPrintf(self, ctx:CGrammarParser.PrintfContext):
+        return self.visitChildren(ctx)
+
+
 
 del CGrammarParser
