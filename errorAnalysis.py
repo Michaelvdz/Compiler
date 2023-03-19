@@ -1,5 +1,5 @@
 from antlr4 import *
-from errorAnalysis import errorAnalyser
+from antlr4.error.ErrorListener import ErrorListener
 from CGrammarLexer import CGrammarLexer
 from CGrammarParser import CGrammarParser
 
