@@ -6,6 +6,7 @@ from CGrammarParser import CGrammarParser
 from CSTVisitor import CSTVisitor
 from AST import *
 from ASTVisitor import ASTVisitor
+from errorAnalysis import errorAnalyser
 
 class MyListener(CGrammarListener):
     def exitExpr(self, ctx):
@@ -18,6 +19,7 @@ def main(argv):
     lexer = CGrammarLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = CGrammarParser(stream)
+    parser.addErrorListener(errorAnalyser())
     tree = parser.prog()
     asttree = ASTTree()
     visitor = CSTVisitor(asttree)
