@@ -39,12 +39,11 @@ class CSTVisitor(CGrammarVisitor):
                 instr.adopt(node)
         return instr
 
-
-
     # Visit a parse tree produced by CGrammarParser#unary_operator.
     def visitUnary_operator(self, ctx: CGrammarParser.Unary_operatorContext):
         print("UnaryOperator")
         op = UnaryOperator(ctx.getText())
+        op.print()
         return op
 
     # Visit a parse tree produced by CGrammarParser#parenthesis_expression.
@@ -69,10 +68,16 @@ class CSTVisitor(CGrammarVisitor):
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, UnaryOperator):
+                    node.print()
                     op = node
                 else:
                     if op.value == "-":
                         node.value = op.value + node.value
+                    elif op.value == "!":
+                        if node.value == "0" or node.value is False:
+                            node.value = "true";
+                        else:
+                            node.value = "false"
                     return node
         else:
             return self.visitChildren(ctx)
@@ -129,7 +134,17 @@ class CSTVisitor(CGrammarVisitor):
     # Visit a parse tree produced by CGrammarParser#logical_expression.
     def visitLogical_expression(self, ctx: CGrammarParser.Logical_expressionContext):
         print("LogicalExpression")
-        return self.visitChildren(ctx)
+        if ctx.getChildCount() > 1:
+            logOp = LogicalOperation(ctx.op.text)
+            for child in ctx.children:
+                node = self.visit(child)
+                if isinstance(node, ASTNode):
+                    node.print()
+                    logOp.adopt(node)
+            logOp.print()
+            return logOp
+        else:
+            return self.visitChildren(ctx)
 
     # Visit a parse tree produced by CGrammarParser#expr.
     def visitExpr(self, ctx: CGrammarParser.ExprContext):
@@ -138,7 +153,7 @@ class CSTVisitor(CGrammarVisitor):
 
     # Visit a parse tree produced by CGrammarParser#constant.
     def visitConstant(self, ctx: CGrammarParser.ConstantContext):
-        #print("Constant")
+        print("Constant")
         const = Constant(ctx.getText())
         return const
 
