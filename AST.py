@@ -134,7 +134,34 @@ class LogicalOperation(ASTNode):
     def accept(self, visitor: Visitor):
         return visitor.VisitLogicalOperation(self)
 
+class Declaration(ASTNode):
 
+    name = ""
+    children = []
+    value = ""
+
+    def __init__(self, name):
+        print("___init-Declaration___");
+        self.children = []
+        self.name = "Declaration"
+        self.value = name
+        print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def print(self):
+        print("This is a declaration node:")
+        for node in self.children:
+            node.print()
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitDeclaration(self)
 
 class Constant(ASTNode):
 
@@ -174,7 +201,34 @@ class UnaryOperator(ASTNode):
     def accept(self, visitor: Visitor):
         return visitor.VisitUnaryOperator(self)
 
+class Assigment(ASTNode):
 
+    name = ""
+    children = []
+    value = ""
+
+    def __init__(self, name):
+        print("___init-Assigment___");
+        self.children = []
+        self.name = "RelationOperation"
+        self.value = name
+        print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def print(self):
+        print("This is a assigment node with operator: " + str(self.value) + " and nodes:")
+        for node in self.children:
+            node.print()
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitAssignment(self)
 
 
 

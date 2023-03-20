@@ -17,11 +17,11 @@ unary_operator:  '+'
 parenthesis_expression: '(' expr ')'
     ;
 
-unary_expression:   unary_operator IDENTIFIER
+unary_expression:   unary_operator iden=IDENTIFIER
     |   unary_operator constant
     |   constant
     |   parenthesis_expression
-    |   IDENTIFIER
+    |   iden=IDENTIFIER
     ;
 
 mul_div_expression: mul_div_expression op=('*'|'/') unary_expression
@@ -43,12 +43,12 @@ logical_expression:  logical_expression op=('&&'|'||') relational_expression
 assignment_expression:  logical_expression
     ;
 
-declaration_specification:  type '*' IDENTIFIER
-    | type IDENTIFIER
-    | IDENTIFIER
+declaration_specification:  type '*' var=IDENTIFIER
+    | type var=IDENTIFIER
+    | var=IDENTIFIER
     ;
 
-declaration:    declaration_specification '=' assignment_expression
+declaration:    declaration_specification assign='=' assignment_expression
     | declaration_specification
     ;
 

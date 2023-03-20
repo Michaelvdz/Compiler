@@ -14,6 +14,7 @@ class ASTVisitor(Visitor):
         print("Node")
         print(id(currentNode))
         self.ast.node(str(id(currentNode)), currentNode.name)
+        print(currentNode.name)
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
@@ -51,4 +52,23 @@ class ASTVisitor(Visitor):
         print(id(currentNode))
         self.ast.node(str(id(currentNode)), currentNode.value)
         return currentNode
+
+    def VisitDeclaration(self, currentNode):
+        print("Declaration")
+        print(id(currentNode))
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        for child in currentNode.children:
+            node = child.accept(self)
+            self.ast.edge(str(id(currentNode)), str(id(node)))
+        return currentNode
+
+    def VisitAssignment(self, currentNode):
+        print("Assignment")
+        print(id(currentNode))
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        for child in currentNode.children:
+            node = child.accept(self)
+            self.ast.edge(str(id(currentNode)), str(id(node)))
+        return currentNode
+
 

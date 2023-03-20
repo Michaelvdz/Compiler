@@ -68,19 +68,27 @@ class CSTVisitor(CGrammarVisitor):
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, UnaryOperator):
+                    print("This is an operator")
                     node.print()
                     op = node
                 else:
+                    print("test")
                     if op.value == "-":
                         node.value = op.value + node.value
                     elif op.value == "!":
                         if node.value == "0" or node.value is False:
-                            node.value = "true";
+                            node.value = "true"
                         else:
                             node.value = "false"
+                    elif op.value == "&":
+                        node = ASTNode("&" + ctx.iden.text)
                     return node
         else:
-            return self.visitChildren(ctx)
+            if ctx.iden:
+                print("Id")
+                var = ASTNode(ctx.getText())
+                return var
+        return self.visitChildren(ctx)
 
     # Visit a parse tree produced by CGrammarParser#mul_div_expression.
     def visitMul_div_expression(self, ctx: CGrammarParser.Mul_div_expressionContext):
@@ -118,7 +126,6 @@ class CSTVisitor(CGrammarVisitor):
     def visitRelational_expression(self, ctx: CGrammarParser.Relational_expressionContext):
         print("RelationalExpression")
         print("#children: " + str(ctx.getChildCount()))
-        print("#children: " + str(ctx.getChildCount()))
         if ctx.getChildCount() > 1:
             relOp = RelationOperation(ctx.op.text)
             for child in ctx.children:
@@ -146,6 +153,41 @@ class CSTVisitor(CGrammarVisitor):
         else:
             return self.visitChildren(ctx)
 
+    def visitAssignment_expression(self, ctx:CGrammarParser.Assignment_expressionContext):
+        return self.visitChildren(ctx)
+
+
+    def visitDeclaration_specification(self, ctx:CGrammarParser.Declaration_specificationContext):
+        print("DeclarationSpecifier")
+        decl = Declaration("VariableDeclartion")
+        for child in ctx.children:
+            node = self.visit(child)
+            if isinstance(node, ASTNode):
+                node.print()
+                decl.adopt(node)
+            elif str(child) == '*':
+                pointer = ASTNode("*")
+                decl.adopt(pointer)
+            else:
+                var = ASTNode(ctx.var.text)
+                decl.adopt(var)
+        return decl
+
+    def visitDeclaration(self, ctx:CGrammarParser.DeclarationContext):
+        print("Declaration")
+        if ctx.assign:
+            print("Assigment")
+            print("#children: " + str(ctx.getChildCount()))
+            assign = Assigment(ctx.assign.text)
+            for child in ctx.children:
+                node = self.visit(child)
+                if isinstance(node, ASTNode):
+                    node.print()
+                    assign.adopt(node)
+            return assign
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CGrammarParser#expr.
     def visitExpr(self, ctx: CGrammarParser.ExprContext):
         print("Expr")
@@ -157,3 +199,23 @@ class CSTVisitor(CGrammarVisitor):
         const = Constant(ctx.getText())
         return const
 
+    # Visit a parse tree produced by CGrammarParser#type.
+    def visitType(self, ctx:CGrammarParser.TypeContext):
+        print("Type")
+        type = ASTNode("VariableType")
+        for child in ctx.children:
+            node = self.visit(child)
+            if isinstance(node, ASTNode):
+                node.print()
+                type.adopt(node)
+            else:
+                print(child)
+                type.name = str(child)
+        return type
+
+
+    # Visit a parse tree produced by CGrammarParser#reserved_word.
+    def visitReserved_word(self, ctx:CGrammarParser.Reserved_wordContext):
+        print("ReservedWord")
+        word = ASTNode(ctx.getText())
+        return word

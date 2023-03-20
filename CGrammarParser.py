@@ -411,6 +411,7 @@ class CGrammarParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
+            self.iden = None # Token
 
         def unary_operator(self):
             return self.getTypedRuleContext(CGrammarParser.Unary_operatorContext,0)
@@ -460,7 +461,7 @@ class CGrammarParser ( Parser ):
                 self.state = 58
                 self.unary_operator()
                 self.state = 59
-                self.match(CGrammarParser.IDENTIFIER)
+                localctx.iden = self.match(CGrammarParser.IDENTIFIER)
                 pass
 
             elif la_ == 2:
@@ -486,7 +487,7 @@ class CGrammarParser ( Parser ):
             elif la_ == 5:
                 self.enterOuterAlt(localctx, 5)
                 self.state = 66
-                self.match(CGrammarParser.IDENTIFIER)
+                localctx.iden = self.match(CGrammarParser.IDENTIFIER)
                 pass
 
 
@@ -913,6 +914,7 @@ class CGrammarParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
+            self.var = None # Token
 
         def type_(self):
             return self.getTypedRuleContext(CGrammarParser.TypeContext,0)
@@ -956,7 +958,7 @@ class CGrammarParser ( Parser ):
                 self.state = 119
                 self.match(CGrammarParser.T__3)
                 self.state = 120
-                self.match(CGrammarParser.IDENTIFIER)
+                localctx.var = self.match(CGrammarParser.IDENTIFIER)
                 pass
 
             elif la_ == 2:
@@ -964,13 +966,13 @@ class CGrammarParser ( Parser ):
                 self.state = 122
                 self.type_()
                 self.state = 123
-                self.match(CGrammarParser.IDENTIFIER)
+                localctx.var = self.match(CGrammarParser.IDENTIFIER)
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 125
-                self.match(CGrammarParser.IDENTIFIER)
+                localctx.var = self.match(CGrammarParser.IDENTIFIER)
                 pass
 
 
@@ -989,6 +991,7 @@ class CGrammarParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
+            self.assign = None # Token
 
         def declaration_specification(self):
             return self.getTypedRuleContext(CGrammarParser.Declaration_specificationContext,0)
@@ -1031,7 +1034,7 @@ class CGrammarParser ( Parser ):
                 self.state = 128
                 self.declaration_specification()
                 self.state = 129
-                self.match(CGrammarParser.T__18)
+                localctx.assign = self.match(CGrammarParser.T__18)
                 self.state = 130
                 self.assignment_expression()
                 pass
