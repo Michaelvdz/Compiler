@@ -83,6 +83,32 @@ class ASTOptimizer(Visitor):
         node = Constant(str(value))
         return node
 
+    def VisitUnaryOperation(self, currentNode):
+        print("Binary")
+        match currentNode.value:
+            case "-":
+                value = 0
+                for child in currentNode.children:
+                    node = child.accept(self)
+                    try:
+                        int("-"+node.value)
+                        value = int("-"+node.value)
+                    except ValueError:
+                        value = float("-"+node.value)
+            case "!":
+                for child in currentNode.children:
+                    node = child.accept(self)
+                    if node.value == "0" or node.value is False:
+                        value = "true"
+                    else:
+                        value = "false"
+            case "_":
+                print("none")
+        currentNode.children = 0
+        currentNode.value = value
+        node = Constant(str(value))
+        return node
+
     def VisitRelationOperation(self, currentNode):
         print("Relation")
         newNode = copy.copy(currentNode)

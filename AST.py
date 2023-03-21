@@ -76,6 +76,35 @@ class BinaryOperation(ASTNode):
     def accept(self, visitor: Visitor):
         return visitor.VisitBinaryOperation(self)
 
+class UnaryOperation(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+
+    def __init__(self, name):
+        print("___init-UnaryOperation___");
+        self.children = []
+        self.name = "UnaryOperation"
+        self.value = name
+        print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def print(self):
+        print("This is a unary operation node with operator: " + str(self.value) + " and nodes:")
+        for node in self.children:
+            node.print()
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitUnaryOperation(self)
+
 class RelationOperation(ASTNode):
 
     name = ""

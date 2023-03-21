@@ -64,25 +64,17 @@ class CSTVisitor(CGrammarVisitor):
     def visitUnary_expression(self, ctx: CGrammarParser.Unary_expressionContext):
         print("UnaryExpression")
         if len(ctx.children) == 2:
-            op = 0
+            newnode = UnaryOperation("")
             for child in ctx.children:
                 node = self.visit(child)
+                node.print()
                 if isinstance(node, UnaryOperator):
                     print("This is an operator")
                     node.print()
-                    op = node
+                    newnode.value = node.value
                 else:
-                    print("test")
-                    if op.value == "-":
-                        node.value = op.value + node.value
-                    elif op.value == "!":
-                        if node.value == "0" or node.value is False:
-                            node.value = "true"
-                        else:
-                            node.value = "false"
-                    elif op.value == "&":
-                        node = ASTNode("&" + ctx.iden.text)
-                    return node
+                    newnode.adopt(node)
+                    return newnode
         else:
             if ctx.iden:
                 print("Id")
