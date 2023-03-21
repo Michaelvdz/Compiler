@@ -9,4 +9,4 @@ import sys
 class errorAnalyser(ErrorListener):
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
-        print("Syntax Error!")
+        print("Syntax Error at line", line, "and position", column, ",", msg, "\n")
