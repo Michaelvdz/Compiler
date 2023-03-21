@@ -7,10 +7,7 @@ from CSTVisitor import CSTVisitor
 from AST import *
 from ASTVisitor import ASTVisitor
 from errorAnalysis import errorAnalyser
-
-class MyListener(CGrammarListener):
-    def exitExpr(self, ctx):
-        print("Oh, a key!")
+from ASTOptimizer import ASTOptimizer
 
 
 def main(argv):
@@ -21,14 +18,21 @@ def main(argv):
     parser = CGrammarParser(stream)
     parser.addErrorListener(errorAnalyser())
     tree = parser.prog()
+
     asttree = ASTTree()
     visitor = CSTVisitor(asttree)
     visitor.visit(tree)
 
-    asttree.print()
+    #Optimize tree
+    optimizedTree = ASTTree()
+    astOptimizer = ASTOptimizer(optimizedTree)
+    optimizedTree.root = asttree.root.accept(astOptimizer)
+
+    #asttree.print()
     astVisitor = ASTVisitor()
-    asttree.root.accept(astVisitor)
+    optimizedTree.root.accept(astVisitor)
     astVisitor.ast.view()
+
 
 
 if __name__ == '__main__':

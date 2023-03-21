@@ -6,7 +6,7 @@ from CGrammarParser import CGrammarParser
 import sys
 
 
-class errorAnalyser(errorAnalyser):
+class errorAnalyser(ErrorListener):
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         print("Syntax Error!")

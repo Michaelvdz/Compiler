@@ -23,6 +23,7 @@ class ASTVisitor(Visitor):
     def VisitBinaryOperation(self, currentNode):
         print("Binary")
         print(id(currentNode))
+        print(currentNode.print())
         self.ast.node(str(id(currentNode)), currentNode.value)
         for child in currentNode.children:
             node = child.accept(self)

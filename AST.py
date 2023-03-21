@@ -177,7 +177,7 @@ class Constant(ASTNode):
         print("___Node-Created-With-Name:"+ self.name + "___")
 
     def print(self):
-        print("Constant: " + self.value)
+        print("Constant: " + str(self.value))
 
     def accept(self, visitor: Visitor):
         return visitor.VisitConstant(self)
