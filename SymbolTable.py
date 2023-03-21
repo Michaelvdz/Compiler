@@ -7,3 +7,6 @@ class Node:
 class SymbolTable:
     def __init__(self):
         self.vars = dict()
+
+    def insertTable(self, type, value):
+        self.vars[value] = Node(type, value)
