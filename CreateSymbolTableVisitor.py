@@ -2,6 +2,7 @@ import copy
 
 from AST import *
 import graphviz
+from colorama import Fore
 
 class Visitor:
     def __str__(self):
@@ -53,6 +54,10 @@ class CreateSymbolTableVisitor(Visitor):
             self.table.insert(currentNode.var.value, currentNode.type.value)
         else:
             self.table.insert(currentNode.var.value, currentNode.type.value)
+        
+        if self.table.lookup(currentNode.var.value) is not 0:
+            print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " has already been declared! \n")
+        
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
