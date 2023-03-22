@@ -63,18 +63,20 @@ class CSTVisitor(CGrammarVisitor):
     # Visit a parse tree produced by CGrammarParser#unary_expression.
     def visitUnary_expression(self, ctx: CGrammarParser.Unary_expressionContext):
         print("UnaryExpression")
+        print("#children: " + str(ctx.getChildCount()))
         if len(ctx.children) == 2:
             newnode = UnaryOperation("")
             for child in ctx.children:
                 node = self.visit(child)
-                node.print()
                 if isinstance(node, UnaryOperator):
                     print("This is an operator")
-                    node.print()
                     newnode.value = node.value
+                elif node is None:
+                    newvar = ASTNode(ctx.iden.text)
+                    newnode.adopt(newvar)
                 else:
                     newnode.adopt(node)
-                    return newnode
+            return newnode
         else:
             if ctx.iden:
                 print("Id")
@@ -157,12 +159,14 @@ class CSTVisitor(CGrammarVisitor):
             if isinstance(node, ASTNode):
                 node.print()
                 decl.adopt(node)
+                decl.type = node
             elif str(child) == '*':
                 pointer = ASTNode("*")
                 decl.adopt(pointer)
             else:
                 var = ASTNode(ctx.var.text)
                 decl.adopt(var)
+                decl.var = var
         return decl
 
     def visitDeclaration(self, ctx:CGrammarParser.DeclarationContext):
@@ -174,7 +178,6 @@ class CSTVisitor(CGrammarVisitor):
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, ASTNode):
-                    node.print()
                     assign.adopt(node)
             return assign
         return self.visitChildren(ctx)

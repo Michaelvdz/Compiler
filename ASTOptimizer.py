@@ -10,7 +10,7 @@ class Visitor:
 class ASTOptimizer(Visitor):
 
     def __init__(self, tree):
-        self.ast = graphviz.Digraph('AST', filename='ast.gv')
+        #self.ast = graphviz.Digraph('AST', filename='ast.gv')
         self.tree = tree
 
     def VisitASTNode(self, currentNode):
@@ -18,70 +18,106 @@ class ASTOptimizer(Visitor):
         newNode = ASTNode(currentNode.name)
         for child in currentNode.children:
             node = child.accept(self)
-            node.print()
             newNode.children.append(node)
         return newNode
 
     def VisitBinaryOperation(self, currentNode):
         print("Binary")
+        children = []
+        for child in currentNode.children:
+            children.append(child.accept(self))
+
         match currentNode.value:
             case "+":
                 value = 0
-                for child in currentNode.children:
-                    node = child.accept(self)
-                    try:
-                        int(node.value)
-                        value += int(node.value)
-                    except ValueError:
-                        value += float(node.value)
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    for child in children:
+                        node = child.accept(self)
+                        try:
+                            int(node.value)
+                            value += int(node.value)
+                        except ValueError:
+                            value += float(node.value)
+                    currentNode.children = 0
+                    currentNode.value = value
+                    newnode = Constant(str(value))
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
             case "*":
                 value = 1
-                for child in currentNode.children:
-                    node = child.accept(self)
-                    try:
-                        int(node.value)
-                        value *= int(node.value)
-                    except ValueError:
-                        value *= float(node.value)
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    for child in children:
+                        node = child.accept(self)
+                        try:
+                            int(node.value)
+                            value *= int(node.value)
+                        except ValueError:
+                            value *= float(node.value)
+                    currentNode.children = 0
+                    currentNode.value = value
+                    newnode = Constant(str(value))
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
             case "/":
                 value = "NaN"
-                for child in currentNode.children:
-                    node = child.accept(self)
-                    try:
-                        int(node.value)
-                        if value == "NaN":
-                            print("Dit?")
-                            value = int(node.value)
-                        else:
-                            print("Daarna dit?")
-                            value = value / int(node.value)
-                    except ValueError:
-                        if value == "NaN":
-                            value = float(node.value)
-                        else:
-                            value = value / float(node.value)
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    for child in children:
+                        node = child.accept(self)
+                        print("Recieved node with type: " + str(type(node)))
+                        try:
+                            int(node.value)
+                            if value == "NaN":
+                                print("Dit?")
+                                value = int(node.value)
+                            else:
+                                print("Daarna dit?")
+                                value = value / int(node.value)
+                        except ValueError:
+                            if value == "NaN":
+                                value = float(node.value)
+                            else:
+                                value = value / float(node.value)
+                    currentNode.children = 0
+                    currentNode.value = value
+                    newnode = Constant(str(value))
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
             case "-":
-                value = "NaN"
-                for child in currentNode.children:
-                    node = child.accept(self)
-                    try:
-                        int(node.value)
-                        if value == "NaN":
-                            value = int(node.value)
-                        else:
-                            value = value - int(node.value)
-                    except ValueError:
-                        if value == "NaN":
-                            value = float(node.value)
-                        else:
-                            value = value - float(node.value)
+                value = 0
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    for child in children:
+                        node = child.accept(self)
+                        try:
+                            int(node.value)
+                            value -= int(node.value)
+                        except ValueError:
+                            value -= float(node.value)
+                    currentNode.children = 0
+                    currentNode.value = value
+                    newnode = Constant(str(value))
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
             case "_":
                 print("none")
-        print(value)
-        currentNode.children = 0
-        currentNode.value = value
-        node = Constant(str(value))
-        return node
+        return currentNode
+
+
 
     def VisitUnaryOperation(self, currentNode):
         print("Binary")
@@ -95,6 +131,10 @@ class ASTOptimizer(Visitor):
                         value = int("-"+node.value)
                     except ValueError:
                         value = float("-"+node.value)
+                currentNode.children = 0
+                currentNode.value = value
+                node = Constant(str(value))
+                return node
             case "!":
                 for child in currentNode.children:
                     node = child.accept(self)
@@ -102,12 +142,13 @@ class ASTOptimizer(Visitor):
                         value = "true"
                     else:
                         value = "false"
+                currentNode.children = 0
+                currentNode.value = value
+                node = Constant(str(value))
+                return node
             case "_":
                 print("none")
-        currentNode.children = 0
-        currentNode.value = value
-        node = Constant(str(value))
-        return node
+        return currentNode
 
     def VisitRelationOperation(self, currentNode):
         print("Relation")
@@ -129,7 +170,6 @@ class ASTOptimizer(Visitor):
 
     def VisitConstant(self, currentNode):
         print("Constant")
-        print(type(currentNode))
         return currentNode
 
     def VisitDeclaration(self, currentNode):

@@ -19,10 +19,13 @@ class ASTTree:
 
 class ASTNode:
 
+    name = ""
+    value = ""
     def __init__(self, name="Free"):
         print("___init-ASTNode___");
         self.children = []
         self.name = name
+        self.value = name
         print("___Node-Created-With-Name:"+ self.name + "___")
 
     def print(self):
@@ -168,6 +171,9 @@ class Declaration(ASTNode):
     name = ""
     children = []
     value = ""
+    type = ASTNode
+    var = ASTNode
+
 
     def __init__(self, name):
         print("___init-Declaration___");

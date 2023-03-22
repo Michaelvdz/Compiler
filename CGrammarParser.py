@@ -1185,6 +1185,7 @@ class CGrammarParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
+            self.typ = None # Token
 
         def reserved_word(self):
             return self.getTypedRuleContext(CGrammarParser.Reserved_wordContext,0)
@@ -1232,17 +1233,17 @@ class CGrammarParser ( Parser ):
             elif token in [20]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 144
-                self.match(CGrammarParser.T__19)
+                localctx.typ = self.match(CGrammarParser.T__19)
                 pass
             elif token in [21]:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 145
-                self.match(CGrammarParser.T__20)
+                localctx.typ = self.match(CGrammarParser.T__20)
                 pass
             elif token in [22]:
                 self.enterOuterAlt(localctx, 4)
                 self.state = 146
-                self.match(CGrammarParser.T__21)
+                localctx.typ = self.match(CGrammarParser.T__21)
                 pass
             else:
                 raise NoViableAltException(self)

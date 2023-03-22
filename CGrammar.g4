@@ -64,9 +64,9 @@ constant:   INT
     ;
 
 type:   reserved_word type
-    |   'int'
-    |   'float'
-    |   'char'
+    |   typ='int'
+    |   typ='float'
+    |   typ='char'
     ;
 
 reserved_word:  'const'
