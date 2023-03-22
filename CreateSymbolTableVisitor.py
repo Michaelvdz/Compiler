@@ -50,13 +50,14 @@ class CreateSymbolTableVisitor(Visitor):
         print("Declaration")
         print(currentNode.var.value)
         print(currentNode.type.value)
+        
+        if self.table.lookup(currentNode.var.value) != 0:
+            print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " has already been declared! \n")
+        
         if not self.table.lookup(currentNode.var.name) is 0:
             self.table.insert(currentNode.var.value, currentNode.type.value)
         else:
             self.table.insert(currentNode.var.value, currentNode.type.value)
-        
-        if self.table.lookup(currentNode.var.value) is not 0:
-            print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " has already been declared! \n")
         
         for child in currentNode.children:
             node = child.accept(self)
