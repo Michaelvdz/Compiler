@@ -203,6 +203,7 @@ class Constant(ASTNode):
     name = ""
     children = []
     value = ""
+    varName = ""
 
     def __init__(self, value):
         print("___init-Constant__");
