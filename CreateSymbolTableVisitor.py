@@ -45,7 +45,7 @@ class CreateSymbolTableVisitor(Visitor):
     def VisitConstant(self, currentNode):
         print("Constant")
         if len(self.table.vars[currentNode.varName]) == 3:
-            if len(currentNode.varType) == 0:
+            if len(currentNode.varType) == 0 and len(self.table.vars[currentNode.varName][0]) == 0:
                 self.table.vars[currentNode.varName][2] = currentNode.value
         else:
             self.table.vars[currentNode.varName].append(currentNode.value)    
