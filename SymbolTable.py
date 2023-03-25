@@ -1,5 +1,6 @@
 class Node:
-    def __init__(self, type, value, attr=""):
+    def __init__(self, constant, type, value, attr=""):
+        self.constant = constant
         self.type = type
         self.attr = attr
 
@@ -17,8 +18,8 @@ class SymbolTable:
             string.append(str(key) + ": " + str(value))
         return "\n".join(string)
 
-    def insert(self, name, type, attribute=""):
-        self.vars[name] = Node(type, "")
+    def insert(self, name, constant, type, attribute=""):
+        self.vars[name] = [Node(constant, type, "").constant, Node(constant, type, "").type]
 
     def lookup(self, name):
         var = self.vars.get(name)
