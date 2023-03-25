@@ -44,7 +44,11 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitConstant(self, currentNode):
         print("Constant")
-        self.table.vars[currentNode.varName].append(currentNode.value)      
+        if len(self.table.vars[currentNode.varName]) == 3:
+            if len(currentNode.varType) == 0:
+                self.table.vars[currentNode.varName][2] = currentNode.value
+        else:
+            self.table.vars[currentNode.varName].append(currentNode.value)    
         return currentNode
 
     def VisitDeclaration(self, currentNode):
@@ -90,9 +94,11 @@ class CreateSymbolTableVisitor(Visitor):
     def VisitAssignment(self, currentNode):
         print("Assignment")
         varName = currentNode.children[0].var.value
+        varType = currentNode.children[0].type.name
         for child in currentNode.children:
             if child.name == "Constant":
                 child.varName = varName
+                child.varType = varType
                 node = child.accept(self)
             else:
                 node = child.accept(self)
