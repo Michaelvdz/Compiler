@@ -1,0 +1,13 @@
+//to do: nothing, every test works
+
+//TEST1
+const int a = 1;
+a = 0;
+
+//TEST2
+const float b = 1.0;
+b = 0.0;
+
+//TEST3
+const char c = 't';
+c = 'f';
