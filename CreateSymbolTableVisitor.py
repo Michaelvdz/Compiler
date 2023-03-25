@@ -44,29 +44,58 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitConstant(self, currentNode):
         print("Constant")
+        self.table.vars[currentNode.varName].append(currentNode.value)      
         return currentNode
 
     def VisitDeclaration(self, currentNode):
         print("Declaration")
         print(currentNode.var.value)
-        print(currentNode.type.value)
-        
-        if self.table.lookup(currentNode.var.value) != 0:
-            print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " has already been declared! \n")
-        
-        if not self.table.lookup(currentNode.var.name) is 0:
-            self.table.insert(currentNode.var.value, currentNode.type.value)
+        print(currentNode.type.name)
+
+        currConst = ""
+        currType = ""
+
+        if currentNode.type.name == "VariableType":
+            currConst = currentNode.type.children[0].name
+            currType = currentNode.type.children[1].name
         else:
-            self.table.insert(currentNode.var.value, currentNode.type.value)
-        
+            currType = currentNode.type.name
+
+        # int i = 3;
+        # int i = 7; Redeclaration
+        if self.table.lookup(currentNode.var.value) != 0 and len(currType) != 0:
+            print(
+                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " has already been declared! \n")
+
+        # int i = 3;
+        # k = 7; Undefined variable
+        if self.table.lookup(currentNode.var.value) == 0 and len(currType) == 0:
+            print(
+                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " has not been declared yet! \n")
+
+        # const int i = 4;
+        # i = 5; const can't be changed
+        if self.table.lookup(currentNode.var.value) != 0 and len(currType) == 0:
+            if self.table.lookup(currentNode.var.value)[0] == "const":
+                print(
+                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " can not be changed because it's a const! \n")
+
+        if self.table.lookup(currentNode.var.name) == 0 and len(currType) != 0:
+            self.table.insert(currentNode.var.value, currConst, currType)
+
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
-
+    
     def VisitAssignment(self, currentNode):
         print("Assignment")
+        varName = currentNode.children[0].var.value
         for child in currentNode.children:
-            node = child.accept(self)
+            if child.name == "Constant":
+                child.varName = varName
+                node = child.accept(self)
+            else:
+                node = child.accept(self)
         return currentNode
 
 
