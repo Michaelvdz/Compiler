@@ -102,6 +102,25 @@ class CreateSymbolTableVisitor(Visitor):
                 node = child.accept(self)
             else:
                 node = child.accept(self)
+        
+        #check if a variable in the rvalue has been declared
+        l = list()
+        newL = [currentNode.children[1]]
+        ok = True
+        while ok:
+            ok = False
+            for i in newL:
+                if i.name == i.value:
+                    l.append(i.value)
+                else:
+                    if i.name == "BinaryOperation":
+                        newL = i.children
+                        ok = True
+
+        for i in l:
+            if self.table.lookup(i) == 0:
+                print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + i + " has not been declared yet! \n")
+        
         return currentNode
 
 
