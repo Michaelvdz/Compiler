@@ -113,7 +113,7 @@ class CreateSymbolTableVisitor(Visitor):
                 if i.name == i.value:
                     l.append(i.value)
                 else:
-                    if i.name == "BinaryOperation":
+                    if i.name != "Constant":
                         newL = i.children
                         ok = True
 
