@@ -23,7 +23,7 @@ class AST2LLVMVisitor(Visitor):
         print("Binary")
         for child in currentNode.children:
             node = child.accept(self)
-        return currentNode
+        return "binary"
 
     def VisitUnaryOperation(self, currentNode):
         print("Unary")
@@ -62,7 +62,7 @@ class AST2LLVMVisitor(Visitor):
         if attr == "const":
             self.llvm += " " + "contant"
         if type == "int":
-            self.llvm += " i32 " + value +", align 4"
+            self.llvm += " i32 " + value +", align 4 \n"
         return currentNode
 
     def VisitAssignment(self, currentNode):

@@ -190,6 +190,8 @@ class ASTOptimizer(Visitor):
         newNode.children = []
         newNode.lvalue = currentNode.lvalue.accept(self)
         newNode.rvalue = currentNode.rvalue.accept(self)
+        newNode.adopt(newNode.lvalue)
+        newNode.adopt(newNode.rvalue)
         """
         for child in currentNode.children:
             node = child.accept(self)
