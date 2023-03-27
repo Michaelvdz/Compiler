@@ -122,6 +122,7 @@ class CreateSymbolTableVisitor(Visitor):
 
         for i in l:
             if self.table.lookup(i) == 0:
+                l.remove(i)
                 print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + i + " has not been declared yet! \n")
                 
         # Check if the variable in the lvalue has the same datatypes as the variables in the rvalue
