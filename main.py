@@ -12,6 +12,7 @@ from CreateSymbolTableVisitor import CreateSymbolTableVisitor
 from errorAnalysis import errorAnalyser
 from ASTOptimizer import ASTOptimizer
 from SymbolTable import *
+from AST2LLVMVisitor import *
 
 def main(argv):
 
@@ -44,6 +45,11 @@ def main(argv):
     optimizedTree.root.accept(STCreator)
     print("\n\nThe generated symbol table:")
     print(table)
+
+    llvm = ""
+    LLVMCreator = AST2LLVMVisitor(llvm)
+    optimizedTree.root.accept(LLVMCreator)
+    print(LLVMCreator.llvm)
 
 
 

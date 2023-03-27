@@ -49,7 +49,7 @@ declaration_specification:  type '*' var=IDENTIFIER
     ;
 
 declaration:    lvalue=declaration_specification assign='=' rvalue=assignment_expression
-    | declaration_specification
+    | lvalue=declaration_specification
     ;
 
 expr:   assignment_expression

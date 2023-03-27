@@ -180,13 +180,11 @@ class CSTVisitor(CGrammarVisitor):
     def visitDeclaration(self, ctx:CGrammarParser.DeclarationContext):
         print("Declaration")
         if ctx.assign:
-            print("Assigment")
-            print("#children: " + str(ctx.getChildCount()))
             assign = Assigment(ctx.assign.text)
-            for child in ctx.children:
-                node = self.visit(child)
-                if isinstance(node, ASTNode):
-                    assign.adopt(node)
+            assign.rvalue = self.visit(ctx.rvalue)
+            assign.lvalue = self.visit(ctx.lvalue)
+            assign.adopt(assign.lvalue)
+            assign.adopt(assign.rvalue)
             return assign
         return self.visitChildren(ctx)
 

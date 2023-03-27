@@ -176,6 +176,8 @@ class Declaration(ASTNode):
     type = ASTNode
     var = ASTNode
     attr = ASTNode
+    lvalue = ASTNode
+    rvalue = ASTNode
 
 
     def __init__(self, name):
@@ -200,6 +202,9 @@ class Declaration(ASTNode):
 
     def accept(self, visitor: Visitor):
         return visitor.VisitDeclaration(self)
+
+    def acceptWithValue(self, visitor: Visitor, value=0):
+        return visitor.VisitDeclaration(self, value)
 
 class Constant(ASTNode):
 
