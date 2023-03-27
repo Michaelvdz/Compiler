@@ -22,6 +22,7 @@ class ASTNode:
     name = ""
     value = ""
     children = []
+    type = ""
     def __init__(self, name="Free"):
         print("___init-ASTNode___");
         self.children = []
@@ -174,6 +175,7 @@ class Declaration(ASTNode):
     value = ""
     type = ASTNode
     var = ASTNode
+    attr = ASTNode
 
 
     def __init__(self, name):

@@ -25,7 +25,7 @@ class CreateSymbolTableVisitor(Visitor):
             node = child.accept(self)
         return currentNode
     def VisitUnaryOperation(self, currentNode):
-        print("Binary")
+        print("Unary")
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
@@ -55,39 +55,43 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitDeclaration(self, currentNode):
         print("Declaration")
-        print(currentNode.var.value)
-        print(currentNode.type.name)
+        print(currentNode.var)
+        print(currentNode.type)
 
         currConst = ""
         currType = ""
 
-        if currentNode.type.name == "VariableType":
+        if currentNode.type == "VariableType":
             currConst = currentNode.type.children[0].name
             currType = currentNode.type.children[1].name
         else:
-            currType = currentNode.type.name
+            currType = currentNode.type
+            print("-----_--------")
+            print(currentNode.var)
+            print(currentNode.type)
+            print(currentNode.attr)
 
         # int i = 3;
         # int i = 7; Redeclaration
-        if self.table.lookup(currentNode.var.value) != 0 and len(currType) != 0:
+        if self.table.lookup(currentNode.var) != 0 and len(currType) != 0:
             print(
-                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " has already been declared! \n")
+                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var + " has already been declared! \n")
 
         # int i = 3;
         # k = 7; Undefined variable
-        if self.table.lookup(currentNode.var.value) == 0 and len(currType) == 0:
+        if self.table.lookup(currentNode.var) == 0 and len(currType) == 0:
             print(
-                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " has not been declared yet! \n")
+                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var + " has not been declared yet! \n")
 
         # const int i = 4;
         # i = 5; const can't be changed
-        if self.table.lookup(currentNode.var.value) != 0 and len(currType) == 0:
+        if self.table.lookup(currentNode.var) != 0 and len(currType) == 0:
             if self.table.lookup(currentNode.var.value)[0] == "const":
                 print(
                     "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " can not be changed because it's a const! \n")
 
-        if self.table.lookup(currentNode.var.name) == 0 and len(currType) != 0:
-            self.table.insert(currentNode.var.value, currConst, currType)
+        if self.table.lookup(currentNode.var) == 0 and len(currType) != 0:
+            self.table.insert(currentNode.var, currConst, currType)
 
         for child in currentNode.children:
             node = child.accept(self)
@@ -95,8 +99,8 @@ class CreateSymbolTableVisitor(Visitor):
     
     def VisitAssignment(self, currentNode):
         print("Assignment")
-        varName = currentNode.children[0].var.value
-        varType = currentNode.children[0].type.name
+        varName = currentNode.children[0].var
+        varType = currentNode.children[0].type
         for child in currentNode.children:
             if child.name == "Constant":
                 child.varName = varName

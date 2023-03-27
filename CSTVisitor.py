@@ -158,15 +158,23 @@ class CSTVisitor(CGrammarVisitor):
             node = self.visit(child)
             if isinstance(node, Variable):
                 for child2 in node.children:
-                    decl.adopt(child2)
+                    if child2.type == "reserved_word":
+                        decl.adopt(child2)
+                        decl.attr = child2.value
+                    if child2.type == "type":
+                        decl.adopt(child2)
+                        decl.type = child2.value
             elif str(child) == '*':
                 pointer = ASTNode("*")
                 decl.adopt(pointer)
             else:
                 var = ASTNode(ctx.var.text)
                 decl.adopt(var)
-                decl.var = var
+                decl.var = var.value
         print("EndOfDeclarationSpecification")
+        print(decl.attr)
+        print(decl.type)
+        print(decl.var)
         return decl
 
     def visitDeclaration(self, ctx:CGrammarParser.DeclarationContext):
@@ -212,6 +220,7 @@ class CSTVisitor(CGrammarVisitor):
         print("Type")
         print(ctx.typ.text)
         type = ASTNode(ctx.typ.text)
+        type.type = "type"
         print("EndOfTypeSpecifier")
         return type
 
@@ -219,4 +228,5 @@ class CSTVisitor(CGrammarVisitor):
     def visitReserved_word(self, ctx:CGrammarParser.Reserved_wordContext):
         print("ReservedWord")
         word = ASTNode(ctx.getText())
+        word.type = "reserved_word"
         return word

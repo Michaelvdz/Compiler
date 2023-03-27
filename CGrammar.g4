@@ -48,7 +48,7 @@ declaration_specification:  type '*' var=IDENTIFIER
     | var=IDENTIFIER
     ;
 
-declaration:    declaration_specification assign='=' assignment_expression
+declaration:    lvalue=declaration_specification assign='=' rvalue=assignment_expression
     | declaration_specification
     ;
 
