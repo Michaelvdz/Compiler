@@ -21,6 +21,7 @@ class ASTNode:
 
     name = ""
     value = ""
+    children = []
     def __init__(self, name="Free"):
         print("___init-ASTNode___");
         self.children = []
@@ -216,6 +217,30 @@ class Constant(ASTNode):
 
     def accept(self, visitor: Visitor):
         return visitor.VisitConstant(self)
+
+class Variable(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+    type = ""
+
+    def __init__(self, value):
+        print("___init-Variable__")
+        self.children = []
+        self.name = "Variable"
+        self.value = value
+        print("___Node-Created-With-Name:" + self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def print(self):
+        print("Variable: " + str(self.value))
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitVariable(self)
+
 
 class UnaryOperator(ASTNode):
 

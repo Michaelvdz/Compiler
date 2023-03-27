@@ -42,6 +42,7 @@ def main(argv):
     table = SymbolTable()
     STCreator = CreateSymbolTableVisitor(table)
     optimizedTree.root.accept(STCreator)
+    print("\n\nThe generated symbol table:")
     print(table)
 
 

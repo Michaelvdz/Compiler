@@ -156,10 +156,9 @@ class CSTVisitor(CGrammarVisitor):
         decl = Declaration("VariableDeclartion")
         for child in ctx.children:
             node = self.visit(child)
-            if isinstance(node, ASTNode):
-                node.print()
-                decl.adopt(node)
-                decl.type = node
+            if isinstance(node, Variable):
+                for child2 in node.children:
+                    decl.adopt(child2)
             elif str(child) == '*':
                 pointer = ASTNode("*")
                 decl.adopt(pointer)
@@ -167,6 +166,7 @@ class CSTVisitor(CGrammarVisitor):
                 var = ASTNode(ctx.var.text)
                 decl.adopt(var)
                 decl.var = var
+        print("EndOfDeclarationSpecification")
         return decl
 
     def visitDeclaration(self, ctx:CGrammarParser.DeclarationContext):
@@ -197,17 +197,23 @@ class CSTVisitor(CGrammarVisitor):
     # Visit a parse tree produced by CGrammarParser#type.
     def visitType(self, ctx:CGrammarParser.TypeContext):
         print("Type")
-        type = ASTNode("VariableType")
+        type = Variable("Variable")
         for child in ctx.children:
             node = self.visit(child)
             if isinstance(node, ASTNode):
-                node.print()
                 type.adopt(node)
             else:
-                print(child)
                 type.name = str(child)
+        print("EndOfType")
         return type
 
+    def visitType_specifier(self, ctx:CGrammarParser.Reserved_wordContext):
+        print("TypeSpecifier")
+        print("Type")
+        print(ctx.typ.text)
+        type = ASTNode(ctx.typ.text)
+        print("EndOfTypeSpecifier")
+        return type
 
     # Visit a parse tree produced by CGrammarParser#reserved_word.
     def visitReserved_word(self, ctx:CGrammarParser.Reserved_wordContext):

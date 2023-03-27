@@ -84,6 +84,11 @@ class CGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CGrammarParser#type_specifier.
+    def visitType_specifier(self, ctx:CGrammarParser.Type_specifierContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CGrammarParser#reserved_word.
     def visitReserved_word(self, ctx:CGrammarParser.Reserved_wordContext):
         return self.visitChildren(ctx)

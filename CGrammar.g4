@@ -63,11 +63,14 @@ constant:   INT
     | CHAR
     ;
 
-type:   reserved_word type
-    |   typ='int'
+type:   reserved_word type_specifier
+    | type_specifier
+    ;
+
+type_specifier: typ='int'
     |   typ='float'
     |   typ='char'
-    ;
+   ;
 
 reserved_word:  'const'
     ;

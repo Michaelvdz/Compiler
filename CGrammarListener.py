@@ -143,6 +143,15 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CGrammarParser#type_specifier.
+    def enterType_specifier(self, ctx:CGrammarParser.Type_specifierContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#type_specifier.
+    def exitType_specifier(self, ctx:CGrammarParser.Type_specifierContext):
+        pass
+
+
     # Enter a parse tree produced by CGrammarParser#reserved_word.
     def enterReserved_word(self, ctx:CGrammarParser.Reserved_wordContext):
         pass
