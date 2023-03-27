@@ -49,7 +49,6 @@ class ASTNode:
 
     def accept(self, visitor: Visitor):
         value = visitor.VisitASTNode(self)
-        print(value)
         return value
 
 class BinaryOperation(ASTNode):
@@ -176,8 +175,6 @@ class Declaration(ASTNode):
     type = ASTNode
     var = ASTNode
     attr = ASTNode
-    lvalue = ASTNode
-    rvalue = ASTNode
 
 
     def __init__(self, name):
@@ -275,6 +272,8 @@ class Assigment(ASTNode):
     name = ""
     children = []
     value = ""
+    lvalue = ASTNode
+    rvalue = ASTNode
 
     def __init__(self, name):
         print("___init-Assigment___");

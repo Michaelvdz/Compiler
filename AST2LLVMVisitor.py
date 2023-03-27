@@ -10,6 +10,7 @@ class AST2LLVMVisitor(Visitor):
     llvm = ""
 
     def __init__(self, llvm=""):
+        print("----------------Converting AST 2 LLVM IR----------------")
         self.llvm = llvm
 
     def VisitASTNode(self, currentNode):

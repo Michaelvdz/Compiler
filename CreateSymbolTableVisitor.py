@@ -99,8 +99,8 @@ class CreateSymbolTableVisitor(Visitor):
     
     def VisitAssignment(self, currentNode):
         print("Assignment")
-        varName = currentNode.children[0].var
-        varType = currentNode.children[0].type
+        varName = currentNode.lvalue.var
+        varType = currentNode.lvalue.type
         for child in currentNode.children:
             if child.name == "Constant":
                 child.varName = varName
@@ -112,7 +112,7 @@ class CreateSymbolTableVisitor(Visitor):
         
         #check if a variable in the rvalue has been declared
         l = list()
-        newL = [currentNode.children[1]]
+        newL = [currentNode.rvalue]
         ok = True
         while ok:
             ok = False

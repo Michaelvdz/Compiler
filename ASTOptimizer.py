@@ -29,6 +29,7 @@ class ASTOptimizer(Visitor):
 
         match currentNode.value:
             case "+":
+                print("We do +")
                 value = 0
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
                     for child in children:
@@ -41,6 +42,7 @@ class ASTOptimizer(Visitor):
                     currentNode.children = 0
                     currentNode.value = value
                     newnode = Constant(str(value))
+                    print("WHOOOOOOOOOOOOOOOOOOOO")
                     return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
@@ -176,6 +178,7 @@ class ASTOptimizer(Visitor):
         print("Declaration")
         newNode = copy.copy(currentNode)
         newNode.children = []
+
         for child in currentNode.children:
             node = child.accept(self)
             newNode.children.append(node)
@@ -185,9 +188,14 @@ class ASTOptimizer(Visitor):
         print("Assignment")
         newNode = copy.copy(currentNode)
         newNode.children = []
+        newNode.lvalue = currentNode.lvalue.accept(self)
+        newNode.rvalue = currentNode.rvalue.accept(self)
+        """
         for child in currentNode.children:
             node = child.accept(self)
+            print(node)
             newNode.children.append(node)
+        """
         return newNode
 
 
