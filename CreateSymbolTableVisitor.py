@@ -103,7 +103,8 @@ class CreateSymbolTableVisitor(Visitor):
                 child.varType = varType
                 node = child.accept(self)
             else:
-                node = child.accept(self)
+                if child.name != child.value:
+                    node = child.accept(self)
         
         #check if a variable in the rvalue has been declared
         l = list()
@@ -122,6 +123,12 @@ class CreateSymbolTableVisitor(Visitor):
         for i in l:
             if self.table.lookup(i) == 0:
                 print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + i + " has not been declared yet! \n")
+                
+        # Check if the variable in the lvalue has the same datatypes as the variables in the rvalue
+        for i in l:
+            if self.table.vars[i][1] != self.table.vars[varName][1]:
+                print(
+                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + i + " has not the same datatype as variable " + varName + "\n")
         
         return currentNode
 
