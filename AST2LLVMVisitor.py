@@ -59,8 +59,8 @@ class AST2LLVMVisitor(Visitor):
         print(value)
 
         self.llvm += "%" + var + " dso_local"
-        if not attr == "":
-            self.llvm += " " + attr
+        if attr == "const":
+            self.llvm += " " + "contant"
         if type == "int":
             self.llvm += " i32 " + value +", align 4"
         return currentNode
