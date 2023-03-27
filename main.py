@@ -33,6 +33,11 @@ def main(argv):
     astOptimizer = ASTOptimizer(optimizedTree)
     optimizedTree.root = asttree.root.accept(astOptimizer)
 
+    print("Printing tree")
+    astVisitor = ASTVisitor()
+    optimizedTree.root.accept(astVisitor)
+    print("ending")
+    astVisitor.ast.view()
 
     print("SymbolTable Part")
     table = SymbolTable()
@@ -46,6 +51,7 @@ def main(argv):
     astVisitor = ASTVisitor()
     optimizedTree.root.accept(astVisitor)
     print("ending")
+    astVisitor.ast.view()
     #astVisitor.ast.view()
 
     llvm = ""

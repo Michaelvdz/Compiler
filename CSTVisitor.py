@@ -154,6 +154,7 @@ class CSTVisitor(CGrammarVisitor):
     def visitDeclaration_specification(self, ctx:CGrammarParser.Declaration_specificationContext):
         print("DeclarationSpecifier")
         decl = Declaration("VariableDeclartion")
+        decl.attr = ""
         for child in ctx.children:
             node = self.visit(child)
             if isinstance(node, Variable):
@@ -228,3 +229,17 @@ class CSTVisitor(CGrammarVisitor):
         word = ASTNode(ctx.getText())
         word.type = "reserved_word"
         return word
+
+    # Visit a parse tree produced by CGrammarParser#reserved_word.
+    def visitComment(self, ctx: CGrammarParser.CommentContext):
+        print("Comment--------------------------")
+        if ctx.block:
+            comment = MLComment(ctx.block.text)
+        elif ctx.sl:
+            comment = SLComment(ctx.sl.text)
+        return comment
+
+    def visitPrintf(self, ctx: CGrammarParser.PrintfContext):
+        print("Printf")
+        printf = PrintF(ctx.getText())
+        return printf

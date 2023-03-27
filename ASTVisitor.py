@@ -76,9 +76,24 @@ class ASTVisitor(Visitor):
         self.ast.node(str(id(currentNode)), currentNode.value)
         for child in currentNode.children:
             node = child.accept(self)
-
             self.ast.edge(str(id(currentNode)), str(id(node)))
         print("Ending Assignment")
         return currentNode
 
+    def VisitMLComment(self, currentNode):
+        print("Beginning MLComment")
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        print("Ending Assignment")
+        return currentNode
 
+    def VisitSLComment(self, currentNode):
+        print("Beginning SLComment")
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        print("Ending Assignment")
+        return currentNode
+
+    def VisitPrintf(self, currentNode):
+        print("Beginning Printf")
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        print("Ending Printf")
+        return currentNode

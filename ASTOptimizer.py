@@ -200,4 +200,16 @@ class ASTOptimizer(Visitor):
         """
         return newNode
 
+    def VisitMLComment(self, currentNode):
+        print("MLComment")
+        return currentNode
+
+    def VisitSLComment(self, currentNode):
+        print("SLComment")
+        return currentNode
+
+    def VisitPrintf(self, currentNode):
+        print("PrintF")
+        return currentNode
+
 

@@ -75,8 +75,8 @@ type_specifier: typ='int'
 reserved_word:  'const'
     ;
 
-comment: BLOCKCOMMENT
-    |   SINGLE_LINE_COMMMENT
+comment: block=BLOCKCOMMENT
+    |   sl=SINGLE_LINE_COMMMENT
     ;
 
 printf: 'printf' '(' (IDENTIFIER | constant) ')'

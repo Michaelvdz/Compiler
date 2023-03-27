@@ -12,9 +12,16 @@ class CreateSymbolTableVisitor(Visitor):
 
     def __init__(self, table):
         self.table = table
+        print("----------------Creating Symbol Table----------------")
 
     def VisitASTNode(self, currentNode):
         print("Node")
+
+        print(len(currentNode.children))
+        if len(currentNode.children) == 0:
+            if self.table.lookup(currentNode.value) == 0:
+                print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.value + " has not been declared yet! \n")
+
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
@@ -55,21 +62,18 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitDeclaration(self, currentNode):
         print("Declaration")
-        print(currentNode.var)
-        print(currentNode.type)
+
 
         currConst = ""
         currType = ""
 
         if currentNode.type == "VariableType":
+            print("dees?")
             currConst = currentNode.type.children[0].name
             currType = currentNode.type.children[1].name
         else:
+            print("nee dit!")
             currType = currentNode.type
-            print("-----_--------")
-            print(currentNode.var)
-            print(currentNode.type)
-            print(currentNode.attr)
 
         # int i = 3;
         # int i = 7; Redeclaration
@@ -91,16 +95,27 @@ class CreateSymbolTableVisitor(Visitor):
                     "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " can not be changed because it's a const! \n")
 
         if self.table.lookup(currentNode.var) == 0 and len(currType) != 0:
-            self.table.insert(currentNode.var, currConst, currType)
+            self.table.insert(currentNode.var, currConst, currType, currentNode.attr)
 
+        """
         for child in currentNode.children:
             node = child.accept(self)
+        """
         return currentNode
     
     def VisitAssignment(self, currentNode):
         print("Assignment")
         varName = currentNode.lvalue.var
         varType = currentNode.lvalue.type
+        varAttr = currentNode.lvalue.attr
+
+        lvalue = currentNode.lvalue
+        lvalue.accept(self)
+
+        rvalue = currentNode.rvalue
+        rvalue.accept(self)
+
+        """
         for child in currentNode.children:
             if child.name == "Constant":
                 child.varName = varName
@@ -134,7 +149,15 @@ class CreateSymbolTableVisitor(Visitor):
             if self.table.vars[i][1] != self.table.vars[varName][1]:
                 print(
                     "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + i + " has not the same datatype as variable " + varName + "\n")
-        
+        """
         return currentNode
 
-
+    def VisitMLComment(self, currentNode):
+        print("MLComment")
+        return currentNode
+    def VisitSLComment(self, currentNode):
+        print("SLComment")
+        return currentNode
+    def VisitPrintf(self, currentNode):
+        print("Printf")
+        return currentNode

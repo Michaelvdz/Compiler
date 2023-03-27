@@ -57,12 +57,12 @@ class AST2LLVMVisitor(Visitor):
         attr = currentNode.attr
         print(attr)
         print(value)
-
+        self.llvm += "\n"
         self.llvm += "%" + var + " dso_local"
         if attr == "const":
             self.llvm += " " + "contant"
         if type == "int":
-            self.llvm += " i32 " + value +", align 4 \n"
+            self.llvm += " i32 " + value +", align 4"
         return currentNode
 
     def VisitAssignment(self, currentNode):
@@ -70,4 +70,25 @@ class AST2LLVMVisitor(Visitor):
         value = currentNode.rvalue.accept(self)
         currentNode.lvalue.acceptWithValue(self, value)
         return currentNode
+
+    def VisitMLComment(self, currentNode):
+        print("MLComment")
+        comment = currentNode.value
+        comment = comment.replace("/*",";")
+        comment = comment.replace("*/", ";")
+        comment = comment.replace("* ", "; ")
+        self.llvm += comment
+        return currentNode
+
+    def VisitSLComment(self, currentNode):
+        print("SLComment")
+        comment = currentNode.value
+        comment = comment.replace("//", " ;")
+        self.llvm += comment
+        return currentNode
+
+    def VisitPrintf(self, currentNode):
+        print("Printf")
+        return currentNode
+
 

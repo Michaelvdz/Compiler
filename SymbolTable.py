@@ -19,7 +19,7 @@ class SymbolTable:
         return "\n".join(string)
 
     def insert(self, name, constant, type, attribute=""):
-        self.vars[name] = [Node(constant, type, "").constant, Node(constant, type, "").type]
+        self.vars[name] = Node(constant, type, "", attribute)
 
     def lookup(self, name):
         var = self.vars.get(name)

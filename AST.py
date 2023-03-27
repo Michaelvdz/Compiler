@@ -298,5 +298,56 @@ class Assigment(ASTNode):
     def accept(self, visitor: Visitor):
         return visitor.VisitAssignment(self)
 
+class MLComment(ASTNode):
 
+    value = ""
+    name = ""
 
+    def __init__(self, value):
+        print("___init-MLComment__");
+        self.children = 0
+        self.name = "Comment"
+        self.value = value
+        print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def print(self):
+        print("Comment: " + str(self.value))
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitMLComment(self)
+
+class SLComment(ASTNode):
+
+    value = ""
+    name = ""
+
+    def __init__(self, value):
+        print("___init-SLComment__");
+        self.children = 0
+        self.name = "Comment"
+        self.value = value
+        print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def print(self):
+        print("Comment: " + str(self.value))
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitSLComment(self)
+
+class PrintF(ASTNode):
+
+    value = ""
+    name = ""
+
+    def __init__(self, value):
+        print("___init-Printf__");
+        self.children = 0
+        self.name = "Prinf"
+        self.value = value
+        print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def print(self):
+        print("Prinf: " + str(self.value))
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitPrintf(self)
