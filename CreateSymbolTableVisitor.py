@@ -94,7 +94,7 @@ class CreateSymbolTableVisitor(Visitor):
         if self.table.lookup(currentNode.var) != 0 and len(currType) == 0:
             if self.table.vars[currentNode.var].attr == "const":
                 print(
-                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " can not be changed because it's a const! \n")
+                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var + " can not be changed because it's a const! \n")
 
         if self.table.lookup(currentNode.var) == 0 and len(currType) != 0:
             self.table.insert(currentNode.var, currConst, currType, currentNode.attr)
