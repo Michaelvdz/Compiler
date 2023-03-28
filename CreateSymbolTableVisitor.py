@@ -12,15 +12,20 @@ class CreateSymbolTableVisitor(Visitor):
 
     def __init__(self, table):
         self.table = table
+        self.lineNr = 0
+        self.positionNr = 0
         print("----------------Creating Symbol Table----------------")
 
     def VisitASTNode(self, currentNode):
         print("Node")
-
+        
+        if currentNode.name == "Inst":
+            self.lineNr += 1
+        
         print(len(currentNode.children))
         if len(currentNode.children) == 0:
             if self.table.lookup(currentNode.value) == 0:
-                print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.value + " has not been declared yet! \n")
+                print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line "+ str(self.lineNr) + ": variable " + currentNode.value + " has not been declared yet! \n")
 
         for child in currentNode.children:
             node = child.accept(self)
@@ -81,20 +86,20 @@ class CreateSymbolTableVisitor(Visitor):
         # int i = 7; Redeclaration
         if self.table.lookup(currentNode.var) != 0 and len(currType) != 0:
             print(
-                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var + " has already been declared! \n")
+                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(self.lineNr) + ": variable " + currentNode.var + " has already been declared! \n")
 
         # int i = 3;
         # k = 7; Undefined variable
         if self.table.lookup(currentNode.var) == 0 and len(currType) == 0:
             print(
-                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var + " has not been declared yet! \n")
+                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(self.lineNr) + ": variable " + currentNode.var + " has not been declared yet! \n")
 
         # const int i = 4;
         # i = 5; const can't be changed
         if self.table.lookup(currentNode.var) != 0 and len(currType) == 0:
             if self.table.vars[currentNode.var].attr == "const":
                 print(
-                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var + " can not be changed because it's a const! \n")
+                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(self.lineNr) + ": variable " + currentNode.var + " can not be changed because it's a const! \n")
 
         if self.table.lookup(currentNode.var) == 0 and len(currType) != 0:
             self.table.insert(currentNode.var, currConst, currType, currentNode.attr)
