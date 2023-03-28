@@ -28,7 +28,6 @@ def main(argv):
     visitor.visit(tree)
 
     #Optimize tree
-    print("---------------Optimizing tree---------------")
     optimizedTree = ASTTree()
     astOptimizer = ASTOptimizer(optimizedTree)
     optimizedTree.root = asttree.root.accept(astOptimizer)

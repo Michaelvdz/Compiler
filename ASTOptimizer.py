@@ -9,16 +9,26 @@ class Visitor:
 
 class ASTOptimizer(Visitor):
 
+    vars = dict()
+
     def __init__(self, tree):
         #self.ast = graphviz.Digraph('AST', filename='ast.gv')
+        print("---------------------Optimizing Tree--------------------")
         self.tree = tree
 
-    def VisitASTNode(self, currentNode):
+    def VisitASTNode(self, currentNode, constantProp=True):
         print("Node")
         newNode = ASTNode(currentNode.name)
-        for child in currentNode.children:
-            node = child.accept(self)
-            newNode.children.append(node)
+        if not currentNode.children:
+            if constantProp:
+                var = self.vars.get(currentNode.value)
+                if var:
+                    print("Var exist, lets do constant propagation")
+                    newNode = Constant(var)
+        else:
+            for child in currentNode.children:
+                node = child.accept(self)
+                newNode.children.append(node)
         return newNode
 
     def VisitBinaryOperation(self, currentNode):
@@ -29,7 +39,6 @@ class ASTOptimizer(Visitor):
 
         match currentNode.value:
             case "+":
-                print("We do +")
                 value = 0
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
                     for child in children:
@@ -42,7 +51,6 @@ class ASTOptimizer(Visitor):
                     currentNode.children = 0
                     currentNode.value = value
                     newnode = Constant(str(value))
-                    print("WHOOOOOOOOOOOOOOOOOOOO")
                     return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
@@ -180,7 +188,7 @@ class ASTOptimizer(Visitor):
         newNode.children = []
 
         for child in currentNode.children:
-            node = child.accept(self)
+            node = child.acceptWithNoOptimization(self)
             newNode.children.append(node)
         return newNode
 
@@ -192,6 +200,13 @@ class ASTOptimizer(Visitor):
         newNode.rvalue = currentNode.rvalue.accept(self)
         newNode.adopt(newNode.lvalue)
         newNode.adopt(newNode.rvalue)
+
+        if not newNode.rvalue.children:
+            print('No kids')
+            self.vars[newNode.lvalue.var] = newNode.rvalue.value
+            for key, value in self.vars.items():
+                print(key + ': ' + value)
+
         """
         for child in currentNode.children:
             node = child.accept(self)

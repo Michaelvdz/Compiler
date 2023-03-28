@@ -51,6 +51,10 @@ class ASTNode:
         value = visitor.VisitASTNode(self)
         return value
 
+    def acceptWithNoOptimization(self, visitor: Visitor):
+        value = visitor.VisitASTNode(self, False)
+        return value
+
 class BinaryOperation(ASTNode):
 
     name = ""
@@ -202,6 +206,7 @@ class Declaration(ASTNode):
 
     def acceptWithValue(self, visitor: Visitor, value=0):
         return visitor.VisitDeclaration(self, value)
+
 
 class Constant(ASTNode):
 
