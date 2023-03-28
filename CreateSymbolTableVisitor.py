@@ -63,9 +63,11 @@ class CreateSymbolTableVisitor(Visitor):
     def VisitDeclaration(self, currentNode):
         print("Declaration")
 
-
         currConst = ""
         currType = ""
+        
+        if currentNode.type != "int" and currentNode.type != "float" and currentNode.type != "char":
+            currentNode.type = ""
 
         if currentNode.type == "VariableType":
             print("dees?")
@@ -90,7 +92,7 @@ class CreateSymbolTableVisitor(Visitor):
         # const int i = 4;
         # i = 5; const can't be changed
         if self.table.lookup(currentNode.var) != 0 and len(currType) == 0:
-            if self.table.lookup(currentNode.var.value)[0] == "const":
+            if self.table.vars[currentNode.var].attr == "const":
                 print(
                     "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + currentNode.var.value + " can not be changed because it's a const! \n")
 
@@ -124,25 +126,6 @@ class CreateSymbolTableVisitor(Visitor):
             else:
                 if child.name != child.value:
                     node = child.accept(self)
-        
-        #check if a variable in the rvalue has been declared
-        l = list()
-        newL = [currentNode.rvalue]
-        ok = True
-        while ok:
-            ok = False
-            for i in newL:
-                if i.name == i.value:
-                    l.append(i.value)
-                else:
-                    if i.name != "Constant":
-                        newL = i.children
-                        ok = True
-
-        for i in l:
-            if self.table.lookup(i) == 0:
-                l.remove(i)
-                print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + i + " has not been declared yet! \n")
                 
         # Check if the variable in the lvalue has the same datatypes as the variables in the rvalue
         for i in l:
