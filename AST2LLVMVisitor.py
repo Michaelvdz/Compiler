@@ -1,5 +1,7 @@
 from AST import *
 import graphviz
+from SymbolTable import *
+import struct
 
 class Visitor:
     def __str__(self):
@@ -8,10 +10,29 @@ class Visitor:
 class AST2LLVMVisitor(Visitor):
 
     llvm = ""
+    symbolTable = 0
+    instr = 1
 
-    def __init__(self, llvm=""):
+    def __init__(self, llvm="", symbolTable=SymbolTable()):
         print("----------------Converting AST 2 LLVM IR----------------")
         self.llvm = llvm
+        self.symbolTable = symbolTable
+        print(self.symbolTable)
+        for key, value in self.symbolTable.vars.items():
+            print(value.type)
+            match value.type:
+                case "int":
+                    self.llvm += "%"+ str(self.instr) + " alloca i32, align 4 \n"
+                    self.symbolTable.insertRegister(key, str(self.instr))
+                case "float":
+                    self.llvm += "%"+ str(self.instr) + " alloca float, align 4 \n"
+                    self.symbolTable.insertRegister(key, str(self.instr))
+                case "char":
+                    self.llvm += "%"+ str(self.instr) + " alloca i8, align 1 \n"
+                    self.symbolTable.insertRegister(key, str(self.instr))
+                case other:
+                    print("Type not implemented")
+            self.instr +=1
 
     def VisitASTNode(self, currentNode):
         print("Node")
@@ -48,7 +69,7 @@ class AST2LLVMVisitor(Visitor):
         #self.llvm+= " "+currentNode.value
         return currentNode.value
 
-    def VisitDeclaration(self, currentNode, value):
+    def VisitDeclaration(self, currentNode):
         print("Declaration2LLVM")
         var = currentNode.var
         print(var)
@@ -56,19 +77,48 @@ class AST2LLVMVisitor(Visitor):
         print(type)
         attr = currentNode.attr
         print(attr)
-        print(value)
+        """
         self.llvm += "\n"
-        self.llvm += "%" + var + " dso_local"
-        if attr == "const":
+        self.llvm += "%" + var + " = "
+        '''if attr == "const":
             self.llvm += " " + "contant"
+        '''
         if type == "int":
-            self.llvm += " i32 " + value +", align 4"
+            self.llvm += "alloca i32, align 4"
+        elif type == "float":
+            self.llvm += "alloca float, align 4"
+        """
         return currentNode
 
     def VisitAssignment(self, currentNode):
         print("Assignment2LLVM")
         value = currentNode.rvalue.accept(self)
-        currentNode.lvalue.acceptWithValue(self, value)
+        currentNode.lvalue.accept(self)
+        print(value)
+        ltype = self.symbolTable.lookup(currentNode.lvalue.var).type
+        print("type=" + ltype)
+        if ltype == "int":
+            print("yeeeeeeeeeeee")
+            try:
+                value = int(value)
+            except ValueError:
+                value = float(value)
+            print(value)
+            if isinstance(value, float) or isinstance(value, int):
+                self.llvm += "store i32 " + str(value) + ", ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4"
+        elif ltype == "float":
+            try:
+                value = float(value)
+            except ValueError:
+                print("failiure")
+            self.llvm += "\nstore float " + str(value) + " ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4"
+        elif ltype == "char":
+            value = value.replace("'","")
+            #char = list(value)
+            #print(ord(char[0]))
+            self.llvm += "\nstore i8 " + str(ord(value)) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 1"
+        else:
+            print("test")
         return currentNode
 
     def VisitMLComment(self, currentNode):

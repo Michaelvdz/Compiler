@@ -54,9 +54,10 @@ def main(argv):
     #astVisitor.ast.view()
 
     llvm = ""
-    LLVMCreator = AST2LLVMVisitor(llvm)
+    LLVMCreator = AST2LLVMVisitor(llvm, table)
     optimizedTree.root.accept(LLVMCreator)
     print(LLVMCreator.llvm)
+    print(table)
 
 
 
