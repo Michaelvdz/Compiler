@@ -7,9 +7,9 @@ class Visitor:
 
 class ASTVisitor(Visitor):
 
-    def __init__(self):
+    def __init__(self, filename=""):
         print("----------------Printing AST TREE----------------")
-        self.ast = graphviz.Digraph('AST', filename='ast.dot')
+        self.ast = graphviz.Digraph('AST', filename=filename+'.dot')
 
     def VisitASTNode(self, currentNode):
         print("Beginning Node")

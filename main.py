@@ -1,5 +1,6 @@
 import sys
 
+import os
 import SymbolTable
 from antlr4 import *
 from CGrammarLexer import CGrammarLexer
@@ -16,6 +17,9 @@ from AST2LLVMVisitor import *
 
 def main(argv):
 
+    filename = argv[1]
+    filename = os.path.splitext(filename)[0]
+
     input_stream = FileStream(argv[1])
     lexer = CGrammarLexer(input_stream)
     stream = CommonTokenStream(lexer)
@@ -27,19 +31,20 @@ def main(argv):
     visitor = CSTVisitor(asttree)
     visitor.visit(tree)
 
-    #Optimize tree
+    print("Printing tree before optimization")
+    astVisitor = ASTVisitor(filename+"_beforeOptimization")
+    asttree.root.accept(astVisitor)
+    print("ending")
+    astVisitor.ast.view()
 
+    #Optimize tree
     optimizedTree = ASTTree()
     astOptimizer = ASTOptimizer(optimizedTree)
     optimizedTree.root = asttree.root.accept(astOptimizer)
 
     #optimizedTree = asttree
 
-    print("Printing tree")
-    astVisitor = ASTVisitor()
-    optimizedTree.root.accept(astVisitor)
-    print("ending")
-    astVisitor.ast.view()
+
 
     print("SymbolTable Part")
     table = SymbolTable()
@@ -50,17 +55,17 @@ def main(argv):
 
 
     print("Printing tree")
-    astVisitor = ASTVisitor()
+    astVisitor = ASTVisitor(filename)
     optimizedTree.root.accept(astVisitor)
     print("ending")
     astVisitor.ast.view()
-    #astVisitor.ast.view()
 
     llvm = ""
     LLVMCreator = AST2LLVMVisitor(llvm, table)
     optimizedTree.root.accept(LLVMCreator)
     print(LLVMCreator.llvm)
     print(table)
+
 
 
 
