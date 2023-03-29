@@ -136,7 +136,7 @@ class CSTVisitor(CGrammarVisitor):
     def visitLogical_expression(self, ctx: CGrammarParser.Logical_expressionContext):
         print("LogicalExpression")
         if ctx.getChildCount() > 1:
-            logOp = LogicalOperation(ctx.op.text)
+            logOp = BinaryOperation(ctx.op.text)
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, ASTNode):

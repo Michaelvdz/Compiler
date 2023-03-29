@@ -271,6 +271,70 @@ class ASTOptimizer(Visitor):
                     for child in children:
                         newnode.adopt(child)
                     return newnode
+            case "&&":
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    value1 = children[0].value
+                    value2 = children[1].value
+                    try:
+                        value1 = int(value1)
+                    except ValueError:
+                        value1 = float(value1)
+                    try:
+                        value2 = int(value2)
+                    except ValueError:
+                        value2 = float(value2)
+
+                    if abs(value1) > 0:
+                        value1 = 1
+                    else:
+                        value1 = 0
+                    if abs(value2) > 0:
+                        value2 = 1
+                    else:
+                        value2 = 0
+                    if value1 and value2:
+                        newvalue = "1"
+                    else:
+                        newvalue = "0"
+                    newnode = Constant(newvalue)
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
+            case "||":
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    value1 = children[0].value
+                    value2 = children[1].value
+                    try:
+                        value1 = int(value1)
+                    except ValueError:
+                        value1 = float(value1)
+                    try:
+                        value2 = int(value2)
+                    except ValueError:
+                        value2 = float(value2)
+
+                    if abs(value1) > 0:
+                        value1 = 1
+                    else:
+                        value1 = 0
+                    if abs(value2) > 0:
+                        value2 = 1
+                    else:
+                        value2 = 0
+                    if value1 or value2:
+                        newvalue = "1"
+                    else:
+                        newvalue = "0"
+                    newnode = Constant(newvalue)
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
             case "_":
                 print("none")
         return currentNode
@@ -307,13 +371,21 @@ class ASTOptimizer(Visitor):
             case "!":
                 for child in currentNode.children:
                     node = child.accept(self)
-                    if node.value == "0" or node.value is False:
-                        value = "true"
+                    try:
+                        value = int(node.value)
+                    except ValueError:
+                        value = float(node.value)
+                    if abs(value) > 0:
+                        value = 1
                     else:
-                        value = "false"
+                        value = 0
+                    if value == 1:
+                        newvalue = "0"
+                    else:
+                        newvalue = "1"
                 currentNode.children = 0
-                currentNode.value = value
-                node = Constant(str(value))
+                currentNode.value = newvalue
+                node = Constant(newvalue)
                 return node
             case "_":
                 print("none")
