@@ -199,6 +199,78 @@ class ASTOptimizer(Visitor):
                     for child in children:
                         newnode.adopt(child)
                     return newnode
+            case "!=":
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    value1 = children[0].value
+                    value2 = children[1].value
+                    try:
+                        value1 = int(value1)
+                    except ValueError:
+                        value1 = float(value1)
+                    try:
+                        value2 = int(value2)
+                    except ValueError:
+                        value2 = float(value2)
+
+                    if value1 != value2:
+                        newvalue = "1"
+                    else:
+                        newvalue = "0"
+                    newnode = Constant(newvalue)
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
+            case ">=":
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    value1 = children[0].value
+                    value2 = children[1].value
+                    try:
+                        value1 = int(value1)
+                    except ValueError:
+                        value1 = float(value1)
+                    try:
+                        value2 = int(value2)
+                    except ValueError:
+                        value2 = float(value2)
+
+                    if value1 >= value2:
+                        newvalue = "1"
+                    else:
+                        newvalue = "0"
+                    newnode = Constant(newvalue)
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
+            case "<=":
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    value1 = children[0].value
+                    value2 = children[1].value
+                    try:
+                        value1 = int(value1)
+                    except ValueError:
+                        value1 = float(value1)
+                    try:
+                        value2 = int(value2)
+                    except ValueError:
+                        value2 = float(value2)
+
+                    if value1 <= value2:
+                        newvalue = "1"
+                    else:
+                        newvalue = "0"
+                    newnode = Constant(newvalue)
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
             case "_":
                 print("none")
         return currentNode
