@@ -97,6 +97,39 @@ class ASTOptimizer(Visitor):
                         print(
                             "\n" + Fore.MAGENTA + "[warning] " + Fore.RESET + "line " + str(
                                 self.lineNr) + ": Division by zero is undefined \n")
+                        currentNode.children = 0
+                        currentNode.value = value
+                        newnode = Constant("NaN")
+                        return newnode
+                    currentNode.children = 0
+                    currentNode.value = value
+                    newnode = Constant(str(value))
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
+            case "%":
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    try:
+                        value = int(children[0].value)
+                    except ValueError:
+                        value = float(children[0].value)
+
+                    try:
+                        try:
+                            value = value % int(children[1].value)
+                        except ValueError:
+                            value = value % float(children[1].value)
+                    except ZeroDivisionError:
+                        print(
+                            "\n" + Fore.MAGENTA + "[warning] " + Fore.RESET + "line " + str(
+                                self.lineNr) + ": Division by zero is undefined \n")
+                        currentNode.children = 0
+                        currentNode.value = value
+                        newnode = Constant("NaN")
+                        return newnode
                     currentNode.children = 0
                     currentNode.value = value
                     newnode = Constant(str(value))
