@@ -19,6 +19,10 @@ class CreateSymbolTableVisitor(Visitor):
     def VisitASTNode(self, currentNode):
         print("Node")
         
+        if currentNode.children[0].name == "Comment":
+            for i in range(currentNode.children[0].value.count('\n')):
+                self.lineNr += 1
+        
         if currentNode.name == "Inst":
             self.lineNr += 1
         
