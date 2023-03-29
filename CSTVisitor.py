@@ -1,5 +1,5 @@
 import ast
-
+import re
 from CGrammarVisitor import CGrammarVisitor
 from CGrammarParser import CGrammarParser
 from AST import *
@@ -121,7 +121,7 @@ class CSTVisitor(CGrammarVisitor):
         print("RelationalExpression")
         print("#children: " + str(ctx.getChildCount()))
         if ctx.getChildCount() > 1:
-            relOp = RelationOperation(ctx.op.text)
+            relOp = BinaryOperation(ctx.op.text)
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, ASTNode):
@@ -241,5 +241,10 @@ class CSTVisitor(CGrammarVisitor):
 
     def visitPrintf(self, ctx: CGrammarParser.PrintfContext):
         print("Printf")
-        printf = PrintF(ctx.getText())
+        result = re.search('\((.+?)\)', ctx.getText()).group(1)
+        print("need this")
+        print(result)
+        node = ASTNode(result)
+        printf = PrintF("printf()")
+        printf.adopt(node)
         return printf

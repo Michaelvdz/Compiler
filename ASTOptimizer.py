@@ -1,5 +1,7 @@
 import copy
 
+from colorama import Fore
+
 from AST import *
 import graphviz
 
@@ -15,9 +17,12 @@ class ASTOptimizer(Visitor):
         #self.ast = graphviz.Digraph('AST', filename='ast.gv')
         print("---------------------Optimizing Tree--------------------")
         self.tree = tree
+        self.lineNr = 0
 
     def VisitASTNode(self, currentNode, constantProp=True):
         print("Node")
+        if currentNode.name == "Inst":
+            self.lineNr += 1
         newNode = ASTNode(currentNode.name)
         if not currentNode.children:
             if constantProp:
@@ -39,15 +44,15 @@ class ASTOptimizer(Visitor):
 
         match currentNode.value:
             case "+":
-                value = 0
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    for child in children:
-                        node = child.accept(self)
-                        try:
-                            int(node.value)
-                            value += int(node.value)
-                        except ValueError:
-                            value += float(node.value)
+                    try:
+                        value = int(children[0].value)
+                    except ValueError:
+                        value = float(children[0].value)
+                    try:
+                        value += int(children[1].value)
+                    except ValueError:
+                        value += float(children[1].value)
                     currentNode.children = 0
                     currentNode.value = value
                     newnode = Constant(str(value))
@@ -58,15 +63,15 @@ class ASTOptimizer(Visitor):
                         newnode.adopt(child)
                     return newnode
             case "*":
-                value = 1
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    for child in children:
-                        node = child.accept(self)
-                        try:
-                            int(node.value)
-                            value *= int(node.value)
-                        except ValueError:
-                            value *= float(node.value)
+                    try:
+                        value = int(children[0].value)
+                    except ValueError:
+                        value = float(children[0].value)
+                    try:
+                        value *= int(children[1].value)
+                    except ValueError:
+                        value *= float(children[1].value)
                     currentNode.children = 0
                     currentNode.value = value
                     newnode = Constant(str(value))
@@ -77,24 +82,21 @@ class ASTOptimizer(Visitor):
                         newnode.adopt(child)
                     return newnode
             case "/":
-                value = "NaN"
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    for child in children:
-                        node = child.accept(self)
-                        print("Recieved node with type: " + str(type(node)))
+                    try:
+                        value = int(children[0].value)
+                    except ValueError:
+                        value = float(children[0].value)
+
+                    try:
                         try:
-                            int(node.value)
-                            if value == "NaN":
-                                print("Dit?")
-                                value = int(node.value)
-                            else:
-                                print("Daarna dit?")
-                                value = value / int(node.value)
+                            value = value / int(children[1].value)
                         except ValueError:
-                            if value == "NaN":
-                                value = float(node.value)
-                            else:
-                                value = value / float(node.value)
+                            value = value / float(children[1].value)
+                    except ZeroDivisionError:
+                        print(
+                            "\n" + Fore.MAGENTA + "[warning] " + Fore.RESET + "line " + str(
+                                self.lineNr) + ": Division by zero is undefined \n")
                     currentNode.children = 0
                     currentNode.value = value
                     newnode = Constant(str(value))
@@ -105,18 +107,92 @@ class ASTOptimizer(Visitor):
                         newnode.adopt(child)
                     return newnode
             case "-":
-                value = 0
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    for child in children:
-                        node = child.accept(self)
-                        try:
-                            int(node.value)
-                            value -= int(node.value)
-                        except ValueError:
-                            value -= float(node.value)
+                    try:
+                        value = int(children[0].value)
+                    except ValueError:
+                        value = float(children[0].value)
+
+                    try:
+                        value -= int(children[1].value)
+                    except ValueError:
+                        value -= float(children[1].value)
+
                     currentNode.children = 0
                     currentNode.value = value
                     newnode = Constant(str(value))
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
+            case ">":
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    value1 = children[0].value
+                    value2 = children[1].value
+                    try:
+                        value1 = int(value1)
+                    except ValueError:
+                        value1 = float(value1)
+                    try:
+                        value2 = int(value2)
+                    except ValueError:
+                        value2 = float(value2)
+
+                    if value1 > value2:
+                        newvalue = "1"
+                    else:
+                        newvalue = "0"
+                    newnode = Constant(newvalue)
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
+            case "<":
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    value1 = children[0].value
+                    value2 = children[1].value
+                    try:
+                        value1 = int(value1)
+                    except ValueError:
+                        value1 = float(value1)
+                    try:
+                        value2 = int(value2)
+                    except ValueError:
+                        value2 = float(value2)
+
+                    if value1 < value2:
+                        newvalue = "1"
+                    else:
+                        newvalue = "0"
+                    newnode = Constant(newvalue)
+                    return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
+            case "==":
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    value1 = children[0].value
+                    value2 = children[1].value
+                    try:
+                        value1 = int(value1)
+                    except ValueError:
+                        value1 = float(value1)
+                    try:
+                        value2 = int(value2)
+                    except ValueError:
+                        value2 = float(value2)
+
+                    if value1 == value2:
+                        newvalue = "1"
+                    else:
+                        newvalue = "0"
+                    newnode = Constant(newvalue)
                     return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
@@ -130,17 +206,28 @@ class ASTOptimizer(Visitor):
 
 
     def VisitUnaryOperation(self, currentNode):
-        print("Binary")
+        print("Unary")
         match currentNode.value:
             case "-":
                 value = 0
                 for child in currentNode.children:
                     node = child.accept(self)
                     try:
-                        int("-"+node.value)
-                        value = int("-"+node.value)
+                        value = -int(node.value)
                     except ValueError:
-                        value = float("-"+node.value)
+                        value = -float(node.value)
+                currentNode.children = 0
+                currentNode.value = value
+                node = Constant(str(value))
+                return node
+            case "+":
+                value = 0
+                for child in currentNode.children:
+                    node = child.accept(self)
+                    try:
+                        value = int(node.value)
+                    except ValueError:
+                        value = float(node.value)
                 currentNode.children = 0
                 currentNode.value = value
                 node = Constant(str(value))
@@ -225,6 +312,11 @@ class ASTOptimizer(Visitor):
 
     def VisitPrintf(self, currentNode):
         print("PrintF")
-        return currentNode
+        newNode = copy.copy(currentNode)
+        newNode.children = []
+        for child in currentNode.children:
+            node = child.accept(self)
+            newNode.children.append(node)
+        return newNode
 
 

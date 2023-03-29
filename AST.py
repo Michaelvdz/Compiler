@@ -343,10 +343,11 @@ class PrintF(ASTNode):
 
     value = ""
     name = ""
+    children = []
 
     def __init__(self, value):
         print("___init-Printf__");
-        self.children = 0
+        self.children = []
         self.name = "Prinf"
         self.value = value
         print("___Node-Created-With-Name:"+ self.name + "___")
@@ -356,3 +357,6 @@ class PrintF(ASTNode):
 
     def accept(self, visitor: Visitor):
         return visitor.VisitPrintf(self)
+
+    def adopt(self, node):
+        self.children.append(node)

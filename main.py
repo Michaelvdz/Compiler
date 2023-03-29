@@ -28,9 +28,12 @@ def main(argv):
     visitor.visit(tree)
 
     #Optimize tree
+
     optimizedTree = ASTTree()
     astOptimizer = ASTOptimizer(optimizedTree)
     optimizedTree.root = asttree.root.accept(astOptimizer)
+
+    #optimizedTree = asttree
 
     print("Printing tree")
     astVisitor = ASTVisitor()
