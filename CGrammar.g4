@@ -22,6 +22,7 @@ unary_expression:   unary_operator iden=IDENTIFIER
     |   constant
     |   parenthesis_expression
     |   iden=IDENTIFIER
+    |   unary_operator unary_expression
     ;
 
 mul_div_expression: mul_div_expression op=('*'|'/') unary_expression
