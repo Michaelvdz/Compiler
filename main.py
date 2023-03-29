@@ -25,46 +25,53 @@ def main(argv):
     stream = CommonTokenStream(lexer)
     parser = CGrammarParser(stream)
     parser.addErrorListener(errorAnalyser())
+
     tree = parser.prog()
-
-    asttree = ASTTree()
-    visitor = CSTVisitor(asttree)
-    visitor.visit(tree)
-
-    print("Printing tree before optimization")
-    astVisitor = ASTVisitor(filename+"_beforeOptimization")
-    asttree.root.accept(astVisitor)
-    print("ending")
-    astVisitor.ast.view()
-
-    #Optimize tree
-    optimizedTree = ASTTree()
-    astOptimizer = ASTOptimizer(optimizedTree)
-    optimizedTree.root = asttree.root.accept(astOptimizer)
-
-    #optimizedTree = asttree
+    if parser.getNumberOfSyntaxErrors() == 0:
 
 
 
-    print("SymbolTable Part")
-    table = SymbolTable()
-    STCreator = CreateSymbolTableVisitor(table)
-    optimizedTree.root.accept(STCreator)
-    print("\n\nThe generated symbol table:")
-    print(table)
+        asttree = ASTTree()
+        visitor = CSTVisitor(asttree)
+        visitor.visit(tree)
+
+        print("Printing tree before optimization")
+        astVisitor = ASTVisitor(filename+"_beforeOptimization")
+        asttree.root.accept(astVisitor)
+        print("ending")
+        astVisitor.ast.view()
+
+        #Optimize tree
+        optimizedTree = ASTTree()
+        astOptimizer = ASTOptimizer(optimizedTree)
+        optimizedTree.root = asttree.root.accept(astOptimizer)
+
+        #optimizedTree = asttree
 
 
-    print("Printing tree")
-    astVisitor = ASTVisitor(filename)
-    optimizedTree.root.accept(astVisitor)
-    print("ending")
-    astVisitor.ast.view()
 
-    llvm = ""
-    LLVMCreator = AST2LLVMVisitor(llvm, table)
-    optimizedTree.root.accept(LLVMCreator)
-    print(LLVMCreator.llvm)
-    print(table)
+        print("SymbolTable Part")
+        table = SymbolTable()
+        STCreator = CreateSymbolTableVisitor(table)
+        optimizedTree.root.accept(STCreator)
+        print("\n\nThe generated symbol table:")
+        print(table)
+
+
+        print("Printing tree")
+        astVisitor = ASTVisitor(filename)
+        optimizedTree.root.accept(astVisitor)
+        print("ending")
+        astVisitor.ast.view()
+
+        llvm = ""
+        LLVMCreator = AST2LLVMVisitor(llvm, table)
+        optimizedTree.root.accept(LLVMCreator)
+        print(LLVMCreator.llvm)
+        print(table)
+
+    else:
+        print("Compiler interrupted after finding syntax errors")
 
 
 
