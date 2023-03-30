@@ -91,19 +91,23 @@ class ASTOptimizer(Visitor):
                     except ValueError:
                         value = float(children[0].value)
 
-                    try:
+                    if isinstance(value, float):
+                        value = value / float(children[1].value)
+                    else:
+
                         try:
-                            value = value / int(children[1].value)
-                        except ValueError:
-                            value = value / float(children[1].value)
-                    except ZeroDivisionError:
-                        print(
-                            "\n" + Fore.MAGENTA + "[warning] " + Fore.RESET + "line " + str(
-                                self.lineNr) + ": Division by zero is undefined \n")
-                        currentNode.children = 0
-                        currentNode.value = value
-                        newnode = Constant("NaN")
-                        return newnode
+                            try:
+                                value = value // int(children[1].value)
+                            except ValueError:
+                                value = value / float(children[1].value)
+                        except ZeroDivisionError:
+                            print(
+                                "\n" + Fore.MAGENTA + "[warning] " + Fore.RESET + "line " + str(
+                                    self.lineNr) + ": Division by zero is undefined \n")
+                            currentNode.children = 0
+                            currentNode.value = value
+                            newnode = Constant("NaN")
+                            return newnode
                     currentNode.children = 0
                     currentNode.value = value
                     newnode = Constant(str(value))
