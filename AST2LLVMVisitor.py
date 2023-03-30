@@ -133,7 +133,7 @@ class AST2LLVMVisitor(Visitor):
                 elif ltype == "float":
                     self.llvm += "%" + str(self.instr) + " = load float, ptr %" + str(self.instr - 1) + ", align 8\n"
                     self.instr +=1
-                    self.llvm += "store float %" + str(self.instr - 1)  + " ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                    self.llvm += "store float %" + str(self.instr - 1) + ", ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                 elif ltype == "char":
                     value = value.replace("'","")
                     self.llvm += "%" + str(self.instr) + " = load i8, ptr %" + str(self.instr - 1) + ", align 8\n"
@@ -187,8 +187,8 @@ class AST2LLVMVisitor(Visitor):
     def VisitSLComment(self, currentNode):
         print("SLComment")
         comment = currentNode.value
-        comment = comment.replace("//", " ;")
-        #self.llvm += comment
+        comment = comment.replace("//", ";")
+        self.llvm += comment + "\n"
         return currentNode
 
     def VisitPrintf(self, currentNode):
