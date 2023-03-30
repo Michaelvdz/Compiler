@@ -35,6 +35,15 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CGrammarParser#post_unary_operator.
+    def enterPost_unary_operator(self, ctx:CGrammarParser.Post_unary_operatorContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#post_unary_operator.
+    def exitPost_unary_operator(self, ctx:CGrammarParser.Post_unary_operatorContext):
+        pass
+
+
     # Enter a parse tree produced by CGrammarParser#parenthesis_expression.
     def enterParenthesis_expression(self, ctx:CGrammarParser.Parenthesis_expressionContext):
         pass

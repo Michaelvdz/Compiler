@@ -14,6 +14,10 @@ unary_operator:  '+'
     |   '&'
     |   '!'
     ;
+
+post_unary_operator:  '++'
+    |   '--'
+    ;
 parenthesis_expression: '(' expr ')'
     ;
 
@@ -23,6 +27,7 @@ unary_expression:   unary_operator iden=IDENTIFIER
     |   parenthesis_expression
     |   iden=IDENTIFIER
     |   unary_operator unary_expression
+    |   unary_expression post_unary_operator
     ;
 
 mul_div_expression: mul_div_expression op=('*'|'/'|'%') unary_expression
@@ -44,7 +49,7 @@ logical_expression:  logical_expression op=('&&'|'||') relational_expression
 assignment_expression:  logical_expression
     ;
 
-declaration_specification:  type '*' var=IDENTIFIER
+declaration_specification:  type pointer='*' var=IDENTIFIER
     | type var=IDENTIFIER
     | var=IDENTIFIER
     ;

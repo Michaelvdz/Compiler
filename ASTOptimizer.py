@@ -389,6 +389,17 @@ class ASTOptimizer(Visitor):
                 currentNode.value = value
                 node = Constant(str(value))
                 return node
+            case "--":
+                for child in currentNode.children:
+                    node = child.accept(self)
+                    try:
+                        value = int(node.value) - 1
+                    except ValueError:
+                        value = float(node.value) - 1
+                currentNode.children = 0
+                currentNode.value = value
+                node = Constant(str(value))
+                return node
             case "+":
                 value = 0
                 for child in currentNode.children:
@@ -397,6 +408,17 @@ class ASTOptimizer(Visitor):
                         value = int(node.value)
                     except ValueError:
                         value = float(node.value)
+                currentNode.children = 0
+                currentNode.value = value
+                node = Constant(str(value))
+                return node
+            case "++":
+                for child in currentNode.children:
+                    node = child.accept(self)
+                    try:
+                        value = int(node.value) + 1
+                    except ValueError:
+                        value = float(node.value) + 1
                 currentNode.children = 0
                 currentNode.value = value
                 node = Constant(str(value))
@@ -448,12 +470,16 @@ class ASTOptimizer(Visitor):
 
     def VisitDeclaration(self, currentNode):
         print("Declaration")
+        print("Pointer decl")
+        print(currentNode.type)
         newNode = copy.copy(currentNode)
         newNode.children = []
 
         for child in currentNode.children:
             node = child.acceptWithNoOptimization(self)
             newNode.children.append(node)
+        print("Afterwards")
+        print(newNode.type)
         return newNode
 
     def VisitAssignment(self, currentNode):
@@ -477,6 +503,8 @@ class ASTOptimizer(Visitor):
             print(node)
             newNode.children.append(node)
         """
+        print("Afterwards2")
+        print(newNode.lvalue.type)
         return newNode
 
     def VisitMLComment(self, currentNode):

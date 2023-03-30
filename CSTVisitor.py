@@ -46,6 +46,13 @@ class CSTVisitor(CGrammarVisitor):
         op.print()
         return op
 
+    # Visit a parse tree produced by CGrammarParser#unary_operator.
+    def visitPost_unary_operator(self, ctx: CGrammarParser.Unary_operatorContext):
+        print("PostUnaryOperator")
+        op = UnaryOperator(ctx.getText())
+        op.print()
+        return op
+
     # Visit a parse tree produced by CGrammarParser#parenthesis_expression.
     def visitParenthesis_expression(self, ctx: CGrammarParser.Parenthesis_expressionContext):
         print("ParenthesisExpression")
@@ -155,23 +162,57 @@ class CSTVisitor(CGrammarVisitor):
         print("DeclarationSpecifier")
         decl = Declaration("VariableDeclartion")
         decl.attr = ""
-        for child in ctx.children:
-            node = self.visit(child)
-            if isinstance(node, Variable):
-                for child2 in node.children:
-                    if child2.type == "reserved_word":
-                        decl.adopt(child2)
-                        decl.attr = child2.value
-                    if child2.type == "type":
-                        decl.adopt(child2)
-                        decl.type = child2.value
-            elif str(child) == '*':
-                pointer = ASTNode("*")
-                decl.adopt(pointer)
-            else:
-                var = ASTNode(ctx.var.text)
-                decl.adopt(var)
-                decl.var = var.value
+        if ctx.pointer:
+            print("Contains pointer")
+            #decl.type = "*"
+            for child in ctx.children:
+                node = self.visit(child)
+                print("child:")
+                print(ctx.var.text)
+                if isinstance(node, Variable):
+                    for child2 in node.children:
+                        if child2.type == "reserved_word":
+                            decl.adopt(child2)
+                            decl.attr = child2.value
+                        if child2.type == "type":
+                            print("Doetem dees wel?")
+                            decl.adopt(child2)
+                            decl.type = child2.value + "*"
+                            print(decl.type)
+                elif str(child) == '*':
+                    pointer = ASTNode("*")
+                    decl.adopt(pointer)
+                else:
+                    print("test")
+                    var = ASTNode(ctx.var.text)
+                    decl.adopt(var)
+                    decl.var = var.value
+
+            print(decl.var)
+            print(decl.type)
+            print(decl.attr)
+            print("Pointer declaration with:")
+            print("Varname: " + decl.var)
+            print("Type: " + decl.type)
+            print("Attr: " + decl.attr)
+        else:
+            for child in ctx.children:
+                node = self.visit(child)
+                if isinstance(node, Variable):
+                    for child2 in node.children:
+                        if child2.type == "reserved_word":
+                            decl.adopt(child2)
+                            decl.attr = child2.value
+                        if child2.type == "type":
+                            decl.adopt(child2)
+                            decl.type = child2.value
+                elif str(child) == '*':
+                    pointer = ASTNode("*")
+                    decl.adopt(pointer)
+                else:
+                    var = ASTNode(ctx.var.text)
+                    decl.adopt(var)
+                    decl.var = var.value
         print("EndOfDeclarationSpecification")
         print(decl.attr)
         print(decl.type)

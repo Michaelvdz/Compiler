@@ -18,15 +18,16 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitASTNode(self, currentNode):
         print("Node")
-        
-        if currentNode.children[0].name == "Comment":
-            for i in range(currentNode.children[0].value.count('\n')):
-                self.lineNr += 1
+        #currentNode.print()
+        if currentNode.children:
+            if currentNode.children[0].name == "Comment":
+                for i in range(currentNode.children[0].value.count('\n')):
+                    self.lineNr += 1
         
         if currentNode.name == "Inst":
             self.lineNr += 1
         
-        print(len(currentNode.children))
+        #print(len(currentNode.children))
         if len(currentNode.children) == 0:
             if self.table.lookup(currentNode.value) == 0:
                 print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line "+ str(self.lineNr) + ": variable " + currentNode.value + " has not been declared yet! \n")
@@ -74,9 +75,13 @@ class CreateSymbolTableVisitor(Visitor):
 
         currConst = ""
         currType = ""
-        
-        if currentNode.type != "int" and currentNode.type != "float" and currentNode.type != "char":
+        print(currentNode.type)
+
+
+        if currentNode.type != "int" and currentNode.type != "float" and currentNode.type != "char" and currentNode.type != "char*"\
+                and currentNode.type != "int*" and currentNode.type != "float*":
             currentNode.type = ""
+
 
         if currentNode.type == "VariableType":
             print("dees?")
@@ -85,6 +90,7 @@ class CreateSymbolTableVisitor(Visitor):
         else:
             print("nee dit!")
             currType = currentNode.type
+            print(currType)
 
         # int i = 3;
         # int i = 7; Redeclaration
@@ -112,6 +118,7 @@ class CreateSymbolTableVisitor(Visitor):
         for child in currentNode.children:
             node = child.accept(self)
         """
+        currentNode.print()
         return currentNode
     
     def VisitAssignment(self, currentNode):
@@ -120,7 +127,9 @@ class CreateSymbolTableVisitor(Visitor):
         varType = currentNode.lvalue.type
         varAttr = currentNode.lvalue.attr
 
+        print(varType)
         lvalue = currentNode.lvalue
+        print(lvalue.type)
         lvalue.accept(self)
 
         rvalue = currentNode.rvalue

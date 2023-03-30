@@ -24,6 +24,11 @@ class CGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CGrammarParser#post_unary_operator.
+    def visitPost_unary_operator(self, ctx:CGrammarParser.Post_unary_operatorContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CGrammarParser#parenthesis_expression.
     def visitParenthesis_expression(self, ctx:CGrammarParser.Parenthesis_expressionContext):
         return self.visitChildren(ctx)
