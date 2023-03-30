@@ -32,6 +32,7 @@ class CSTVisitor(CGrammarVisitor):
         print("Inst")
         print("#children: " + str(ctx.getChildCount()))
         instr = ASTNode("Inst")
+
         for child in ctx.children:
             node = self.visit(child)
             if isinstance(node, ASTNode):

@@ -29,8 +29,6 @@ def main(argv):
     tree = parser.prog()
     if parser.getNumberOfSyntaxErrors() == 0:
 
-
-
         asttree = ASTTree()
         visitor = CSTVisitor(asttree)
         visitor.visit(tree)

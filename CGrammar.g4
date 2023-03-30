@@ -4,8 +4,9 @@ prog: instr+ EOF
 	;
 
 instr: expr ';'
-    | comment
-    | printf ';'
+    | expr ';' comment
+    | printf ';' comment
+    | bc=BLOCKCOMMENT
 	;
 
 unary_operator:  '+'
@@ -68,7 +69,6 @@ expr:   assignment_expression
 	;
 
 
-
 constant:   INT
     | FLOAT
     | CHAR
@@ -87,14 +87,14 @@ reserved_word:  'const'
     ;
 
 comment: block=BLOCKCOMMENT
-    |   sl=SINGLE_LINE_COMMMENT
+    |   sl=SINGLE_LINE_COMMENT
     ;
 
 printf: 'printf' '(' (IDENTIFIER | constant) ')'
     ;
 
 BLOCKCOMMENT: '/*' .*? '*/';
-SINGLE_LINE_COMMMENT: '//'~( '\r' | '\n' )*;
+SINGLE_LINE_COMMENT: '//'~( '\r' | '\n' )*;
 INT: [0-9]+;
 FLOAT: [0-9]*? '.' [0-9]+;
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;

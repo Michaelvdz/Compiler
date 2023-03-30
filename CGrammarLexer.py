@@ -116,7 +116,7 @@ class CGrammarLexer(Lexer):
     T__24 = 25
     T__25 = 26
     BLOCKCOMMENT = 27
-    SINGLE_LINE_COMMMENT = 28
+    SINGLE_LINE_COMMENT = 28
     INT = 29
     FLOAT = 30
     IDENTIFIER = 31
@@ -134,14 +134,14 @@ class CGrammarLexer(Lexer):
             "'printf'" ]
 
     symbolicNames = [ "<INVALID>",
-            "BLOCKCOMMENT", "SINGLE_LINE_COMMMENT", "INT", "FLOAT", "IDENTIFIER", 
+            "BLOCKCOMMENT", "SINGLE_LINE_COMMENT", "INT", "FLOAT", "IDENTIFIER", 
             "CHAR", "WS" ]
 
     ruleNames = [ "T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "T__6", 
                   "T__7", "T__8", "T__9", "T__10", "T__11", "T__12", "T__13", 
                   "T__14", "T__15", "T__16", "T__17", "T__18", "T__19", 
                   "T__20", "T__21", "T__22", "T__23", "T__24", "T__25", 
-                  "BLOCKCOMMENT", "SINGLE_LINE_COMMMENT", "INT", "FLOAT", 
+                  "BLOCKCOMMENT", "SINGLE_LINE_COMMENT", "INT", "FLOAT", 
                   "IDENTIFIER", "CHAR", "WS" ]
 
     grammarFileName = "CGrammar.g4"

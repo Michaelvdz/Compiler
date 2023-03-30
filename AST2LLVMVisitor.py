@@ -17,24 +17,6 @@ class AST2LLVMVisitor(Visitor):
         print("----------------Converting AST 2 LLVM IR----------------")
         self.llvm = llvm
         self.symbolTable = symbolTable
-        #print(self.symbolTable)
-        '''
-        for key, value in self.symbolTable.vars.items():
-            print(value.type)
-            match value.type:
-                case "int":
-                    self.llvm += "%"+ str(self.instr) + " alloca i32, align 4 \n"
-                    self.symbolTable.insertRegister(key, str(self.instr))
-                case "float":
-                    self.llvm += "%"+ str(self.instr) + " alloca float, align 4 \n"
-                    self.symbolTable.insertRegister(key, str(self.instr))
-                case "char":
-                    self.llvm += "%"+ str(self.instr) + " alloca i8, align 1 \n"
-                    self.symbolTable.insertRegister(key, str(self.instr))
-                case other:
-                    print("Type not implemented")
-            self.instr +=1
-        '''
 
     def VisitASTNode(self, currentNode):
         print("Node")
@@ -199,7 +181,7 @@ class AST2LLVMVisitor(Visitor):
         comment = comment.replace("/*",";")
         comment = comment.replace("*/", ";")
         comment = comment.replace("* ", "; ")
-        #self.llvm += comment
+        self.llvm += comment + "\n"
         return currentNode
 
     def VisitSLComment(self, currentNode):

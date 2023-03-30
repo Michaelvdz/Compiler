@@ -21,10 +21,13 @@ class ASTOptimizer(Visitor):
 
     def VisitASTNode(self, currentNode, constantProp=True):
         print("Node")
+
+
         if currentNode.name == "Inst":
             self.lineNr += 1
         newNode = ASTNode(currentNode.name)
         if not currentNode.children:
+            print("DOETEM DEES?")
             if constantProp:
                 var = self.vars.get(currentNode.value)
                 if var:
@@ -470,30 +473,31 @@ class ASTOptimizer(Visitor):
 
     def VisitDeclaration(self, currentNode):
         print("Declaration")
-        print("Pointer decl")
-        print(currentNode.type)
         newNode = copy.copy(currentNode)
         newNode.children = []
-
         for child in currentNode.children:
             node = child.acceptWithNoOptimization(self)
             newNode.children.append(node)
-        print("Afterwards")
-        print(newNode.type)
         return newNode
 
     def VisitAssignment(self, currentNode):
         print("Assignment")
         newNode = copy.copy(currentNode)
         newNode.children = []
+        print(currentNode.lvalue)
         newNode.lvalue = currentNode.lvalue.accept(self)
+        print(newNode.lvalue)
         newNode.rvalue = currentNode.rvalue.accept(self)
         newNode.adopt(newNode.lvalue)
         newNode.adopt(newNode.rvalue)
 
+        print("Wa is dees na?")
+        newNode.rvalue.print()
         if not newNode.rvalue.children:
             print('No kids')
-            if isinstance(newNode.lvalue, Variable):
+            print(newNode.lvalue)
+            if isinstance(newNode.lvalue, Declaration):
+                print("Invoegen?")
                 self.vars[newNode.lvalue.var] = newNode.rvalue.value
                 for key, value in self.vars.items():
                     print(key + ': ' + value)
