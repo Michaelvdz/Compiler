@@ -123,34 +123,21 @@ class CreateSymbolTableVisitor(Visitor):
     
     def VisitAssignment(self, currentNode):
         print("Assignment")
-        varName = currentNode.lvalue.var
-        varType = currentNode.lvalue.type
-        varAttr = currentNode.lvalue.attr
+        if isinstance(currentNode.lvalue, Variable):
+            varName = currentNode.lvalue.var
+            varType = currentNode.lvalue.type
+            varAttr = currentNode.lvalue.attr
 
-        print(varType)
-        lvalue = currentNode.lvalue
-        print(lvalue.type)
-        lvalue.accept(self)
+            print(varType)
+            lvalue = currentNode.lvalue
+            print(lvalue.type)
+            lvalue.accept(self)
 
-        rvalue = currentNode.rvalue
-        rvalue.accept(self)
+            rvalue = currentNode.rvalue
+            rvalue.accept(self)
+        else:
+            currentNode.lvalue.accept(self)
 
-        """
-        for child in currentNode.children:
-            if child.name == "Constant":
-                child.varName = varName
-                child.varType = varType
-                node = child.accept(self)
-            else:
-                if child.name != child.value:
-                    node = child.accept(self)
-                
-        # Check if the variable in the lvalue has the same datatypes as the variables in the rvalue
-        for i in l:
-            if self.table.vars[i][1] != self.table.vars[varName][1]:
-                print(
-                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " variable " + i + " has not the same datatype as variable " + varName + "\n")
-        """
         return currentNode
 
     def VisitMLComment(self, currentNode):

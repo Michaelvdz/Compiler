@@ -64,6 +64,11 @@ class CGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CGrammarParser#pointer.
+    def visitPointer(self, ctx:CGrammarParser.PointerContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CGrammarParser#declaration_specification.
     def visitDeclaration_specification(self, ctx:CGrammarParser.Declaration_specificationContext):
         return self.visitChildren(ctx)

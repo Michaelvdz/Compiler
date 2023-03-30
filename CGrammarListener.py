@@ -107,6 +107,15 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CGrammarParser#pointer.
+    def enterPointer(self, ctx:CGrammarParser.PointerContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#pointer.
+    def exitPointer(self, ctx:CGrammarParser.PointerContext):
+        pass
+
+
     # Enter a parse tree produced by CGrammarParser#declaration_specification.
     def enterDeclaration_specification(self, ctx:CGrammarParser.Declaration_specificationContext):
         pass

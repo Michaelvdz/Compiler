@@ -493,18 +493,11 @@ class ASTOptimizer(Visitor):
 
         if not newNode.rvalue.children:
             print('No kids')
-            self.vars[newNode.lvalue.var] = newNode.rvalue.value
-            for key, value in self.vars.items():
-                print(key + ': ' + value)
+            if isinstance(newNode.lvalue, Variable):
+                self.vars[newNode.lvalue.var] = newNode.rvalue.value
+                for key, value in self.vars.items():
+                    print(key + ': ' + value)
 
-        """
-        for child in currentNode.children:
-            node = child.accept(self)
-            print(node)
-            newNode.children.append(node)
-        """
-        print("Afterwards2")
-        print(newNode.lvalue.type)
         return newNode
 
     def VisitMLComment(self, currentNode):

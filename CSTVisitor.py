@@ -162,31 +162,39 @@ class CSTVisitor(CGrammarVisitor):
         print("DeclarationSpecifier")
         decl = Declaration("VariableDeclartion")
         decl.attr = ""
-        if ctx.pointer:
+        if ctx.ptr:
             print("Contains pointer")
             #decl.type = "*"
-            for child in ctx.children:
-                node = self.visit(child)
-                print("child:")
-                print(ctx.var.text)
-                if isinstance(node, Variable):
-                    for child2 in node.children:
-                        if child2.type == "reserved_word":
-                            decl.adopt(child2)
-                            decl.attr = child2.value
-                        if child2.type == "type":
-                            print("Doetem dees wel?")
-                            decl.adopt(child2)
-                            decl.type = child2.value + "*"
-                            print(decl.type)
-                elif str(child) == '*':
-                    pointer = ASTNode("*")
-                    decl.adopt(pointer)
-                else:
-                    print("test")
-                    var = ASTNode(ctx.var.text)
-                    decl.adopt(var)
-                    decl.var = var.value
+            if ctx.typ:
+                for child in ctx.children:
+                    node = self.visit(child)
+                    print("child:")
+                    print(ctx.var.text)
+                    if isinstance(node, Variable):
+                        for child2 in node.children:
+                            if child2.type == "reserved_word":
+                                decl.adopt(child2)
+                                decl.attr = child2.value
+                            if child2.type == "type":
+                                print("Doetem dees wel?")
+                                decl.adopt(child2)
+                                decl.type = child2.value + "*"
+                                print(decl.type)
+                    elif child is ctx.ptr:
+                        pointer = ASTNode("*")
+                        decl.adopt(pointer)
+                    else:
+                        print("test")
+                        var = ASTNode(ctx.var.text)
+                        decl.adopt(var)
+                        decl.var = var.value
+            else:
+                print("Zijn we hier")
+                print(self.visit(ctx.ptr).value)
+                op = UnaryOperation(self.visit(ctx.ptr).value)
+                var = ASTNode(ctx.var.text)
+                op.adopt(var)
+                return op
 
             print(decl.var)
             print(decl.type)
@@ -269,6 +277,13 @@ class CSTVisitor(CGrammarVisitor):
         print("ReservedWord")
         word = ASTNode(ctx.getText())
         word.type = "reserved_word"
+        return word
+
+    # Visit a parse tree produced by CGrammarParser#reserved_word.
+    def visitPointer(self, ctx:CGrammarParser.Reserved_wordContext):
+        print("Pointer")
+        word = ASTNode(ctx.getText())
+        word.type = "pointer"
         return word
 
     # Visit a parse tree produced by CGrammarParser#reserved_word.

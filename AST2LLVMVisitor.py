@@ -53,7 +53,17 @@ class AST2LLVMVisitor(Visitor):
         match currentNode.value:
             case "&":
                 node = currentNode.children[0].accept(self)
-                return self.symbolTable.lookup(node.value).register
+                return "%"+self.symbolTable.lookup(node.value).register
+            case "*":
+                node = currentNode.children[0].accept(self)
+                if isinstance(node, ASTNode):
+                    self.llvm += "%" + str(self.instr) + " = load ptr, ptr %" + str(self.symbolTable.lookup(node.value).register) + ", align 8\n"
+                    self.instr += 1
+                    return "%"+self.symbolTable.lookup(node.value).register
+                else:
+                    self.llvm += "%" + str(self.instr) + " = load ptr, ptr %" + str(self.instr-1) + ", align 8\n"
+                    self.instr += 1;
+                    return node
             case other:
                 print("not implemented yet")
         return currentNode
@@ -82,19 +92,19 @@ class AST2LLVMVisitor(Visitor):
         attr = currentNode.attr
         match type:
             case "int":
-                self.llvm += "%" + str(self.instr) + " alloca i32, align 4\n"
+                self.llvm += "%" + str(self.instr) + " = alloca i32, align 4\n"
                 self.symbolTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case "float":
-                self.llvm += "%" + str(self.instr) + " alloca float, align 4\n"
+                self.llvm += "%" + str(self.instr) + " = alloca float, align 4\n"
                 self.symbolTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case "char":
-                self.llvm += "%" + str(self.instr) + " alloca i8, align 1\n"
+                self.llvm += "%" + str(self.instr) + " = alloca i8, align 1\n"
                 self.symbolTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case "int*" | "float*" | "char*":
-                self.llvm += "%" + str(self.instr) + " alloca ptr, align 8\n"
+                self.llvm += "%" + str(self.instr) + " = alloca ptr, align 8\n"
                 self.symbolTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case other:
@@ -104,32 +114,83 @@ class AST2LLVMVisitor(Visitor):
 
     def VisitAssignment(self, currentNode):
         print("Assignment2LLVM")
-        value = currentNode.rvalue.accept(self)
-        currentNode.lvalue.accept(self)
-        ltype = self.symbolTable.lookup(currentNode.lvalue.var).type
-        print("type=" + ltype)
-        if ltype == "int":
-            try:
-                value = int(value)
-            except ValueError:
-                value = float(value)
-            if isinstance(value, float) or isinstance(value, int):
-                self.llvm += "store i32 " + str(value) + ", ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
-        elif ltype == "float":
-            try:
-                value = float(value)
-            except ValueError:
-                print("failiure")
-            self.llvm += "store float " + str(value) + " ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
-        elif ltype == "char":
-            value = value.replace("'","")
-            #char = list(value)
-            #print(ord(char[0]))
-            self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
-        elif ltype == "int*" or ltype == "float*" or ltype == "char*":
-            self.llvm += "store ptr %" + str(value) + ", ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 8\n"
+
+
+        if isinstance(currentNode.lvalue, Declaration):
+            currentNode.lvalue.accept(self)
+            value = currentNode.rvalue.accept(self)
+            print(value)
+            ltype = self.symbolTable.lookup(currentNode.lvalue.var).type
+            print("type=" + ltype)
+            if "%" not in value:
+                if ltype == "int":
+                    try:
+                        value = int(value)
+                    except ValueError:
+                        value = float(value)
+                    if isinstance(value, float) or isinstance(value, int):
+                        self.llvm += "store i32 " + str(value) + ", ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                elif ltype == "float":
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        print("failiure")
+                    self.llvm += "store float " + str(value) + " ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                elif ltype == "char":
+                    value = value.replace("'","")
+                    #char = list(value)
+                    #print(ord(char[0]))
+                    self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
+            else:
+                if ltype == "int*" or ltype == "float*" or ltype == "char*":
+                    self.llvm += "store ptr " + str(value) + ", ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 8\n"
+                elif ltype == "int":
+                    self.llvm += "%" + str(self.instr) + " = load i32, ptr %" + str(self.instr - 1) + ", align 8\n"
+                    self.instr +=1
+                    self.llvm += "store i32 %" + str(self.instr - 1)  + ", ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                elif ltype == "float":
+                    self.llvm += "%" + str(self.instr) + " = load float, ptr %" + str(self.instr - 1) + ", align 8\n"
+                    self.instr +=1
+                    self.llvm += "store float %" + str(self.instr - 1)  + " ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                elif ltype == "char":
+                    value = value.replace("'","")
+                    self.llvm += "%" + str(self.instr) + " = load i8, ptr %" + str(self.instr - 1) + ", align 8\n"
+                    self.instr +=1
+                    self.llvm += "store i8 %" + str(self.instr - 1)  + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
+                else:
+                    print("test")
         else:
-            print("test")
+            value = currentNode.rvalue.accept(self)
+            print(value)
+            reg = currentNode.lvalue.accept(self)
+            ltype = self.symbolTable.lookup(currentNode.lvalue.children[0].value).type
+            self.llvm += "%" + str(self.instr) + " = load ptr, ptr " + str(reg) + ", align 8\n"
+            self.instr += 1
+            if ltype == "int*":
+                try:
+                    value = int(value)
+                except ValueError:
+                    value = float(value)
+                if isinstance(value, float) or isinstance(value, int):
+                    print(self.instr - 1)
+                    self.llvm += "store i32 " + str(value) + ", ptr %" + str(self.instr-1) + ", align 4\n"
+            if ltype == "float*":
+                try:
+                    value = int(value)
+                except ValueError:
+                    value = float(value)
+                if isinstance(value, float) or isinstance(value, int):
+                    print(self.instr - 1)
+                    self.llvm += "store float " + str(value) + ", ptr %" + str(self.instr-1) + ", align 4\n"
+            if ltype == "char*":
+                try:
+                    value = int(value)
+                except ValueError:
+                    value = float(value)
+                if isinstance(value, float) or isinstance(value, int):
+                    print(self.instr - 1)
+                    self.llvm += "store i8 " + str(value) + ", ptr %" + str(self.instr-1) + ", align 1\n"
+
         return currentNode
 
     def VisitMLComment(self, currentNode):
@@ -138,14 +199,14 @@ class AST2LLVMVisitor(Visitor):
         comment = comment.replace("/*",";")
         comment = comment.replace("*/", ";")
         comment = comment.replace("* ", "; ")
-        self.llvm += comment
+        #self.llvm += comment
         return currentNode
 
     def VisitSLComment(self, currentNode):
         print("SLComment")
         comment = currentNode.value
         comment = comment.replace("//", " ;")
-        self.llvm += comment
+        #self.llvm += comment
         return currentNode
 
     def VisitPrintf(self, currentNode):

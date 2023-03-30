@@ -49,9 +49,14 @@ logical_expression:  logical_expression op=('&&'|'||') relational_expression
 assignment_expression:  logical_expression
     ;
 
-declaration_specification:  type pointer='*' var=IDENTIFIER
-    | type var=IDENTIFIER
+pointer:    '*' pointer
+    | '*'
+    ;
+
+declaration_specification:  typ=type ptr=pointer var=IDENTIFIER
+    | typ=type var=IDENTIFIER
     | var=IDENTIFIER
+    | ptr=pointer var=IDENTIFIER
     ;
 
 declaration:    lvalue=declaration_specification assign='=' rvalue=assignment_expression
