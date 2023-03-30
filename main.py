@@ -66,7 +66,10 @@ def main(argv):
         LLVMCreator = AST2LLVMVisitor(llvm, table)
         optimizedTree.root.accept(LLVMCreator)
         print(LLVMCreator.llvm)
-        print(table)
+
+        llvm = open(filename+".ll", "w")
+        llvm.write(LLVMCreator.llvm)
+        llvm.close()
 
     else:
         print("Compiler interrupted after finding syntax errors")
