@@ -123,6 +123,15 @@ class CreateSymbolTableVisitor(Visitor):
     
     def VisitAssignment(self, currentNode):
         print("Assignment")
+        
+        if currentNode.rvalue.name == "UnaryOperation":
+            var = currentNode.rvalue.children[0].value
+            type = self.table.vars[var].type
+            if currentNode.rvalue.value == "&":
+                if type != currentNode.lvalue.type:
+                    print(
+                        "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " initializing " + currentNode.lvalue.type + " with incopatible type " + type + "* ! \n")
+        
         if isinstance(currentNode.lvalue, Variable):
             varName = currentNode.lvalue.var
             varType = currentNode.lvalue.type
