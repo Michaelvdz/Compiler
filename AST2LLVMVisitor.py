@@ -85,8 +85,16 @@ class AST2LLVMVisitor(Visitor):
                 self.llvm += "%" + str(self.instr) + " = alloca i8, align 1\n"
                 self.symbolTable.insertRegister(var, str(self.instr))
                 self.instr += 1
-            case "int*" | "float*" | "char*":
-                self.llvm += "%" + str(self.instr) + " = alloca ptr, align 8\n"
+            case "int*":
+                self.llvm += "%" + str(self.instr) + " = alloca i32*, align 8\n"
+                self.symbolTable.insertRegister(var, str(self.instr))
+                self.instr += 1
+            case "float*":
+                self.llvm += "%" + str(self.instr) + " = alloca float*, align 8\n"
+                self.symbolTable.insertRegister(var, str(self.instr))
+                self.instr += 1
+            case "char*":
+                self.llvm += "%" + str(self.instr) + " = alloca i8*, align 8\n"
                 self.symbolTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case other:
@@ -125,8 +133,14 @@ class AST2LLVMVisitor(Visitor):
                     #print(ord(char[0]))
                     self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
             else:
-                if ltype == "int*" or ltype == "float*" or ltype == "char*":
-                    self.llvm += "store ptr " + str(value) + ", ptr %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 8\n"
+                if ltype == "int*":
+                    self.llvm += "store i32* " + str(value) + ", i32** %" + self.symbolTable.lookup(
+                        currentNode.lvalue.var).register + ", align 8\n"
+                elif ltype == "float*":
+                    self.llvm += "store float* " + str(value) + ", float** %" + self.symbolTable.lookup(
+                        currentNode.lvalue.var).register + ", align 8\n"
+                elif ltype == "char*":
+                    self.llvm += "store i8* " + str(value) + ", i8** %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 8\n"
                 elif ltype == "int":
                     self.llvm += "%" + str(self.instr) + " = load i32, i32 %" + str(self.instr - 1) + ", align 8\n"
                     self.instr +=1
@@ -225,7 +239,6 @@ class AST2LLVMVisitor(Visitor):
                              "@.char, i64 0, i64 0), i32 noundef %" + str(int(self.instr) - 1) + ")\n"
                 self.instr += 1
 
-        #self.llvm += "declare i32 @printf(i8* noundef, ...)"
         return currentNode
 
 
