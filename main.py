@@ -33,10 +33,10 @@ def main(argv):
         visitor = CSTVisitor(asttree)
         visitor.visit(tree)
 
-        print("Printing tree before optimization")
+        #print("Printing tree before optimization")
         astVisitor = ASTVisitor(filename+"_beforeOptimization")
         asttree.root.accept(astVisitor)
-        print("ending")
+        #print("ending")
         astVisitor.ast.view()
 
         #Optimize tree
@@ -48,24 +48,24 @@ def main(argv):
 
 
 
-        print("SymbolTable Part")
+        #print("SymbolTable Part")
         table = SymbolTable()
         STCreator = CreateSymbolTableVisitor(table)
         optimizedTree.root.accept(STCreator)
-        print("\n\nThe generated symbol table:")
-        print(table)
+        #print("\n\nThe generated symbol table:")
+        #print(table)
 
 
-        print("Printing tree")
+        #print("Printing tree")
         astVisitor = ASTVisitor(filename)
         optimizedTree.root.accept(astVisitor)
-        print("ending")
+        #print("ending")
         astVisitor.ast.view()
 
         llvm = ""
         LLVMCreator = AST2LLVMVisitor(llvm, table)
         optimizedTree.root.accept(LLVMCreator)
-        print(LLVMCreator.llvm)
+        #print(LLVMCreator.llvm)
 
         llvm = open(filename+".ll", "w")
         llvm.write(LLVMCreator.llvm)
