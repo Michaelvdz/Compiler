@@ -130,7 +130,7 @@ class CreateSymbolTableVisitor(Visitor):
             if currentNode.rvalue.value == "&":
                 if type != currentNode.lvalue.type:
                     print(
-                        "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " initializing " + currentNode.lvalue.type + " with incopatible type " + type + "* ! \n")
+                        "\n" + Fore.RED + "[ERROR]" + Fore.RESET + " line " + str(self.lineNr) + ": initializing " + currentNode.lvalue.type + " with incopatible type " + type + "* ! \n")
         
         if isinstance(currentNode.lvalue, Variable):
             varName = currentNode.lvalue.var
