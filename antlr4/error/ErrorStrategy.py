@@ -601,7 +601,7 @@ class DefaultErrorStrategy(ErrorStrategy):
     #  we resync'd to that token, we'd consume until EOF.  We need to
     #  sync to context-sensitive FOLLOWs for a, b, and c: {']','^'}.
     #  In this case, for input "[]", LA(1) is ']' and in the set, so we would
-    #  not consume anything. After printing an error, rule c would
+    #  not consume anything. After printing.c an error, rule c would
     #  return normally.  Rule b would not find the required '^' though.
     #  At this point, it gets a mismatched token error and throws an
     #  exception (since LA(1) is not in the viable following token

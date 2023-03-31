@@ -54,6 +54,7 @@ for file in files:
         optimizedTree.root.accept(LLVMCreator)
         # Act like we are close the main function for future debugging
         LLVMCreator.llvm += "ret i32 0\n}"
+        LLVMCreator.printing = False
 
         llvm = open(outputPath+filename+".ll", "w")
         llvm.write(LLVMCreator.llvm)
