@@ -38,3 +38,27 @@ during the compilation process. The comments will thus be stored in the AST.
 Such comments can then be put into the LLVM code.</li>
 </ul>
 
+Requirements
+------------
+This compiler is written and can be interpreted with Python 3.10 interpreter.
+The requirements and packages can be found and installed using command:
+<code>pip install -r requirements.txt</code>
+
+
+Execution:
+----------
+To test the compiler, one can use following command:
+
+<code>python main.py "filename"</code>
+
+For example:
+
+<code>python main.py test.c</code>
+
+We made some tests that show the compilers' behavior.
+The tests will create for each test file and .ll file containing the potential LLVM IR code and
+two .dot file's containing the AST's before and after optimisation.
+To run our tests, the following command can be used:
+
+<code>python test.py</code>
+
