@@ -42,8 +42,8 @@ Requirements
 ------------
 This compiler is written and can be interpreted with Python 3.10 interpreter.
 The requirements and packages can be found and installed using command:
-<code>pip install -r requirements.txt</code>
 
+<code>pip install -r Requirements.txt</code>
 
 Execution:
 ----------
