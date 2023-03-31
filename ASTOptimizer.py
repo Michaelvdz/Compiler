@@ -15,23 +15,23 @@ class ASTOptimizer(Visitor):
 
     def __init__(self, tree):
         #self.ast = graphviz.Digraph('AST', filename='ast.gv')
-        print("---------------------Optimizing Tree--------------------")
+        #print("---------------------Optimizing Tree--------------------")
         self.tree = tree
         self.lineNr = 0
 
     def VisitASTNode(self, currentNode, constantProp=True):
-        print("Node")
+        #print("Node")
 
 
         if currentNode.name == "Inst":
             self.lineNr += 1
         newNode = ASTNode(currentNode.name)
         if not currentNode.children:
-            print("DOETEM DEES?")
+            #print("DOETEM DEES?")
             if constantProp:
                 var = self.vars.get(currentNode.value)
                 if var:
-                    print("Var exist, lets do constant propagation")
+                    #print("Var exist, lets do constant propagation")
                     newNode = Constant(var)
         else:
             for child in currentNode.children:
@@ -40,7 +40,7 @@ class ASTOptimizer(Visitor):
         return newNode
 
     def VisitBinaryOperation(self, currentNode):
-        print("Binary")
+        #print("Binary")
         children = []
         for child in currentNode.children:
             children.append(child.accept(self))
@@ -382,7 +382,7 @@ class ASTOptimizer(Visitor):
 
 
     def VisitUnaryOperation(self, currentNode):
-        print("Unary")
+        #print("Unary")
         match currentNode.value:
             case "-":
                 value = 0
@@ -454,7 +454,7 @@ class ASTOptimizer(Visitor):
         return currentNode
 
     def VisitRelationOperation(self, currentNode):
-        print("Relation")
+        #print("Relation")
         newNode = copy.copy(currentNode)
         newNode.children = []
         for child in currentNode.children:
@@ -463,7 +463,7 @@ class ASTOptimizer(Visitor):
         return newNode
 
     def VisitLogicalOperation(self, currentNode):
-        print("Logical")
+        #print("Logical")
         newNode = copy.copy(currentNode)
         newNode.children = []
         for child in currentNode.children:
@@ -472,11 +472,11 @@ class ASTOptimizer(Visitor):
         return newNode
 
     def VisitConstant(self, currentNode):
-        print("Constant")
+        #print("Constant")
         return currentNode
 
     def VisitDeclaration(self, currentNode):
-        print("Declaration")
+        #print("Declaration")
         newNode = copy.copy(currentNode)
         newNode.children = []
         for child in currentNode.children:
@@ -485,39 +485,41 @@ class ASTOptimizer(Visitor):
         return newNode
 
     def VisitAssignment(self, currentNode):
-        print("Assignment")
+        #print("Assignment")
         newNode = copy.copy(currentNode)
         newNode.children = []
-        print(currentNode.lvalue)
+        #print(currentNode.lvalue)
         newNode.lvalue = currentNode.lvalue.accept(self)
-        print(newNode.lvalue)
+        #print(newNode.lvalue)
         newNode.rvalue = currentNode.rvalue.accept(self)
         newNode.adopt(newNode.lvalue)
         newNode.adopt(newNode.rvalue)
 
-        print("Wa is dees na?")
-        newNode.rvalue.print()
+        #print("Wa is dees na?")
+        #newNode.rvalue.print()
         if not newNode.rvalue.children:
-            print('No kids')
-            print(newNode.lvalue)
+            #print('No kids')
+            #print(newNode.lvalue)
             if isinstance(newNode.lvalue, Declaration):
-                print("Invoegen?")
+                #print("Invoegen?")
                 self.vars[newNode.lvalue.var] = newNode.rvalue.value
                 for key, value in self.vars.items():
-                    print(key + ': ' + value)
+                    x = "test"
+                    #print(key + ': ' + value)
+
 
         return newNode
 
     def VisitMLComment(self, currentNode):
-        print("MLComment")
+        #print("MLComment")
         return currentNode
 
     def VisitSLComment(self, currentNode):
-        print("SLComment")
+        #print("SLComment")
         return currentNode
 
     def VisitPrintf(self, currentNode):
-        print("PrintF")
+        #print("PrintF")
         newNode = copy.copy(currentNode)
         newNode.children = []
         for child in currentNode.children:

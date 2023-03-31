@@ -14,24 +14,24 @@ class AST2LLVMVisitor(Visitor):
     instr = 1
 
     def __init__(self, llvm="", symbolTable=SymbolTable()):
-        print("----------------Converting AST 2 LLVM IR----------------")
+        #print("----------------Converting AST 2 LLVM IR----------------")
         self.llvm = llvm
         self.symbolTable = symbolTable
 
     def VisitASTNode(self, currentNode):
-        print("Node")
+        #print("Node")
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
 
     def VisitBinaryOperation(self, currentNode):
-        print("Binary")
+        #print("Binary")
         for child in currentNode.children:
             node = child.accept(self)
         return "binary"
 
     def VisitUnaryOperation(self, currentNode):
-        print("Unary")
+        #print("Unary")
         match currentNode.value:
             case "&":
                 node = currentNode.children[0].accept(self)
@@ -51,24 +51,24 @@ class AST2LLVMVisitor(Visitor):
         return currentNode
 
     def VisitRelationOperation(self, currentNode):
-        print("Relation")
+        #print("Relation")
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
 
     def VisitLogicalOperation(self, currentNode):
-        print("Logical")
+        #print("Logical")
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
 
     def VisitConstant(self, currentNode):
-        print("Constant")
+        #print("Constant")
         #self.llvm+= " "+currentNode.value
         return currentNode.value
 
     def VisitDeclaration(self, currentNode):
-        print("Declaration2LLVM")
+        #print("Declaration2LLVM")
         var = currentNode.var
         type = currentNode.type
         attr = currentNode.attr
@@ -90,20 +90,21 @@ class AST2LLVMVisitor(Visitor):
                 self.symbolTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case other:
-                print("Type not implemented or literal")
+                x = "test"
+                #print("Type not implemented or literal")
 
         return currentNode
 
     def VisitAssignment(self, currentNode):
-        print("Assignment2LLVM")
+        #print("Assignment2LLVM")
 
 
         if isinstance(currentNode.lvalue, Declaration):
             currentNode.lvalue.accept(self)
             value = currentNode.rvalue.accept(self)
-            print(value)
+            #print(value)
             ltype = self.symbolTable.lookup(currentNode.lvalue.var).type
-            print("type=" + ltype)
+            #print("type=" + ltype)
             if "%" not in value:
                 if ltype == "int":
                     try:
@@ -138,12 +139,12 @@ class AST2LLVMVisitor(Visitor):
                     value = value.replace("'","")
                     self.llvm += "%" + str(self.instr) + " = load i8, ptr %" + str(self.instr - 1) + ", align 8\n"
                     self.instr +=1
-                    self.llvm += "store i8 %" + str(self.instr - 1)  + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
+                    self.llvm += "store i8 %" + str(self.instr - 1) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
                 else:
                     print("test")
         else:
             value = currentNode.rvalue.accept(self)
-            print(value)
+            #print(value)
             reg = currentNode.lvalue.accept(self)
             ltype = self.symbolTable.lookup(currentNode.lvalue.children[0].value).type
             self.llvm += "%" + str(self.instr) + " = load ptr, ptr " + str(reg) + ", align 8\n"
@@ -176,7 +177,7 @@ class AST2LLVMVisitor(Visitor):
         return currentNode
 
     def VisitMLComment(self, currentNode):
-        print("MLComment")
+        #print("MLComment")
         comment = currentNode.value
         comment = comment.replace("/*",";")
         comment = comment.replace("*/", ";")
@@ -185,14 +186,17 @@ class AST2LLVMVisitor(Visitor):
         return currentNode
 
     def VisitSLComment(self, currentNode):
-        print("SLComment")
+        #print("SLComment")
         comment = currentNode.value
         comment = comment.replace("//", ";")
         self.llvm += comment + "\n"
         return currentNode
 
     def VisitPrintf(self, currentNode):
-        print("Printf")
+        #print("Printf")
+        self.llvm = "@.str = private unnamed_addr constant [3 x i8] c" + "\"" + "%d" + "\\00" + "\", align 1\n" + self.llvm
+        self.llvm += "call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* @.str, i64 0, i64 0), double noundef %16)"
+        self.llvm += "declare i32 @printf(i8* noundef, ...)"
         return currentNode
 
 

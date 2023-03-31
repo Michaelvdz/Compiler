@@ -6,6 +6,7 @@ prog: instr+ EOF
 instr: expr ';'
     | expr ';' comment
     | printf ';' comment
+    | printf ';'
     | bc=BLOCKCOMMENT
 	;
 

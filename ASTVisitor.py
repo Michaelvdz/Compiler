@@ -7,96 +7,96 @@ class Visitor:
 
 class ASTVisitor(Visitor):
 
-    def __init__(self, filename=""):
-        print("----------------Printing AST TREE----------------")
-        self.ast = graphviz.Digraph('AST', filename=filename+'.dot')
+    def __init__(self, filename="", path="."):
+        #print("----------------Printing AST TREE----------------")
+        self.ast = graphviz.Digraph('AST', filename=filename+'.dot', directory=path)
 
     def VisitASTNode(self, currentNode):
-        print("Beginning Node")
+        #print("Beginning Node")
         self.ast.node(str(id(currentNode)), currentNode.name)
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
-        print("Ending Node")
+        #print("Ending Node")
         return currentNode
 
     def VisitBinaryOperation(self, currentNode):
-        print("Beginning Binary")
+        #print("Beginning Binary")
         self.ast.node(str(id(currentNode)), currentNode.value)
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
-        print("Ending Binary")
+        #print("Ending Binary")
         return currentNode
 
     def VisitUnaryOperation(self, currentNode):
-        print("Beginning Unary")
+        #print("Beginning Unary")
         self.ast.node(str(id(currentNode)), currentNode.value)
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
-        print("Ending Unary")
+        #print("Ending Unary")
         return currentNode
 
     def VisitRelationOperation(self, currentNode):
-        print("BeginningRelation")
+        #print("BeginningRelation")
         self.ast.node(str(id(currentNode)), currentNode.value)
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
-        print("Endng Relation")
+        #print("Endng Relation")
         return currentNode
 
     def VisitLogicalOperation(self, currentNode):
-        print("Beginning Logical")
+        #print("Beginning Logical")
         self.ast.node(str(id(currentNode)), currentNode.value)
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
-        print("Ending Logical")
+        #print("Ending Logical")
         return currentNode
 
     def VisitConstant(self, currentNode):
-        print("Beginning Constant")
+        #print("Beginning Constant")
         self.ast.node(str(id(currentNode)), currentNode.value)
-        print("Ending Constant")
+        #print("Ending Constant")
         return currentNode
 
     def VisitDeclaration(self, currentNode):
-        print("Beginning Declaration")
+        #print("Beginning Declaration")
         self.ast.node(str(id(currentNode)), currentNode.value)
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
-        print("Ending Declaration")
+        #print("Ending Declaration")
         return currentNode
 
     def VisitAssignment(self, currentNode):
-        print("Beginning Assignment")
+        #print("Beginning Assignment")
         self.ast.node(str(id(currentNode)), currentNode.value)
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
-        print("Ending Assignment")
+        #print("Ending Assignment")
         return currentNode
 
     def VisitMLComment(self, currentNode):
-        print("Beginning MLComment")
+        #print("Beginning MLComment")
         self.ast.node(str(id(currentNode)), currentNode.value)
-        print("Ending Assignment")
+        #print("Ending Assignment")
         return currentNode
 
     def VisitSLComment(self, currentNode):
-        print("Beginning SLComment")
+        #print("Beginning SLComment")
         self.ast.node(str(id(currentNode)), currentNode.value)
-        print("Ending Assignment")
+        #print("Ending Assignment")
         return currentNode
 
     def VisitPrintf(self, currentNode):
-        print("Beginning Printf")
+        #print("Beginning Printf")
         self.ast.node(str(id(currentNode)), currentNode.value)
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
-        print("Ending Printf")
+        #print("Ending Printf")
         return currentNode

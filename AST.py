@@ -24,11 +24,11 @@ class ASTNode:
     children = []
     type = ""
     def __init__(self, name="Free"):
-        print("___init-ASTNode___");
+        #print("___init-ASTNode___");
         self.children = []
         self.name = name
         self.value = name
-        print("___Node-Created-With-Name:"+ self.name + "___")
+        #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def print(self):
         if not self.children:
@@ -44,7 +44,7 @@ class ASTNode:
 
     def adoptChildren(self, nodes):
         for node in nodes:
-            print("Adding node: " + node.name)
+            #print("Adding node: " + node.name)
             self.children.append(node)
 
     def accept(self, visitor: Visitor):
@@ -62,18 +62,18 @@ class BinaryOperation(ASTNode):
     value = ""
 
     def __init__(self, name):
-        print("___init-BinaryOperation___");
+        #print("___init-BinaryOperation___");
         self.children = []
         self.name = "BinaryOperation"
         self.value = name
-        print("___Node-Created-With-Name:"+ self.name + "___")
+        #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def adopt(self, node):
         self.children.append(node)
 
     def adoptChildren(self, nodes):
         for node in nodes:
-            print("Adding node: " + node.name)
+            #print("Adding node: " + node.name)
             self.children.append(node)
 
     def print(self):
@@ -91,22 +91,22 @@ class UnaryOperation(ASTNode):
     value = ""
 
     def __init__(self, name):
-        print("___init-UnaryOperation___");
+        #print("___init-UnaryOperation___");
         self.children = []
         self.name = "UnaryOperation"
         self.value = name
-        print("___Node-Created-With-Name:"+ self.name + "___")
+        #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def adopt(self, node):
         self.children.append(node)
 
     def adoptChildren(self, nodes):
         for node in nodes:
-            print("Adding node: " + node.name)
+            #print("Adding node: " + node.name)
             self.children.append(node)
 
     def print(self):
-        print("This is a unary operation node with operator: " + str(self.value) + " and nodes:")
+        print("This is a unary.c operation node with operator: " + str(self.value) + " and nodes:")
         for node in self.children:
             node.print()
 
@@ -120,11 +120,11 @@ class RelationOperation(ASTNode):
     value = ""
 
     def __init__(self, name):
-        print("___init-RelationOperation___");
+        #print("___init-RelationOperation___");
         self.children = []
         self.name = "RelationOperation"
         self.value = name
-        print("___Node-Created-With-Name:"+ self.name + "___")
+        #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def adopt(self, node):
         self.children.append(node)
@@ -149,18 +149,18 @@ class LogicalOperation(ASTNode):
     value = ""
 
     def __init__(self, name):
-        print("___init-LogicalOperation___");
+        #print("___init-LogicalOperation___");
         self.children = []
         self.name = "LogicalOperation"
         self.value = name
-        print("___Node-Created-With-Name:"+ self.name + "___")
+        #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def adopt(self, node):
         self.children.append(node)
 
     def adoptChildren(self, nodes):
         for node in nodes:
-            print("Adding node: " + node.name)
+            #print("Adding node: " + node.name)
             self.children.append(node)
 
     def print(self):
@@ -182,18 +182,18 @@ class Declaration(ASTNode):
 
 
     def __init__(self, name):
-        print("___init-Declaration___");
+        #print("___init-Declaration___");
         self.children = []
         self.name = "Declaration"
         self.value = name
-        print("___Node-Created-With-Name:"+ self.name + "___")
+        #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def adopt(self, node):
         self.children.append(node)
 
     def adoptChildren(self, nodes):
         for node in nodes:
-            print("Adding node: " + node.name)
+            #print("Adding node: " + node.name)
             self.children.append(node)
 
     def print(self):
@@ -217,11 +217,11 @@ class Constant(ASTNode):
     varType = ""
 
     def __init__(self, value):
-        print("___init-Constant__");
+        #print("___init-Constant__");
         self.children = 0
         self.name = "Constant"
         self.value = value
-        print("___Node-Created-With-Name:"+ self.name + "___")
+        #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def print(self):
         print("Constant: " + str(self.value))
@@ -237,11 +237,11 @@ class Variable(ASTNode):
     type = ""
 
     def __init__(self, value):
-        print("___init-Variable__")
+        #print("___init-Variable__")
         self.children = []
         self.name = "Variable"
         self.value = value
-        print("___Node-Created-With-Name:" + self.name + "___")
+        #print("___Node-Created-With-Name:" + self.name + "___")
 
     def adopt(self, node):
         self.children.append(node)
@@ -260,11 +260,11 @@ class UnaryOperator(ASTNode):
     value = ""
 
     def __init__(self, value):
-        print("___init-UnaryOperator__");
+        #print("___init-UnaryOperator__");
         self.children = 0
         self.name = "Operator"
         self.value = value
-        print("___Node-Created-With-Name:"+ self.name + "___")
+        #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def print(self):
         print("Operator: " + self.value)
@@ -281,18 +281,18 @@ class Assigment(ASTNode):
     rvalue = ASTNode
 
     def __init__(self, name):
-        print("___init-Assigment___");
+        #print("___init-Assigment___");
         self.children = []
         self.name = "RelationOperation"
         self.value = name
-        print("___Node-Created-With-Name:"+ self.name + "___")
+        #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def adopt(self, node):
         self.children.append(node)
 
     def adoptChildren(self, nodes):
         for node in nodes:
-            print("Adding node: " + node.name)
+            #print("Adding node: " + node.name)
             self.children.append(node)
 
     def print(self):
@@ -309,11 +309,11 @@ class MLComment(ASTNode):
     name = ""
 
     def __init__(self, value):
-        print("___init-MLComment__");
+        #print("___init-MLComment__");
         self.children = 0
         self.name = "Comment"
         self.value = value
-        print("___Node-Created-With-Name:"+ self.name + "___")
+        #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def print(self):
         print("Comment: " + str(self.value))
@@ -327,11 +327,11 @@ class SLComment(ASTNode):
     name = ""
 
     def __init__(self, value):
-        print("___init-SLComment__");
+        #print("___init-SLComment__");
         self.children = 0
         self.name = "Comment"
         self.value = value
-        print("___Node-Created-With-Name:"+ self.name + "___")
+        #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def print(self):
         print("Comment: " + str(self.value))
@@ -346,11 +346,11 @@ class PrintF(ASTNode):
     children = []
 
     def __init__(self, value):
-        print("___init-Printf__");
+        #print("___init-Printf__");
         self.children = []
         self.name = "Prinf"
         self.value = value
-        print("___Node-Created-With-Name:"+ self.name + "___")
+        #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def print(self):
         print("Prinf: " + str(self.value))

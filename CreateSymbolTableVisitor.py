@@ -14,10 +14,10 @@ class CreateSymbolTableVisitor(Visitor):
         self.table = table
         self.lineNr = 0
         self.positionNr = 0
-        print("----------------Creating Symbol Table----------------")
+        #print("----------------Creating Symbol Table----------------")
 
     def VisitASTNode(self, currentNode):
-        print("Node")
+        #print("Node")
         #currentNode.print()
         if currentNode.children:
             if currentNode.children[0].name == "Comment":
@@ -28,7 +28,7 @@ class CreateSymbolTableVisitor(Visitor):
             self.lineNr += 1
         
         #print(len(currentNode.children))
-        if len(currentNode.children) == 0:
+        if len(currentNode.children) == 0 and currentNode.value is not "Inst":
             if self.table.lookup(currentNode.value) == 0:
                 print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line "+ str(self.lineNr) + ": variable " + currentNode.value + " has not been declared yet! \n")
 
@@ -37,30 +37,30 @@ class CreateSymbolTableVisitor(Visitor):
         return currentNode
 
     def VisitBinaryOperation(self, currentNode):
-        print("Binary")
+        #print("Binary")
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
     def VisitUnaryOperation(self, currentNode):
-        print("Unary")
+        #print("Unary")
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
 
     def VisitRelationOperation(self, currentNode):
-        print("Relation")
+        #print("Relation")
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
 
     def VisitLogicalOperation(self, currentNode):
-        print("Logical")
+        #print("Logical")
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
 
     def VisitConstant(self, currentNode):
-        print("Constant")
+        #print("Constant")
         """
         if len(self.table.vars[currentNode.varName]) == 3:
             if len(currentNode.varType) == 0 and len(self.table.vars[currentNode.varName][0]) == 0:
@@ -71,11 +71,11 @@ class CreateSymbolTableVisitor(Visitor):
         return currentNode
 
     def VisitDeclaration(self, currentNode):
-        print("Declaration")
+        #print("Declaration")
 
         currConst = ""
         currType = ""
-        print(currentNode.type)
+        #print(currentNode.type)
 
 
         if currentNode.type != "int" and currentNode.type != "float" and currentNode.type != "char" and currentNode.type != "char*"\
@@ -84,13 +84,13 @@ class CreateSymbolTableVisitor(Visitor):
 
 
         if currentNode.type == "VariableType":
-            print("dees?")
+            #print("dees?")
             currConst = currentNode.type.children[0].name
             currType = currentNode.type.children[1].name
         else:
-            print("nee dit!")
+            #print("nee dit!")
             currType = currentNode.type
-            print(currType)
+            #print(currType)
 
         # int i = 3;
         # int i = 7; Redeclaration
@@ -118,19 +118,19 @@ class CreateSymbolTableVisitor(Visitor):
         for child in currentNode.children:
             node = child.accept(self)
         """
-        currentNode.print()
+        #currentNode.print()
         return currentNode
     
     def VisitAssignment(self, currentNode):
-        print("Assignment")
+        #print("Assignment")
         if isinstance(currentNode.lvalue, Variable):
             varName = currentNode.lvalue.var
             varType = currentNode.lvalue.type
             varAttr = currentNode.lvalue.attr
 
-            print(varType)
+            #print(varType)
             lvalue = currentNode.lvalue
-            print(lvalue.type)
+            #print(lvalue.type)
             lvalue.accept(self)
 
             rvalue = currentNode.rvalue
@@ -141,11 +141,11 @@ class CreateSymbolTableVisitor(Visitor):
         return currentNode
 
     def VisitMLComment(self, currentNode):
-        print("MLComment")
+        #print("MLComment")
         return currentNode
     def VisitSLComment(self, currentNode):
-        print("SLComment")
+        #print("SLComment")
         return currentNode
     def VisitPrintf(self, currentNode):
-        print("Printf")
+        #print("Printf")
         return currentNode
