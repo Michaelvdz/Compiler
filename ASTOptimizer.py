@@ -12,6 +12,7 @@ class Visitor:
 class ASTOptimizer(Visitor):
 
     vars = dict()
+    propagation = True
 
     def __init__(self, tree):
         #self.ast = graphviz.Digraph('AST', filename='ast.gv')
@@ -28,11 +29,12 @@ class ASTOptimizer(Visitor):
         newNode = ASTNode(currentNode.name)
         if not currentNode.children:
             #print("DOETEM DEES?")
-            if constantProp:
-                var = self.vars.get(currentNode.value)
-                if var:
-                    #print("Var exist, lets do constant propagation")
-                    newNode = Constant(var)
+            if self.propagation:
+                if constantProp:
+                    var = self.vars.get(currentNode.value)
+                    if var:
+                        #print("Var exist, lets do constant propagation")
+                        newNode = Constant(var)
         else:
             for child in currentNode.children:
                 node = child.accept(self)
@@ -522,9 +524,11 @@ class ASTOptimizer(Visitor):
         #print("PrintF")
         newNode = copy.copy(currentNode)
         newNode.children = []
+        self.propagation = False
         for child in currentNode.children:
             node = child.accept(self)
             newNode.children.append(node)
+        self.propagation = True
         return newNode
 
 

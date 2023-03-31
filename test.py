@@ -21,35 +21,39 @@ for file in files:
     tree = parser.prog()
     if parser.getNumberOfSyntaxErrors() == 0:
 
-        #convert CST to AST
+        # Convert CST to AST
         asttree = ASTTree()
         visitor = CSTVisitor(asttree)
         visitor.visit(tree)
 
-        #Print before optimization
+        # Print before optimization
         astVisitor = ASTVisitor(filename+"_beforeOptimization", "outputfiles")
         asttree.root.accept(astVisitor)
         astVisitor.ast.render()
 
-        #Optimize tree
+        # Optimize tree
         optimizedTree = ASTTree()
         astOptimizer = ASTOptimizer(optimizedTree)
         optimizedTree.root = asttree.root.accept(astOptimizer)
 
-        #Create symbol table
+        # Create symbol table
         table = SymbolTable()
         STCreator = CreateSymbolTableVisitor(table)
         optimizedTree.root.accept(STCreator)
 
-        #Print after optimisation
+        # Print after optimisation
         astVisitor = ASTVisitor(filename, "outputfiles")
         optimizedTree.root.accept(astVisitor)
         astVisitor.ast.render()
 
-        #Generate llvm
+        # Generate llvm
         llvm = ""
+        # Act like we are in the main function for future debugging
+        llvm += "define dso_local i32 @main(){\n"
         LLVMCreator = AST2LLVMVisitor(llvm, table)
         optimizedTree.root.accept(LLVMCreator)
+        # Act like we are close the main function for future debugging
+        LLVMCreator.llvm += "ret i32 0\n}"
 
         llvm = open(outputPath+filename+".ll", "w")
         llvm.write(LLVMCreator.llvm)

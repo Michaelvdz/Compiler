@@ -348,7 +348,7 @@ class PrintF(ASTNode):
     def __init__(self, value):
         #print("___init-Printf__");
         self.children = []
-        self.name = "Prinf"
+        self.name = "Printf"
         self.value = value
         #print("___Node-Created-With-Name:"+ self.name + "___")
 

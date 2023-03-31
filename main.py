@@ -63,8 +63,10 @@ def main(argv):
         astVisitor.ast.view()
 
         llvm = ""
+        llvm += "define dso_local i32 @main(){\n"
         LLVMCreator = AST2LLVMVisitor(llvm, table)
         optimizedTree.root.accept(LLVMCreator)
+        LLVMCreator.llvm += "ret i32 0\n}"
         #print(LLVMCreator.llvm)
 
         llvm = open(filename+".ll", "w")
