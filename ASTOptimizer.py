@@ -35,6 +35,9 @@ class ASTOptimizer(Visitor):
                     if var:
                         #print("Var exist, lets do constant propagation")
                         newNode = Constant(var)
+                    else:
+                        newNode = Variable(currentNode.name)
+
 
         else:
             for child in currentNode.children:
@@ -48,6 +51,7 @@ class ASTOptimizer(Visitor):
         for child in currentNode.children:
             children.append(child.accept(self))
 
+        print(children[0])
         match currentNode.value:
             case "+":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
@@ -68,6 +72,7 @@ class ASTOptimizer(Visitor):
                     for child in children:
                         newnode.adopt(child)
                     return newnode
+
             case "*":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
                     try:
@@ -515,7 +520,8 @@ class ASTOptimizer(Visitor):
                     #print(key + ': ' + value)
             elif isinstance(newNode.lvalue, Variable):
                 print("We are assigning a new value")
-                self.vars.pop(newNode.lvalue.value)
+                if self.vars.get(newNode.lvalue.value):
+                    self.vars.pop(newNode.lvalue.value)
 
 
         return newNode

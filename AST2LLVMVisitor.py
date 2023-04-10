@@ -16,6 +16,7 @@ class AST2LLVMVisitor(Visitor):
     floatprinting = False
     charprinting = False
     printing = False
+    lvalue = True
 
     def __init__(self, llvm="", symbolTable=SymbolTable()):
         #print("----------------Converting AST 2 LLVM IR----------------")
@@ -34,16 +35,108 @@ class AST2LLVMVisitor(Visitor):
 
     def VisitVariable(self, currentNode):
         print("Variable")
-        if self.symbolTable.lookup(currentNode.value):
-            return str(self.symbolTable.lookup(currentNode.value).register)
+        if self.lvalue:
+            print("This is an lvalue")
+            if self.symbolTable.lookup(currentNode.value):
+                return str(self.symbolTable.lookup(currentNode.value).register)
+            else:
+                return currentNode
         else:
-            return currentNode
+            symbol = self.symbolTable.lookup(currentNode.value)
+            type = symbol.type
+            if type == "int":
+                self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(
+                    symbol.register) + ", align 4\n"
+                self.instr += 1
+            if type == "float":
+                self.llvm += "%" + str(self.instr) + " = load float, float* %" + str(
+                    symbol.register) + ", align 4\n"
+                self.instr += 1
+            if type == "char":
+                self.llvm += "%" + str(self.instr) + " = load i8, i8* %" + str(
+                    symbol.register) + ", align 1\n"
+                self.instr += 1
+            return str(self.instr-1)
+
 
     def VisitBinaryOperation(self, currentNode):
-        #print("Binary")
+        print("Binary-----------")
+        BinType = None
+        children = []
+        self.lvalue = False
+
+
         for child in currentNode.children:
-            node = child.accept(self)
-        return "binary"
+            if isinstance(child, Variable):
+                print("No constant")
+                newType = self.symbolTable.lookup(child.value).type
+                if BinType is None:
+                    BinType = newType
+                elif newType == "float":
+                    BinType = newType
+            elif isinstance(child, Constant):
+                print("Constant")
+            children.append(child)
+
+        left = currentNode.children[0].accept(self)
+        print("left node has reg or value")
+        print(left)
+        right = currentNode.children[1].accept(self)
+        print("Right node has reg or value")
+        print(right)
+        print(isinstance(right, Variable))
+        if not isinstance(currentNode.children[0], Constant) and not isinstance(currentNode.children[0], BinaryOperation):
+            left = "%" + left
+        if not isinstance(currentNode.children[1], Constant) and not isinstance(currentNode.children[1], BinaryOperation):
+            right = "%" + right
+
+        match currentNode.value:
+            case "+":
+                self.llvm += "%" + str(self.instr) + " = add nsw i32 " + str(left) + ", " + str(right) + "\n"
+                self.instr += 1
+            case "-":
+                self.llvm += "%" + str(self.instr) + " = sub nsw i32 " + str(left) + ", " + str(right) + "\n"
+                self.instr += 1
+            case "*":
+                self.llvm += "%" + str(self.instr) + " = mul nsw i32 " + str(left) + ", " + str(right) + "\n"
+                self.instr += 1
+            case "/":
+                self.llvm += "%" + str(self.instr) + " = sdiv i32 " + str(left) + ", " + str(right) + "\n"
+                self.instr += 1
+            case "%":
+                self.llvm += "%" + str(self.instr) + " = srem i32 " + str(left) + ", " + str(right) + "\n"
+                self.instr += 1
+            case "==":
+                self.llvm += "%" + str(self.instr) + " = icmp eq i32 " + str(left) + ", " + str(right) + "\n"
+                self.instr += 1
+                self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
+                self.instr += 1
+            case "<":
+                self.llvm += "%" + str(self.instr) + " = icmp slt i32 " + str(left) + ", " + str(right) + "\n"
+                self.instr += 1
+                self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
+                self.instr += 1
+            case "<=":
+                self.llvm += "%" + str(self.instr) + " = icmp sle i32 " + str(left) + ", " + str(right) + "\n"
+                self.instr += 1
+                self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
+                self.instr += 1
+            case ">":
+                self.llvm += "%" + str(self.instr) + " = icmp sgt i32 " + str(left) + ", " + str(right) + "\n"
+                self.instr += 1
+                self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
+                self.instr += 1
+            case ">=":
+                self.llvm += "%" + str(self.instr) + " = icmp sge i32 " + str(left) + ", " + str(right) + "\n"
+                self.instr += 1
+                self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
+                self.instr += 1
+            case "!=":
+                self.llvm += "%" + str(self.instr) + " = icmp ne i32 " + str(left) + ", " + str(right) + "\n"
+                self.instr += 1
+                self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
+                self.instr += 1
+        return "%"+str(self.instr-1)
 
     def VisitUnaryOperation(self, currentNode):
         print("Unary")
@@ -156,6 +249,8 @@ class AST2LLVMVisitor(Visitor):
         if isinstance(currentNode.lvalue, Declaration):
             currentNode.lvalue.accept(self)
             value = currentNode.rvalue.accept(self)
+            self.lvalue = True
+            print(value)
             ltype = self.symbolTable.lookup(currentNode.lvalue.var).type
             if "%" not in value:
                 print("test")
@@ -189,17 +284,10 @@ class AST2LLVMVisitor(Visitor):
                     self.llvm += "store i8* %" + str(value) + ", i8** %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 8\n"
             else:
                 if ltype == "int":
-                    self.llvm += "%" + str(self.instr) + " = load i32, i32 %" + str(self.instr - 1) + ", align 8\n"
-                    self.instr +=1
                     self.llvm += "store i32 %" + str(self.instr - 1) + ", i32* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                 elif ltype == "float":
-                    self.llvm += "%" + str(self.instr) + " = load float, float %" + str(self.instr - 1) + ", align 8\n"
-                    self.instr +=1
                     self.llvm += "store float %" + str(self.instr - 1) + ", float* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                 elif ltype == "char":
-                    value = value.replace("'","")
-                    self.llvm += "%" + str(self.instr) + " = load i8, ptr %" + str(self.instr - 1) + ", align 8\n"
-                    self.instr +=1
                     self.llvm += "store i8 %" + str(self.instr - 1) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
                 else:
                     print("test")
@@ -208,6 +296,7 @@ class AST2LLVMVisitor(Visitor):
         elif isinstance(currentNode.lvalue, Variable):
             print("No decl")
             value = currentNode.rvalue.accept(self)
+            self.lvalue = True
             print("rvalue:")
             print(value)
             reg = currentNode.lvalue.accept(self)
@@ -219,60 +308,41 @@ class AST2LLVMVisitor(Visitor):
             print(ltype)
             #self.instr += 1
             if ltype == "int*":
-                print("WE DOEN DEES")
-
                 self.llvm += "store i32* %" + str(value) + ", i32** %" + str(reg) + ", align 8\n"
-                #self.symbolTable.insertRegister(currentNode.lvalue.value, str(value))
-
-                #self.llvm += "%" + str(self.instr) + " = load i32, i32* " + str(reg) + ", align 8\n"
-                '''
-                try:
-                    value = int(value)
-                except ValueError:
-                    value = float(value)
-                if isinstance(value, float) or isinstance(value, int):
-                    self.llvm += "store i32 " + str(value) + ", i32* %" + str(self.instr-1) + ", align 4\n"
-                '''
             if ltype == "float*":
-                #self.llvm += "%" + str(self.instr) + " = load float, float* " + str(reg) + ", align 8\n"
                 self.llvm += "store float* %" + str(value) + ", float** %" + str(reg) + ", align 8\n"
-                #self.symbolTable.insertRegister(currentNode.lvalue.value, str(value))
-                '''
-                try:
-                    value = int(value)
-                except ValueError:
-                    value = float(value)
-                if isinstance(value, float) or isinstance(value, int):
-                    #print(self.instr - 1)
-                    self.llvm += "store float " + str(value) + ", float* %" + str(self.instr-1) + ", align 4\n"
-                '''
             if ltype == "char*":
-                value = value.replace("'", "")
-                self.llvm += "%" + str(self.instr) + " = load i8*, i8** " + str(reg) + ", align 8\n"
-                self.llvm += "store i8 %" + str(ord(value)) + ", i8* %" + str(self.instr-1) + ", align 1\n"
-                self.instr += 1
-            if ltype == "int":
-                try:
-                    value = int(value)
-                except ValueError:
-                    value = float(value)
-                if isinstance(value, float) or isinstance(value, int):
-                    self.llvm += "store i32 " + str(value) + ", i32* %" + self.symbolTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
-            elif ltype == "float":
-                try:
-                    value = float(value)
-                except ValueError:
-                    print("failiure")
-                self.llvm += "store float " + str(value) + ", float* %" + self.symbolTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
-            elif ltype == "char":
-                value = value.replace("'","")
-                #char = list(value)
-                #print(ord(char[0]))
-                self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.value).register + ", align 1\n"
+                self.llvm += "store i8* %" + str(value) + ", i8** %" + str(reg) + ", align 1\n"
+            if "%" not in value:
+                if ltype == "int":
+                    try:
+                        value = int(value)
+                    except ValueError:
+                        value = float(value)
+                    if isinstance(value, float) or isinstance(value, int):
+                        self.llvm += "store i32 " + str(value) + ", i32* %" + self.symbolTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
+                elif ltype == "float":
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        print("failiure")
+                    self.llvm += "store float " + str(value) + ", float* %" + self.symbolTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
+                elif ltype == "char":
+                    value = value.replace("'","")
+                    self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.value).register + ", align 1\n"
+            else:
+                if ltype == "int":
+                    self.llvm += "store i32 " + str(value) + ", i32* %" + reg + ", align 4\n"
+                elif ltype == "float":
+                    self.llvm += "store float " + str(value) + ", float* %" + reg + ", align 4\n"
+                elif ltype == "char":
+                    value = value.replace("'","")
+                    self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + reg + ", align 1\n"
         else:
             # In this case the lvalue is a pointer dereference
             print("Not yet implemented")
             value = currentNode.rvalue.accept(self)
+            self.lvalue = True
             print("value:")
             print(value)
             reg = currentNode.lvalue.accept(self)
@@ -299,9 +369,7 @@ class AST2LLVMVisitor(Visitor):
                     #self.symbolTable.replaceRegisters(reg, str(self.instr-1))
             if type == "char*":
                 value = value.replace("'", "")
-                self.llvm += "%" + str(self.instr) + " = load i8*, i8** " + str(reg) + ", align 8\n"
-                self.llvm += "store i8 %" + str(ord(value)) + ", i8* %" + str(self.instr-1) + ", align 1\n"
-                self.instr += 1
+                self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + str(self.instr-1) + ", align 1\n"
         return currentNode
 
     def VisitMLComment(self, currentNode):
