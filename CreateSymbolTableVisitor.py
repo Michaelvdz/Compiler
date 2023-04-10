@@ -124,6 +124,7 @@ class CreateSymbolTableVisitor(Visitor):
     def VisitAssignment(self, currentNode):
         #print("Assignment")
         if isinstance(currentNode.lvalue, Variable):
+            '''
             varName = currentNode.lvalue.var
             varType = currentNode.lvalue.type
             varAttr = currentNode.lvalue.attr
@@ -135,6 +136,7 @@ class CreateSymbolTableVisitor(Visitor):
 
             rvalue = currentNode.rvalue
             rvalue.accept(self)
+            '''
         else:
             currentNode.lvalue.accept(self)
 

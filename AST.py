@@ -113,6 +113,7 @@ class UnaryOperation(ASTNode):
     def accept(self, visitor: Visitor):
         return visitor.VisitUnaryOperation(self)
 
+'''
 class RelationOperation(ASTNode):
 
     name = ""
@@ -170,6 +171,7 @@ class LogicalOperation(ASTNode):
 
     def accept(self, visitor: Visitor):
         return visitor.VisitLogicalOperation(self)
+'''
 
 class Declaration(ASTNode):
 

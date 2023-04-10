@@ -68,7 +68,7 @@ def main(argv):
         optimizedTree.root.accept(LLVMCreator)
         LLVMCreator.llvm += "ret i32 0\n}"
         #print(LLVMCreator.llvm)
-
+        print(table)
         llvm = open(filename+".ll", "w")
         llvm.write(LLVMCreator.llvm)
         llvm.close()

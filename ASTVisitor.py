@@ -62,6 +62,13 @@ class ASTVisitor(Visitor):
         #print("Ending Constant")
         return currentNode
 
+    def VisitVariable(self, currentNode):
+        #print("Beginning Constant")
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        #print("Ending Constant")
+        return currentNode
+
+
     def VisitDeclaration(self, currentNode):
         #print("Beginning Declaration")
         self.ast.node(str(id(currentNode)), currentNode.value)

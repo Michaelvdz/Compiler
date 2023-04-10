@@ -162,13 +162,15 @@ class CSTVisitor(CGrammarVisitor):
 
 
     def visitDeclaration_specification(self, ctx:CGrammarParser.Declaration_specificationContext):
-        #print("DeclarationSpecifier")
+        print("DeclarationSpecifier")
         decl = Declaration("VariableDeclartion")
         decl.attr = ""
+        '''
         if ctx.ptr:
             #print("Contains pointer")
-            #decl.type = "*"
+            # lvalue contains a pointer, which can either be a declaration/definition or assignment
             if ctx.typ:
+                # This is a declaration/definition
                 for child in ctx.children:
                     node = self.visit(child)
                     #print("child:")
@@ -192,6 +194,7 @@ class CSTVisitor(CGrammarVisitor):
                         decl.adopt(var)
                         decl.var = var.value
             else:
+                # This is just an assignment to the value the pointer is pointing to
                 #print("Zijn we hier")
                 #print(self.visit(ctx.ptr).value)
                 op = UnaryOperation(self.visit(ctx.ptr).value)
@@ -207,6 +210,8 @@ class CSTVisitor(CGrammarVisitor):
             #print("Type: " + decl.type)
             #print("Attr: " + decl.attr)
         else:
+            # We are assigning a value to
+            print("Declaring var not pointer")
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, Variable):
@@ -224,14 +229,52 @@ class CSTVisitor(CGrammarVisitor):
                     var = ASTNode(ctx.var.text)
                     decl.adopt(var)
                     decl.var = var.value
-        #print("EndOfDeclarationSpecification")
-        #print(decl.attr)
-        #print(decl.type)
-        #print(decl.var)
+        '''
+        # Test for declaration/definition or just var assignment
+        if ctx.typ:
+            # We are in decl/def
+            for child in ctx.children:
+                node = self.visit(child)
+                if isinstance(node, Variable):
+                    for child2 in node.children:
+                        if child2.type == "reserved_word":
+                            decl.adopt(child2)
+                            decl.attr = child2.value
+                        if child2.type == "type":
+                            # print("Doetem dees wel?")
+                            decl.adopt(child2)
+                            if ctx.ptr:
+                                # We are in pointer decl/def
+                                decl.type = child2.value + "*"
+                            else:
+                                decl.type = child2.value
+                elif child is ctx.ptr:
+                    pointer = ASTNode("*")
+                    decl.adopt(pointer)
+                else:
+                    # print("test")
+                    var = ASTNode(ctx.var.text)
+                    decl.adopt(var)
+                    decl.var = var.value
+        else:
+            # We are just in var assignment/definition
+            if ctx.ptr:
+                op = UnaryOperation(self.visit(ctx.ptr).value)
+                var = ASTNode(ctx.var.text)
+                op.adopt(var)
+                return op
+            else:
+                for child in ctx.children:
+                    node = self.visit(child)
+                    var = Variable(ctx.var.text)
+                    #decl.adopt(var)
+                    #decl.var = var.value
+                    return var
+        # We return decl if we have a declaration
         return decl
 
     def visitDeclaration(self, ctx:CGrammarParser.DeclarationContext):
-        #print("Declaration")
+        print("Declaration")
         if ctx.assign:
             assign = Assigment(ctx.assign.text)
             assign.rvalue = self.visit(ctx.rvalue)

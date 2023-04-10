@@ -477,6 +477,10 @@ class ASTOptimizer(Visitor):
         #print("Constant")
         return currentNode
 
+    def VisitVariable(self, currentNode):
+        #print("Constant")
+        return currentNode
+
     def VisitDeclaration(self, currentNode):
         #print("Declaration")
         newNode = copy.copy(currentNode)

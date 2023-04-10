@@ -31,3 +31,22 @@ class SymbolTable:
             return var
         else:
             return 0
+
+    def lookupByRegister(self, register):
+        print("Searching vor regs")
+        for key, value in self.vars.items():
+
+            print(self.vars[key].register)
+            print(type(self.vars[key].register))
+            print(register)
+            print(type(register))
+            if self.vars[key].register == register:
+                print("found")
+                return self.vars[key]
+        return 0
+
+    def replaceRegisters(self, old, new):
+        for key, value in self.vars.items():
+            if self.vars[key].register == old:
+                self.vars[key].register = new
+        return 0
