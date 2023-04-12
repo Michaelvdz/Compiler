@@ -3,11 +3,7 @@ grammar CGrammar;
 prog: instr+ EOF
 	;
 
-instr: expr ';'
-    | expr ';' comment
-    | printf ';' comment
-    | printf ';'
-    | bc=BLOCKCOMMENT
+instr: expr
 	;
 
 unary_operator:  '+'
@@ -65,10 +61,31 @@ declaration:    lvalue=declaration_specification assign='=' rvalue=assignment_ex
     | lvalue=declaration_specification
     ;
 
-expr:   assignment_expression
-    | declaration
+expr:   assignment_expression ';'
+    | declaration ';'
+    | conditional_statement
+    | loops
+    | scope
+    | printf ';'
+    | expr comment
+    | comment
 	;
 
+conditional_statement:
+    'if' '(' assignment_expression ')' '{' expr* '}'
+    | 'if' '(' assignment_expression ')' '{' expr* '}' 'ELSE' '{' expr* '}'
+    ;
+
+loops:
+    'while' '(' assignment_expression ')' '{' expr* '}'
+    | 'for' '(' expr ';' expr ';' expr ')' '{' expr* '}'
+    | 'break' ';'
+    | 'continue' ';'
+    ;
+
+scope:
+    '{' comment? expr* '}' comment?
+    ;
 
 constant:   INT
     | FLOAT
