@@ -35,13 +35,7 @@ class SymbolTable:
     def lookupByRegister(self, register):
         print("Searching vor regs")
         for key, value in self.vars.items():
-
-            print(self.vars[key].register)
-            print(type(self.vars[key].register))
-            print(register)
-            print(type(register))
             if self.vars[key].register == register:
-                print("found")
                 return self.vars[key]
         return 0
 
