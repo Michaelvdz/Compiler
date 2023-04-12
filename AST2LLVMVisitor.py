@@ -34,6 +34,17 @@ class AST2LLVMVisitor(Visitor):
                 node = child.accept(self)
             return currentNode
 
+    def VisitConditional(self, currentNode):
+        #print("Scope")
+        for child in currentNode.children:
+            node = child.accept(self)
+        return currentNode
+    def VisitScope(self, currentNode):
+        #print("Scope")
+        for child in currentNode.children:
+            node = child.accept(self)
+        return currentNode
+
     def VisitVariable(self, currentNode):
         print("Variable")
         if self.lvalue:
@@ -402,12 +413,12 @@ class AST2LLVMVisitor(Visitor):
                     self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.value).register + ", align 1\n"
             else:
                 if ltype == "int":
-                    self.llvm += "store i32 " + str(value[0]) + ", i32* %" + reg + ", align 4\n"
+                    self.llvm += "store i32 " + str(value[0]) + ", i32* %" + reg[0] + ", align 4\n"
                 elif ltype == "float":
-                    self.llvm += "store float " + str(value[0]) + ", float* %" + reg + ", align 4\n"
+                    self.llvm += "store float " + str(value[0]) + ", float* %" + reg[0] + ", align 4\n"
                 elif ltype == "char":
                     value = value.replace("'","")
-                    self.llvm += "store i8 " + str(ord(value[0])) + ", i8* %" + reg + ", align 1\n"
+                    self.llvm += "store i8 " + str(ord(value[0])) + ", i8* %" + reg[0] + ", align 1\n"
         else:
             # In this case the lvalue is a pointer dereference
             print("Not yet implemented")
@@ -459,7 +470,7 @@ class AST2LLVMVisitor(Visitor):
         return currentNode
 
     def VisitPrintf(self, currentNode):
-        #print("Printf")
+        print("Printffff")
         node = currentNode.children[0].accept(self)
         print("Printing:")
         print(node)

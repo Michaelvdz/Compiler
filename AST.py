@@ -84,6 +84,68 @@ class BinaryOperation(ASTNode):
     def accept(self, visitor: Visitor):
         return visitor.VisitBinaryOperation(self)
 
+class Scope(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+
+    def __init__(self, name):
+        #print("___init-BinaryOperation___");
+        self.children = []
+        self.name = "Scope"
+        self.value = name
+        #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            #print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def print(self):
+        print("This is a scope node with name: " + str(self.value) + " and nodes:")
+        for node in self.children:
+            node.print()
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitScope(self)
+
+class Conditional(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+    condition = 0
+    ifbody = 0
+    elsebody = 0
+
+
+    def __init__(self, name):
+        #print("___init-BinaryOperation___");
+        self.children = []
+        self.name = "Conditional"
+        self.value = name
+        #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            #print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def print(self):
+        print("This is a conditional node with name: " + str(self.value) + " and nodes:")
+        for node in self.children:
+            node.print()
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitConditional(self)
+
 class UnaryOperation(ASTNode):
 
     name = ""

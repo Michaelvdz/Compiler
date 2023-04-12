@@ -36,6 +36,18 @@ class CreateSymbolTableVisitor(Visitor):
             node = child.accept(self)
         return currentNode
 
+    def VisitConditional(self, currentNode):
+        #print("Scope")
+        for child in currentNode.children:
+            node = child.accept(self)
+        return currentNode
+
+    def VisitScope(self, currentNode):
+        #print("Scope")
+        for child in currentNode.children:
+            node = child.accept(self)
+        return currentNode
+
     def VisitBinaryOperation(self, currentNode):
         #print("Binary")
         for child in currentNode.children:
@@ -140,6 +152,10 @@ class CreateSymbolTableVisitor(Visitor):
         else:
             currentNode.lvalue.accept(self)
 
+        return currentNode
+
+    def VisitVariable(self, currentNode):
+        print("Variable")
         return currentNode
 
     def VisitMLComment(self, currentNode):

@@ -72,8 +72,8 @@ expr:   assignment_expression ';'
 	;
 
 conditional_statement:
-    'if' '(' assignment_expression ')' '{' expr* '}'
-    | 'if' '(' assignment_expression ')' '{' expr* '}' 'ELSE' '{' expr* '}'
+    'if' '(' condition=assignment_expression ')' '{' ifbody=expr* '}'
+    | 'if' '(' condition=assignment_expression ')' '{' ifbody=expr* '}' 'else' '{' elsebody=expr* '}'
     ;
 
 loops:
@@ -84,7 +84,7 @@ loops:
     ;
 
 scope:
-    '{' comment? expr* '}' comment?
+    startscope='{' expr* endscope='}'
     ;
 
 constant:   INT

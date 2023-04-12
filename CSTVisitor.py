@@ -12,7 +12,7 @@ class CSTVisitor(CGrammarVisitor):
         #print("Visiting the program")
 
     def visitProg(self, ctx):
-        #print("Prog")
+        print("Prog")
         #print("#children: " + str(ctx.getChildCount()))
         self.tree.Name = "Prog" + str(ctx.getRuleIndex())
         #print("Visiting Prog children")
@@ -29,18 +29,22 @@ class CSTVisitor(CGrammarVisitor):
 
 
     def visitInstr(self, ctx):
-        #print("Inst")
+        print("Inst")
         #print("#children: " + str(ctx.getChildCount()))
         instr = ASTNode("Inst")
+        '''
         if ctx.bc:
             comment = MLComment(ctx.bc.text)
             instr.adopt(comment)
         else:
-            for child in ctx.children:
-                node = self.visit(child)
-                if isinstance(node, ASTNode):
-                    #node.print()
-                    instr.adopt(node)
+        '''
+        for child in ctx.children:
+            node = self.visit(child)
+            print("Node recieved from child")
+            print(node)
+            if isinstance(node, ASTNode):
+                #node.print()
+                instr.adopt(node)
         return instr
 
     # Visit a parse tree produced by CGrammarParser#unary_operator.
@@ -149,6 +153,7 @@ class CSTVisitor(CGrammarVisitor):
             logOp = BinaryOperation(ctx.op.text)
             for child in ctx.children:
                 node = self.visit(child)
+
                 if isinstance(node, ASTNode):
                     #node.print()
                     logOp.adopt(node)
@@ -287,8 +292,51 @@ class CSTVisitor(CGrammarVisitor):
 
     # Visit a parse tree produced by CGrammarParser#expr.
     def visitExpr(self, ctx: CGrammarParser.ExprContext):
-        #print("Expr")
-        return self.visitChildren(ctx)
+        print("Expr")
+        for child in ctx.children:
+            if not child.getText() == ";":
+                node = self.visit(child)
+                if isinstance(node, ASTNode):
+                    return node
+        return node
+
+    # Visit a parse tree produced by CGrammarParser#conditional_statement.
+    def visitConditional_statement(self, ctx:CGrammarParser.Conditional_statementContext):
+        print("Conditional")
+        node = Conditional("Conditional")
+        condition = self.visit(ctx.condition)
+        node.adopt(condition)
+        node.condition = condition
+        ifbody = self.visit(ctx.ifbody)
+        node.ifbody = ifbody
+        node.adopt(ifbody)
+        if ctx.elsebody:
+            elsebody = self.visit(ctx.elsebody)
+            node.adopt(elsebody)
+            node.elsebody = elsebody
+        return node
+
+
+    # Visit a parse tree produced by CGrammarParser#loops.
+    def visitLoops(self, ctx:CGrammarParser.LoopsContext):
+        print("Loop")
+        node = ASTNode("Loop")
+        for child in ctx.content:
+            childnode = self.visit(child)
+            node.adopt(childnode)
+        return node
+
+
+    # Visit a parse tree produced by CGrammarParser#scope.
+    def visitScope(self, ctx:CGrammarParser.ScopeContext):
+        print("Scope")
+        node = Scope("UnnamedScope")
+        for child in ctx.children:
+            if not child.getText() == "{" and not child.getText() == "}":
+                childnode = self.visit(child)
+                node.adopt(childnode)
+        return node
+
 
     # Visit a parse tree produced by CGrammarParser#constant.
     def visitConstant(self, ctx: CGrammarParser.ConstantContext):
@@ -342,7 +390,7 @@ class CSTVisitor(CGrammarVisitor):
         return comment
 
     def visitPrintf(self, ctx: CGrammarParser.PrintfContext):
-        #print("Printf")
+        print("Printf")
         result = re.search('\((.+?)\)', ctx.getText()).group(1)
         #print("need this")
         #print(result)

@@ -84,6 +84,21 @@ class CGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CGrammarParser#conditional_statement.
+    def visitConditional_statement(self, ctx:CGrammarParser.Conditional_statementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CGrammarParser#loops.
+    def visitLoops(self, ctx:CGrammarParser.LoopsContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CGrammarParser#scope.
+    def visitScope(self, ctx:CGrammarParser.ScopeContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CGrammarParser#constant.
     def visitConstant(self, ctx:CGrammarParser.ConstantContext):
         return self.visitChildren(ctx)

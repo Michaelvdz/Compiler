@@ -20,6 +20,27 @@ class ASTVisitor(Visitor):
         #print("Ending Node")
         return currentNode
 
+    def VisitConditional(self, currentNode):
+        #print("Beginning Node")
+        self.ast.node(str(id(currentNode)), currentNode.name)
+        condition = currentNode.condition.accept(self)
+        self.ast.edge(str(id(currentNode)), str(id(condition)))
+        ifbody = currentNode.ifbody.accept(self)
+        self.ast.edge(str(id(currentNode)), str(id(ifbody)))
+        if not currentNode.elsebody == 0:
+            elsebody = currentNode.elsebody.accept(self)
+            self.ast.edge(str(id(currentNode)), str(id(elsebody)))
+        #print("Ending Node")
+        return currentNode
+    def VisitScope(self, currentNode):
+        #print("Beginning Node")
+        self.ast.node(str(id(currentNode)), currentNode.name)
+        for child in currentNode.children:
+            node = child.accept(self)
+            self.ast.edge(str(id(currentNode)), str(id(node)))
+        #print("Ending Node")
+        return currentNode
+
     def VisitBinaryOperation(self, currentNode):
         #print("Beginning Binary")
         self.ast.node(str(id(currentNode)), currentNode.value)
