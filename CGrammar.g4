@@ -16,7 +16,7 @@ unary_operator:  '+'
 post_unary_operator:  '++'
     |   '--'
     ;
-parenthesis_expression: '(' expr ')'
+parenthesis_expression: '(' assignment_expression ')'
     ;
 
 unary_expression:   unary_operator iden=IDENTIFIER
