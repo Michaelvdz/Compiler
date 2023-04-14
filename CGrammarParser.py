@@ -45,7 +45,7 @@ def serializedATN():
         3,2,1,0,49,48,1,0,0,0,50,51,1,0,0,0,51,49,1,0,0,0,51,52,1,0,0,0,
         52,53,1,0,0,0,53,54,5,0,0,1,54,1,1,0,0,0,55,56,3,28,14,0,56,3,1,
         0,0,0,57,58,7,0,0,0,58,5,1,0,0,0,59,60,7,1,0,0,60,7,1,0,0,0,61,62,
-        5,8,0,0,62,63,3,28,14,0,63,64,5,9,0,0,64,9,1,0,0,0,65,66,6,5,-1,
+        5,8,0,0,62,63,3,20,10,0,63,64,5,9,0,0,64,9,1,0,0,0,65,66,6,5,-1,
         0,66,67,3,4,2,0,67,68,5,39,0,0,68,79,1,0,0,0,69,70,3,4,2,0,70,71,
         3,36,18,0,71,79,1,0,0,0,72,79,3,36,18,0,73,79,3,8,4,0,74,79,5,39,
         0,0,75,76,3,4,2,0,76,77,3,10,5,2,77,79,1,0,0,0,78,65,1,0,0,0,78,
@@ -454,8 +454,8 @@ class CGrammarParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def expr(self):
-            return self.getTypedRuleContext(CGrammarParser.ExprContext,0)
+        def assignment_expression(self):
+            return self.getTypedRuleContext(CGrammarParser.Assignment_expressionContext,0)
 
 
         def getRuleIndex(self):
@@ -487,7 +487,7 @@ class CGrammarParser ( Parser ):
             self.state = 61
             self.match(CGrammarParser.T__7)
             self.state = 62
-            self.expr(0)
+            self.assignment_expression()
             self.state = 63
             self.match(CGrammarParser.T__8)
         except RecognitionException as re:
