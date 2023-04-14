@@ -24,14 +24,31 @@ class ASTVisitor(Visitor):
         #print("Beginning Node")
         self.ast.node(str(id(currentNode)), currentNode.name)
         condition = currentNode.condition.accept(self)
-        self.ast.edge(str(id(currentNode)), str(id(condition)))
+        self.ast.edge(str(id(currentNode)), str(id(condition)), "Condition")
         ifbody = currentNode.ifbody.accept(self)
-        self.ast.edge(str(id(currentNode)), str(id(ifbody)))
+        self.ast.edge(str(id(currentNode)), str(id(ifbody)), "If-body")
         if not currentNode.elsebody == 0:
             elsebody = currentNode.elsebody.accept(self)
-            self.ast.edge(str(id(currentNode)), str(id(elsebody)))
+            self.ast.edge(str(id(currentNode)), str(id(elsebody)), "Else-body")
         #print("Ending Node")
         return currentNode
+
+    def VisitWhile(self, currentNode):
+        #print("Beginning Node")
+        self.ast.node(str(id(currentNode)), currentNode.name)
+        if currentNode.beforeLoop:
+            beforeLoop = currentNode.beforeLoop.accept(self)
+            self.ast.edge(str(id(currentNode)), str(id(beforeLoop)), "Before Loop")
+        condition = currentNode.condition.accept(self)
+        self.ast.edge(str(id(currentNode)), str(id(condition)), "Condition")
+        body = currentNode.body.accept(self)
+        self.ast.edge(str(id(currentNode)), str(id(body)), "Body")
+        if currentNode.afterLoop:
+            afterLoop = currentNode.afterLoop.accept(self)
+            self.ast.edge(str(id(currentNode)), str(id(afterLoop)), "After Loop")
+        #print("Ending Node")
+        return currentNode
+
     def VisitScope(self, currentNode):
         #print("Beginning Node")
         self.ast.node(str(id(currentNode)), currentNode.name)

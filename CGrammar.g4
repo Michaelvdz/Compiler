@@ -69,18 +69,26 @@ expr:   assignment_expression ';'
     | printf ';'
     | expr comment
     | comment
+    | jumps
 	;
 
+expr_loop:
+    expr*
+    ;
+
 conditional_statement:
-    'if' '(' condition=assignment_expression ')' '{' ifbody=expr* '}'
-    | 'if' '(' condition=assignment_expression ')' '{' ifbody=expr* '}' 'else' '{' elsebody=expr* '}'
+    'if' '(' condition=assignment_expression ')' '{' ifbody=expr_loop '}'
+    | 'if' '(' condition=assignment_expression ')' '{' ifbody=expr_loop '}' 'else' '{' elsebody=expr_loop '}'
     ;
 
 loops:
-    'while' '(' assignment_expression ')' '{' expr* '}'
-    | 'for' '(' expr ';' expr ';' expr ')' '{' expr* '}'
-    | 'break' ';'
-    | 'continue' ';'
+    loop='while' '(' condition=assignment_expression ')' '{' body=expr_loop '}'
+    | loop='for' '(' before=declaration ';' condition=assignment_expression ';' after=assignment_expression? ')' '{' body=expr_loop '}'
+    ;
+
+jumps:
+    jump='break' ';'
+    | jump='continue' ';'
     ;
 
 scope:

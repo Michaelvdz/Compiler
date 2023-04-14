@@ -45,6 +45,12 @@ class AST2LLVMVisitor(Visitor):
             node = child.accept(self)
         return currentNode
 
+    def VisitWhile(self, currentNode):
+        #print("Scope")
+        for child in currentNode.children:
+            node = child.accept(self)
+        return currentNode
+
     def VisitVariable(self, currentNode):
         print("Variable")
         if self.lvalue:
@@ -81,6 +87,7 @@ class AST2LLVMVisitor(Visitor):
         for child in currentNode.children:
             if isinstance(child, Variable):
                 print("No constant")
+                print(child.value)
                 newType = self.symbolTable.lookup(child.value).type
                 if BinType is None:
                     BinType = newType
@@ -247,7 +254,8 @@ class AST2LLVMVisitor(Visitor):
                     else:
                         #type = self.symbolTable.lookupByRegister(node).type
                         var = child.value
-                        match self.symbolTable.lookupByRegister(node).type:
+                        print(node[0])
+                        match self.symbolTable.lookupByRegister(node[0]).type:
                             case "int*":
                                 self.llvm += "%" + str(self.instr) + " = load i32*, i32** %" + str(self.symbolTable.lookup(var).register) + ", align 8\n"
                                 self.instr += 1
@@ -347,7 +355,7 @@ class AST2LLVMVisitor(Visitor):
                         print("failiure")
                     self.llvm += "store float " + str(value) + ", float* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                 elif ltype == "char":
-                    value = value.replace("'","")
+                    value = value[0].replace("'","")
                     self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
                 elif ltype == "int*":
                     self.llvm += "store i32* %" + str(value) + ", i32** %" + self.symbolTable.lookup(
@@ -449,7 +457,7 @@ class AST2LLVMVisitor(Visitor):
                     self.llvm += "store float " + str(value) + ", float* %" + str(self.instr-1) + ", align 4\n"
                     #self.symbolTable.replaceRegisters(reg, str(self.instr-1))
             if type == "char*":
-                value = value.replace("'", "")
+                value = value[0].replace("'", "")
                 self.llvm += "store i8 " + str(ord(value[0])) + ", i8* %" + str(self.instr-1) + ", align 1\n"
         return currentNode
 
@@ -475,7 +483,9 @@ class AST2LLVMVisitor(Visitor):
         print("Printing:")
         print(node)
         #symbol = self.symbolTable.lookup(node.value)
-        symbol = self.symbolTable.lookupByRegister(node[0])
+        symbol = 0
+        if not isinstance(node, ASTNode):
+            symbol = self.symbolTable.lookupByRegister(node[0])
 
         print(symbol)
         if symbol:
@@ -525,11 +535,11 @@ class AST2LLVMVisitor(Visitor):
         else:
             print("test:")
             print(node)
-            if '\'' not in node[0].value:
+            if '\'' not in node.value:
                 try:
-                    value = int(node[0].value)
+                    value = int(node.value)
                 except ValueError:
-                    value = float(node[0].value)
+                    value = float(node.value)
                 if isinstance(value, int):
                     if not self.printing:
                         self.llvm = "declare i32 @printf(i8* noundef, ...)\n" + self.llvm

@@ -146,6 +146,77 @@ class Conditional(ASTNode):
     def accept(self, visitor: Visitor):
         return visitor.VisitConditional(self)
 
+class While(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+    condition = 0
+    body = 0
+    beforeLoop = 0
+    afterLoop = 0
+
+
+    def __init__(self, name):
+        #print("___init-BinaryOperation___");
+        self.children = []
+        self.name = "While"
+        self.value = name
+        #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            #print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def print(self):
+        print("This is a while node with name: " + str(self.value) + " and nodes:")
+        for node in self.children:
+            node.print()
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitWhile(self)
+
+class Jump:
+
+    name = ""
+    value = ""
+    children = []
+    def __init__(self, name="Free"):
+        #print("___init-ASTNode___");
+        self.children = []
+        self.name = name
+        self.value = name
+        #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def print(self):
+        if not self.children:
+            print(self.name)
+        else:
+            print(self.name)
+            print("With children")
+            for node in self.children:
+                node.print()
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            #print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def accept(self, visitor: Visitor):
+        value = visitor.VisitASTNode(self)
+        return value
+
+    def acceptWithNoOptimization(self, visitor: Visitor):
+        value = visitor.VisitASTNode(self, False)
+        return value
+
 class UnaryOperation(ASTNode):
 
     name = ""

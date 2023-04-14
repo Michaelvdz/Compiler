@@ -143,6 +143,15 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CGrammarParser#expr_loop.
+    def enterExpr_loop(self, ctx:CGrammarParser.Expr_loopContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#expr_loop.
+    def exitExpr_loop(self, ctx:CGrammarParser.Expr_loopContext):
+        pass
+
+
     # Enter a parse tree produced by CGrammarParser#conditional_statement.
     def enterConditional_statement(self, ctx:CGrammarParser.Conditional_statementContext):
         pass
@@ -158,6 +167,15 @@ class CGrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by CGrammarParser#loops.
     def exitLoops(self, ctx:CGrammarParser.LoopsContext):
+        pass
+
+
+    # Enter a parse tree produced by CGrammarParser#jumps.
+    def enterJumps(self, ctx:CGrammarParser.JumpsContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#jumps.
+    def exitJumps(self, ctx:CGrammarParser.JumpsContext):
         pass
 
 

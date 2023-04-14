@@ -10,110 +10,105 @@ else:
 
 def serializedATN():
     return [
-        4,1,41,294,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        4,1,41,284,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
         6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,
         2,14,7,14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,20,
-        7,20,2,21,7,21,2,22,7,22,2,23,7,23,1,0,4,0,50,8,0,11,0,12,0,51,1,
-        0,1,0,1,1,1,1,1,2,1,2,1,3,1,3,1,4,1,4,1,4,1,4,1,5,1,5,1,5,1,5,1,
-        5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,3,5,79,8,5,1,5,1,5,5,5,83,8,5,
-        10,5,12,5,86,9,5,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,5,6,97,8,6,
-        10,6,12,6,100,9,6,1,7,1,7,1,7,1,7,1,7,1,7,5,7,108,8,7,10,7,12,7,
-        111,9,7,1,8,1,8,1,8,1,8,1,8,1,8,5,8,119,8,8,10,8,12,8,122,9,8,1,
-        9,1,9,1,9,1,9,1,9,1,9,5,9,130,8,9,10,9,12,9,133,9,9,1,10,1,10,1,
-        11,1,11,1,11,3,11,140,8,11,1,12,1,12,1,12,1,12,1,12,1,12,1,12,1,
-        12,1,12,1,12,1,12,3,12,153,8,12,1,13,1,13,1,13,1,13,1,13,3,13,160,
-        8,13,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,
-        1,14,1,14,3,14,176,8,14,1,14,1,14,5,14,180,8,14,10,14,12,14,183,
-        9,14,1,15,1,15,1,15,1,15,1,15,1,15,5,15,191,8,15,10,15,12,15,194,
-        9,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,1,15,5,15,204,8,15,10,15,
-        12,15,207,9,15,1,15,1,15,1,15,1,15,5,15,213,8,15,10,15,12,15,216,
-        9,15,1,15,1,15,3,15,220,8,15,1,16,1,16,1,16,1,16,1,16,1,16,5,16,
-        228,8,16,10,16,12,16,231,9,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,
-        1,16,1,16,1,16,1,16,1,16,5,16,245,8,16,10,16,12,16,248,9,16,1,16,
-        1,16,1,16,1,16,1,16,1,16,3,16,256,8,16,1,17,1,17,5,17,260,8,17,10,
-        17,12,17,263,9,17,1,17,1,17,1,18,1,18,1,19,1,19,1,19,1,19,3,19,273,
-        8,19,1,20,1,20,1,20,3,20,278,8,20,1,21,1,21,1,22,1,22,3,22,284,8,
-        22,1,23,1,23,1,23,1,23,3,23,290,8,23,1,23,1,23,1,23,0,6,10,12,14,
-        16,18,28,24,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,
-        38,40,42,44,46,0,7,1,0,1,5,1,0,6,7,2,0,3,3,10,11,1,0,1,2,1,0,12,
-        17,1,0,18,19,2,0,37,38,40,40,308,0,49,1,0,0,0,2,55,1,0,0,0,4,57,
-        1,0,0,0,6,59,1,0,0,0,8,61,1,0,0,0,10,78,1,0,0,0,12,87,1,0,0,0,14,
-        101,1,0,0,0,16,112,1,0,0,0,18,123,1,0,0,0,20,134,1,0,0,0,22,139,
-        1,0,0,0,24,152,1,0,0,0,26,159,1,0,0,0,28,175,1,0,0,0,30,219,1,0,
-        0,0,32,255,1,0,0,0,34,257,1,0,0,0,36,266,1,0,0,0,38,272,1,0,0,0,
-        40,277,1,0,0,0,42,279,1,0,0,0,44,283,1,0,0,0,46,285,1,0,0,0,48,50,
-        3,2,1,0,49,48,1,0,0,0,50,51,1,0,0,0,51,49,1,0,0,0,51,52,1,0,0,0,
-        52,53,1,0,0,0,53,54,5,0,0,1,54,1,1,0,0,0,55,56,3,28,14,0,56,3,1,
-        0,0,0,57,58,7,0,0,0,58,5,1,0,0,0,59,60,7,1,0,0,60,7,1,0,0,0,61,62,
-        5,8,0,0,62,63,3,20,10,0,63,64,5,9,0,0,64,9,1,0,0,0,65,66,6,5,-1,
-        0,66,67,3,4,2,0,67,68,5,39,0,0,68,79,1,0,0,0,69,70,3,4,2,0,70,71,
-        3,36,18,0,71,79,1,0,0,0,72,79,3,36,18,0,73,79,3,8,4,0,74,79,5,39,
-        0,0,75,76,3,4,2,0,76,77,3,10,5,2,77,79,1,0,0,0,78,65,1,0,0,0,78,
-        69,1,0,0,0,78,72,1,0,0,0,78,73,1,0,0,0,78,74,1,0,0,0,78,75,1,0,0,
-        0,79,84,1,0,0,0,80,81,10,1,0,0,81,83,3,6,3,0,82,80,1,0,0,0,83,86,
-        1,0,0,0,84,82,1,0,0,0,84,85,1,0,0,0,85,11,1,0,0,0,86,84,1,0,0,0,
-        87,88,6,6,-1,0,88,89,3,10,5,0,89,98,1,0,0,0,90,91,10,3,0,0,91,92,
-        7,2,0,0,92,97,3,10,5,0,93,94,10,2,0,0,94,95,5,11,0,0,95,97,3,10,
-        5,0,96,90,1,0,0,0,96,93,1,0,0,0,97,100,1,0,0,0,98,96,1,0,0,0,98,
-        99,1,0,0,0,99,13,1,0,0,0,100,98,1,0,0,0,101,102,6,7,-1,0,102,103,
-        3,12,6,0,103,109,1,0,0,0,104,105,10,2,0,0,105,106,7,3,0,0,106,108,
-        3,12,6,0,107,104,1,0,0,0,108,111,1,0,0,0,109,107,1,0,0,0,109,110,
-        1,0,0,0,110,15,1,0,0,0,111,109,1,0,0,0,112,113,6,8,-1,0,113,114,
-        3,14,7,0,114,120,1,0,0,0,115,116,10,2,0,0,116,117,7,4,0,0,117,119,
-        3,14,7,0,118,115,1,0,0,0,119,122,1,0,0,0,120,118,1,0,0,0,120,121,
-        1,0,0,0,121,17,1,0,0,0,122,120,1,0,0,0,123,124,6,9,-1,0,124,125,
-        3,16,8,0,125,131,1,0,0,0,126,127,10,2,0,0,127,128,7,5,0,0,128,130,
-        3,16,8,0,129,126,1,0,0,0,130,133,1,0,0,0,131,129,1,0,0,0,131,132,
-        1,0,0,0,132,19,1,0,0,0,133,131,1,0,0,0,134,135,3,18,9,0,135,21,1,
-        0,0,0,136,137,5,3,0,0,137,140,3,22,11,0,138,140,5,3,0,0,139,136,
-        1,0,0,0,139,138,1,0,0,0,140,23,1,0,0,0,141,142,3,38,19,0,142,143,
-        3,22,11,0,143,144,5,39,0,0,144,153,1,0,0,0,145,146,3,38,19,0,146,
-        147,5,39,0,0,147,153,1,0,0,0,148,153,5,39,0,0,149,150,3,22,11,0,
-        150,151,5,39,0,0,151,153,1,0,0,0,152,141,1,0,0,0,152,145,1,0,0,0,
-        152,148,1,0,0,0,152,149,1,0,0,0,153,25,1,0,0,0,154,155,3,24,12,0,
-        155,156,5,20,0,0,156,157,3,20,10,0,157,160,1,0,0,0,158,160,3,24,
-        12,0,159,154,1,0,0,0,159,158,1,0,0,0,160,27,1,0,0,0,161,162,6,14,
-        -1,0,162,163,3,20,10,0,163,164,5,21,0,0,164,176,1,0,0,0,165,166,
-        3,26,13,0,166,167,5,21,0,0,167,176,1,0,0,0,168,176,3,30,15,0,169,
-        176,3,32,16,0,170,176,3,34,17,0,171,172,3,46,23,0,172,173,5,21,0,
-        0,173,176,1,0,0,0,174,176,3,44,22,0,175,161,1,0,0,0,175,165,1,0,
-        0,0,175,168,1,0,0,0,175,169,1,0,0,0,175,170,1,0,0,0,175,171,1,0,
-        0,0,175,174,1,0,0,0,176,181,1,0,0,0,177,178,10,2,0,0,178,180,3,44,
-        22,0,179,177,1,0,0,0,180,183,1,0,0,0,181,179,1,0,0,0,181,182,1,0,
-        0,0,182,29,1,0,0,0,183,181,1,0,0,0,184,185,5,22,0,0,185,186,5,8,
-        0,0,186,187,3,20,10,0,187,188,5,9,0,0,188,192,5,23,0,0,189,191,3,
-        28,14,0,190,189,1,0,0,0,191,194,1,0,0,0,192,190,1,0,0,0,192,193,
-        1,0,0,0,193,195,1,0,0,0,194,192,1,0,0,0,195,196,5,24,0,0,196,220,
-        1,0,0,0,197,198,5,22,0,0,198,199,5,8,0,0,199,200,3,20,10,0,200,201,
-        5,9,0,0,201,205,5,23,0,0,202,204,3,28,14,0,203,202,1,0,0,0,204,207,
-        1,0,0,0,205,203,1,0,0,0,205,206,1,0,0,0,206,208,1,0,0,0,207,205,
-        1,0,0,0,208,209,5,24,0,0,209,210,5,25,0,0,210,214,5,23,0,0,211,213,
-        3,28,14,0,212,211,1,0,0,0,213,216,1,0,0,0,214,212,1,0,0,0,214,215,
-        1,0,0,0,215,217,1,0,0,0,216,214,1,0,0,0,217,218,5,24,0,0,218,220,
-        1,0,0,0,219,184,1,0,0,0,219,197,1,0,0,0,220,31,1,0,0,0,221,222,5,
-        26,0,0,222,223,5,8,0,0,223,224,3,20,10,0,224,225,5,9,0,0,225,229,
-        5,23,0,0,226,228,3,28,14,0,227,226,1,0,0,0,228,231,1,0,0,0,229,227,
-        1,0,0,0,229,230,1,0,0,0,230,232,1,0,0,0,231,229,1,0,0,0,232,233,
-        5,24,0,0,233,256,1,0,0,0,234,235,5,27,0,0,235,236,5,8,0,0,236,237,
-        3,28,14,0,237,238,5,21,0,0,238,239,3,28,14,0,239,240,5,21,0,0,240,
-        241,3,28,14,0,241,242,5,9,0,0,242,246,5,23,0,0,243,245,3,28,14,0,
-        244,243,1,0,0,0,245,248,1,0,0,0,246,244,1,0,0,0,246,247,1,0,0,0,
-        247,249,1,0,0,0,248,246,1,0,0,0,249,250,5,24,0,0,250,256,1,0,0,0,
-        251,252,5,28,0,0,252,256,5,21,0,0,253,254,5,29,0,0,254,256,5,21,
-        0,0,255,221,1,0,0,0,255,234,1,0,0,0,255,251,1,0,0,0,255,253,1,0,
-        0,0,256,33,1,0,0,0,257,261,5,23,0,0,258,260,3,28,14,0,259,258,1,
-        0,0,0,260,263,1,0,0,0,261,259,1,0,0,0,261,262,1,0,0,0,262,264,1,
-        0,0,0,263,261,1,0,0,0,264,265,5,24,0,0,265,35,1,0,0,0,266,267,7,
-        6,0,0,267,37,1,0,0,0,268,269,3,42,21,0,269,270,3,40,20,0,270,273,
-        1,0,0,0,271,273,3,40,20,0,272,268,1,0,0,0,272,271,1,0,0,0,273,39,
-        1,0,0,0,274,278,5,30,0,0,275,278,5,31,0,0,276,278,5,32,0,0,277,274,
-        1,0,0,0,277,275,1,0,0,0,277,276,1,0,0,0,278,41,1,0,0,0,279,280,5,
-        33,0,0,280,43,1,0,0,0,281,284,5,35,0,0,282,284,5,36,0,0,283,281,
-        1,0,0,0,283,282,1,0,0,0,284,45,1,0,0,0,285,286,5,34,0,0,286,289,
-        5,8,0,0,287,290,5,39,0,0,288,290,3,36,18,0,289,287,1,0,0,0,289,288,
-        1,0,0,0,290,291,1,0,0,0,291,292,5,9,0,0,292,47,1,0,0,0,25,51,78,
-        84,96,98,109,120,131,139,152,159,175,181,192,205,214,219,229,246,
-        255,261,272,277,283,289
+        7,20,2,21,7,21,2,22,7,22,2,23,7,23,2,24,7,24,2,25,7,25,1,0,4,0,54,
+        8,0,11,0,12,0,55,1,0,1,0,1,1,1,1,1,2,1,2,1,3,1,3,1,4,1,4,1,4,1,4,
+        1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,3,5,83,8,5,1,
+        5,1,5,5,5,87,8,5,10,5,12,5,90,9,5,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,
+        6,1,6,5,6,101,8,6,10,6,12,6,104,9,6,1,7,1,7,1,7,1,7,1,7,1,7,5,7,
+        112,8,7,10,7,12,7,115,9,7,1,8,1,8,1,8,1,8,1,8,1,8,5,8,123,8,8,10,
+        8,12,8,126,9,8,1,9,1,9,1,9,1,9,1,9,1,9,5,9,134,8,9,10,9,12,9,137,
+        9,9,1,10,1,10,1,11,1,11,1,11,3,11,144,8,11,1,12,1,12,1,12,1,12,1,
+        12,1,12,1,12,1,12,1,12,1,12,1,12,3,12,157,8,12,1,13,1,13,1,13,1,
+        13,1,13,3,13,164,8,13,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,
+        14,1,14,1,14,1,14,1,14,1,14,1,14,3,14,181,8,14,1,14,1,14,5,14,185,
+        8,14,10,14,12,14,188,9,14,1,15,5,15,191,8,15,10,15,12,15,194,9,15,
+        1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,
+        1,16,1,16,1,16,1,16,1,16,1,16,1,16,3,16,216,8,16,1,17,1,17,1,17,
+        1,17,1,17,1,17,1,17,1,17,1,17,1,17,1,17,1,17,1,17,1,17,1,17,3,17,
+        233,8,17,1,17,1,17,1,17,1,17,1,17,3,17,240,8,17,1,18,1,18,1,18,1,
+        18,3,18,246,8,18,1,19,1,19,5,19,250,8,19,10,19,12,19,253,9,19,1,
+        19,1,19,1,20,1,20,1,21,1,21,1,21,1,21,3,21,263,8,21,1,22,1,22,1,
+        22,3,22,268,8,22,1,23,1,23,1,24,1,24,3,24,274,8,24,1,25,1,25,1,25,
+        1,25,3,25,280,8,25,1,25,1,25,1,25,0,6,10,12,14,16,18,28,26,0,2,4,
+        6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,
+        50,0,7,1,0,1,5,1,0,6,7,2,0,3,3,10,11,1,0,1,2,1,0,12,17,1,0,18,19,
+        2,0,37,38,40,40,293,0,53,1,0,0,0,2,59,1,0,0,0,4,61,1,0,0,0,6,63,
+        1,0,0,0,8,65,1,0,0,0,10,82,1,0,0,0,12,91,1,0,0,0,14,105,1,0,0,0,
+        16,116,1,0,0,0,18,127,1,0,0,0,20,138,1,0,0,0,22,143,1,0,0,0,24,156,
+        1,0,0,0,26,163,1,0,0,0,28,180,1,0,0,0,30,192,1,0,0,0,32,215,1,0,
+        0,0,34,239,1,0,0,0,36,245,1,0,0,0,38,247,1,0,0,0,40,256,1,0,0,0,
+        42,262,1,0,0,0,44,267,1,0,0,0,46,269,1,0,0,0,48,273,1,0,0,0,50,275,
+        1,0,0,0,52,54,3,2,1,0,53,52,1,0,0,0,54,55,1,0,0,0,55,53,1,0,0,0,
+        55,56,1,0,0,0,56,57,1,0,0,0,57,58,5,0,0,1,58,1,1,0,0,0,59,60,3,28,
+        14,0,60,3,1,0,0,0,61,62,7,0,0,0,62,5,1,0,0,0,63,64,7,1,0,0,64,7,
+        1,0,0,0,65,66,5,8,0,0,66,67,3,20,10,0,67,68,5,9,0,0,68,9,1,0,0,0,
+        69,70,6,5,-1,0,70,71,3,4,2,0,71,72,5,39,0,0,72,83,1,0,0,0,73,74,
+        3,4,2,0,74,75,3,40,20,0,75,83,1,0,0,0,76,83,3,40,20,0,77,83,3,8,
+        4,0,78,83,5,39,0,0,79,80,3,4,2,0,80,81,3,10,5,2,81,83,1,0,0,0,82,
+        69,1,0,0,0,82,73,1,0,0,0,82,76,1,0,0,0,82,77,1,0,0,0,82,78,1,0,0,
+        0,82,79,1,0,0,0,83,88,1,0,0,0,84,85,10,1,0,0,85,87,3,6,3,0,86,84,
+        1,0,0,0,87,90,1,0,0,0,88,86,1,0,0,0,88,89,1,0,0,0,89,11,1,0,0,0,
+        90,88,1,0,0,0,91,92,6,6,-1,0,92,93,3,10,5,0,93,102,1,0,0,0,94,95,
+        10,3,0,0,95,96,7,2,0,0,96,101,3,10,5,0,97,98,10,2,0,0,98,99,5,11,
+        0,0,99,101,3,10,5,0,100,94,1,0,0,0,100,97,1,0,0,0,101,104,1,0,0,
+        0,102,100,1,0,0,0,102,103,1,0,0,0,103,13,1,0,0,0,104,102,1,0,0,0,
+        105,106,6,7,-1,0,106,107,3,12,6,0,107,113,1,0,0,0,108,109,10,2,0,
+        0,109,110,7,3,0,0,110,112,3,12,6,0,111,108,1,0,0,0,112,115,1,0,0,
+        0,113,111,1,0,0,0,113,114,1,0,0,0,114,15,1,0,0,0,115,113,1,0,0,0,
+        116,117,6,8,-1,0,117,118,3,14,7,0,118,124,1,0,0,0,119,120,10,2,0,
+        0,120,121,7,4,0,0,121,123,3,14,7,0,122,119,1,0,0,0,123,126,1,0,0,
+        0,124,122,1,0,0,0,124,125,1,0,0,0,125,17,1,0,0,0,126,124,1,0,0,0,
+        127,128,6,9,-1,0,128,129,3,16,8,0,129,135,1,0,0,0,130,131,10,2,0,
+        0,131,132,7,5,0,0,132,134,3,16,8,0,133,130,1,0,0,0,134,137,1,0,0,
+        0,135,133,1,0,0,0,135,136,1,0,0,0,136,19,1,0,0,0,137,135,1,0,0,0,
+        138,139,3,18,9,0,139,21,1,0,0,0,140,141,5,3,0,0,141,144,3,22,11,
+        0,142,144,5,3,0,0,143,140,1,0,0,0,143,142,1,0,0,0,144,23,1,0,0,0,
+        145,146,3,42,21,0,146,147,3,22,11,0,147,148,5,39,0,0,148,157,1,0,
+        0,0,149,150,3,42,21,0,150,151,5,39,0,0,151,157,1,0,0,0,152,157,5,
+        39,0,0,153,154,3,22,11,0,154,155,5,39,0,0,155,157,1,0,0,0,156,145,
+        1,0,0,0,156,149,1,0,0,0,156,152,1,0,0,0,156,153,1,0,0,0,157,25,1,
+        0,0,0,158,159,3,24,12,0,159,160,5,20,0,0,160,161,3,20,10,0,161,164,
+        1,0,0,0,162,164,3,24,12,0,163,158,1,0,0,0,163,162,1,0,0,0,164,27,
+        1,0,0,0,165,166,6,14,-1,0,166,167,3,20,10,0,167,168,5,21,0,0,168,
+        181,1,0,0,0,169,170,3,26,13,0,170,171,5,21,0,0,171,181,1,0,0,0,172,
+        181,3,32,16,0,173,181,3,34,17,0,174,181,3,38,19,0,175,176,3,50,25,
+        0,176,177,5,21,0,0,177,181,1,0,0,0,178,181,3,48,24,0,179,181,3,36,
+        18,0,180,165,1,0,0,0,180,169,1,0,0,0,180,172,1,0,0,0,180,173,1,0,
+        0,0,180,174,1,0,0,0,180,175,1,0,0,0,180,178,1,0,0,0,180,179,1,0,
+        0,0,181,186,1,0,0,0,182,183,10,3,0,0,183,185,3,48,24,0,184,182,1,
+        0,0,0,185,188,1,0,0,0,186,184,1,0,0,0,186,187,1,0,0,0,187,29,1,0,
+        0,0,188,186,1,0,0,0,189,191,3,28,14,0,190,189,1,0,0,0,191,194,1,
+        0,0,0,192,190,1,0,0,0,192,193,1,0,0,0,193,31,1,0,0,0,194,192,1,0,
+        0,0,195,196,5,22,0,0,196,197,5,8,0,0,197,198,3,20,10,0,198,199,5,
+        9,0,0,199,200,5,23,0,0,200,201,3,30,15,0,201,202,5,24,0,0,202,216,
+        1,0,0,0,203,204,5,22,0,0,204,205,5,8,0,0,205,206,3,20,10,0,206,207,
+        5,9,0,0,207,208,5,23,0,0,208,209,3,30,15,0,209,210,5,24,0,0,210,
+        211,5,25,0,0,211,212,5,23,0,0,212,213,3,30,15,0,213,214,5,24,0,0,
+        214,216,1,0,0,0,215,195,1,0,0,0,215,203,1,0,0,0,216,33,1,0,0,0,217,
+        218,5,26,0,0,218,219,5,8,0,0,219,220,3,20,10,0,220,221,5,9,0,0,221,
+        222,5,23,0,0,222,223,3,30,15,0,223,224,5,24,0,0,224,240,1,0,0,0,
+        225,226,5,27,0,0,226,227,5,8,0,0,227,228,3,26,13,0,228,229,5,21,
+        0,0,229,230,3,20,10,0,230,232,5,21,0,0,231,233,3,20,10,0,232,231,
+        1,0,0,0,232,233,1,0,0,0,233,234,1,0,0,0,234,235,5,9,0,0,235,236,
+        5,23,0,0,236,237,3,30,15,0,237,238,5,24,0,0,238,240,1,0,0,0,239,
+        217,1,0,0,0,239,225,1,0,0,0,240,35,1,0,0,0,241,242,5,28,0,0,242,
+        246,5,21,0,0,243,244,5,29,0,0,244,246,5,21,0,0,245,241,1,0,0,0,245,
+        243,1,0,0,0,246,37,1,0,0,0,247,251,5,23,0,0,248,250,3,28,14,0,249,
+        248,1,0,0,0,250,253,1,0,0,0,251,249,1,0,0,0,251,252,1,0,0,0,252,
+        254,1,0,0,0,253,251,1,0,0,0,254,255,5,24,0,0,255,39,1,0,0,0,256,
+        257,7,6,0,0,257,41,1,0,0,0,258,259,3,46,23,0,259,260,3,44,22,0,260,
+        263,1,0,0,0,261,263,3,44,22,0,262,258,1,0,0,0,262,261,1,0,0,0,263,
+        43,1,0,0,0,264,268,5,30,0,0,265,268,5,31,0,0,266,268,5,32,0,0,267,
+        264,1,0,0,0,267,265,1,0,0,0,267,266,1,0,0,0,268,45,1,0,0,0,269,270,
+        5,33,0,0,270,47,1,0,0,0,271,274,5,35,0,0,272,274,5,36,0,0,273,271,
+        1,0,0,0,273,272,1,0,0,0,274,49,1,0,0,0,275,276,5,34,0,0,276,279,
+        5,8,0,0,277,280,5,39,0,0,278,280,3,40,20,0,279,277,1,0,0,0,279,278,
+        1,0,0,0,280,281,1,0,0,0,281,282,5,9,0,0,282,51,1,0,0,0,23,55,82,
+        88,100,102,113,124,135,143,156,163,180,186,192,215,232,239,245,251,
+        262,267,273,279
     ]
 
 class CGrammarParser ( Parser ):
@@ -160,23 +155,25 @@ class CGrammarParser ( Parser ):
     RULE_declaration_specification = 12
     RULE_declaration = 13
     RULE_expr = 14
-    RULE_conditional_statement = 15
-    RULE_loops = 16
-    RULE_scope = 17
-    RULE_constant = 18
-    RULE_type = 19
-    RULE_type_specifier = 20
-    RULE_reserved_word = 21
-    RULE_comment = 22
-    RULE_printf = 23
+    RULE_expr_loop = 15
+    RULE_conditional_statement = 16
+    RULE_loops = 17
+    RULE_jumps = 18
+    RULE_scope = 19
+    RULE_constant = 20
+    RULE_type = 21
+    RULE_type_specifier = 22
+    RULE_reserved_word = 23
+    RULE_comment = 24
+    RULE_printf = 25
 
     ruleNames =  [ "prog", "instr", "unary_operator", "post_unary_operator", 
                    "parenthesis_expression", "unary_expression", "mul_div_expression", 
                    "add_sub_expression", "relational_expression", "logical_expression", 
                    "assignment_expression", "pointer", "declaration_specification", 
-                   "declaration", "expr", "conditional_statement", "loops", 
-                   "scope", "constant", "type", "type_specifier", "reserved_word", 
-                   "comment", "printf" ]
+                   "declaration", "expr", "expr_loop", "conditional_statement", 
+                   "loops", "jumps", "scope", "constant", "type", "type_specifier", 
+                   "reserved_word", "comment", "printf" ]
 
     EOF = Token.EOF
     T__0=1
@@ -274,19 +271,19 @@ class CGrammarParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 49 
+            self.state = 53 
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while True:
-                self.state = 48
+                self.state = 52
                 self.instr()
-                self.state = 51 
+                self.state = 55 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & 2198968729918) != 0)):
                     break
 
-            self.state = 53
+            self.state = 57
             self.match(CGrammarParser.EOF)
         except RecognitionException as re:
             localctx.exception = re
@@ -334,7 +331,7 @@ class CGrammarParser ( Parser ):
         self.enterRule(localctx, 2, self.RULE_instr)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 55
+            self.state = 59
             self.expr(0)
         except RecognitionException as re:
             localctx.exception = re
@@ -380,7 +377,7 @@ class CGrammarParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 57
+            self.state = 61
             _la = self._input.LA(1)
             if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 62) != 0)):
                 self._errHandler.recoverInline(self)
@@ -431,7 +428,7 @@ class CGrammarParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 59
+            self.state = 63
             _la = self._input.LA(1)
             if not(_la==6 or _la==7):
                 self._errHandler.recoverInline(self)
@@ -484,11 +481,11 @@ class CGrammarParser ( Parser ):
         self.enterRule(localctx, 8, self.RULE_parenthesis_expression)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 61
+            self.state = 65
             self.match(CGrammarParser.T__7)
-            self.state = 62
+            self.state = 66
             self.assignment_expression()
-            self.state = 63
+            self.state = 67
             self.match(CGrammarParser.T__8)
         except RecognitionException as re:
             localctx.exception = re
@@ -558,48 +555,48 @@ class CGrammarParser ( Parser ):
         self.enterRecursionRule(localctx, 10, self.RULE_unary_expression, _p)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 78
+            self.state = 82
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,1,self._ctx)
             if la_ == 1:
-                self.state = 66
+                self.state = 70
                 self.unary_operator()
-                self.state = 67
+                self.state = 71
                 localctx.iden = self.match(CGrammarParser.IDENTIFIER)
                 pass
 
             elif la_ == 2:
-                self.state = 69
+                self.state = 73
                 self.unary_operator()
-                self.state = 70
+                self.state = 74
                 self.constant()
                 pass
 
             elif la_ == 3:
-                self.state = 72
+                self.state = 76
                 self.constant()
                 pass
 
             elif la_ == 4:
-                self.state = 73
+                self.state = 77
                 self.parenthesis_expression()
                 pass
 
             elif la_ == 5:
-                self.state = 74
+                self.state = 78
                 localctx.iden = self.match(CGrammarParser.IDENTIFIER)
                 pass
 
             elif la_ == 6:
-                self.state = 75
+                self.state = 79
                 self.unary_operator()
-                self.state = 76
+                self.state = 80
                 self.unary_expression(2)
                 pass
 
 
             self._ctx.stop = self._input.LT(-1)
-            self.state = 84
+            self.state = 88
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,2,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -609,13 +606,13 @@ class CGrammarParser ( Parser ):
                     _prevctx = localctx
                     localctx = CGrammarParser.Unary_expressionContext(self, _parentctx, _parentState)
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_unary_expression)
-                    self.state = 80
+                    self.state = 84
                     if not self.precpred(self._ctx, 1):
                         from antlr4.error.Errors import FailedPredicateException
                         raise FailedPredicateException(self, "self.precpred(self._ctx, 1)")
-                    self.state = 81
+                    self.state = 85
                     self.post_unary_operator() 
-                self.state = 86
+                self.state = 90
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,2,self._ctx)
 
@@ -673,10 +670,10 @@ class CGrammarParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 88
+            self.state = 92
             self.unary_expression(0)
             self._ctx.stop = self._input.LT(-1)
-            self.state = 98
+            self.state = 102
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,4,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -684,17 +681,17 @@ class CGrammarParser ( Parser ):
                     if self._parseListeners is not None:
                         self.triggerExitRuleEvent()
                     _prevctx = localctx
-                    self.state = 96
+                    self.state = 100
                     self._errHandler.sync(self)
                     la_ = self._interp.adaptivePredict(self._input,3,self._ctx)
                     if la_ == 1:
                         localctx = CGrammarParser.Mul_div_expressionContext(self, _parentctx, _parentState)
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_mul_div_expression)
-                        self.state = 90
+                        self.state = 94
                         if not self.precpred(self._ctx, 3):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 3)")
-                        self.state = 91
+                        self.state = 95
                         localctx.op = self._input.LT(1)
                         _la = self._input.LA(1)
                         if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 3080) != 0)):
@@ -702,25 +699,25 @@ class CGrammarParser ( Parser ):
                         else:
                             self._errHandler.reportMatch(self)
                             self.consume()
-                        self.state = 92
+                        self.state = 96
                         self.unary_expression(0)
                         pass
 
                     elif la_ == 2:
                         localctx = CGrammarParser.Mul_div_expressionContext(self, _parentctx, _parentState)
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_mul_div_expression)
-                        self.state = 93
+                        self.state = 97
                         if not self.precpred(self._ctx, 2):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
-                        self.state = 94
+                        self.state = 98
                         self.match(CGrammarParser.T__10)
-                        self.state = 95
+                        self.state = 99
                         self.unary_expression(0)
                         pass
 
              
-                self.state = 100
+                self.state = 104
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,4,self._ctx)
 
@@ -778,10 +775,10 @@ class CGrammarParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 102
+            self.state = 106
             self.mul_div_expression(0)
             self._ctx.stop = self._input.LT(-1)
-            self.state = 109
+            self.state = 113
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,5,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -791,11 +788,11 @@ class CGrammarParser ( Parser ):
                     _prevctx = localctx
                     localctx = CGrammarParser.Add_sub_expressionContext(self, _parentctx, _parentState)
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_add_sub_expression)
-                    self.state = 104
+                    self.state = 108
                     if not self.precpred(self._ctx, 2):
                         from antlr4.error.Errors import FailedPredicateException
                         raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
-                    self.state = 105
+                    self.state = 109
                     localctx.op = self._input.LT(1)
                     _la = self._input.LA(1)
                     if not(_la==1 or _la==2):
@@ -803,9 +800,9 @@ class CGrammarParser ( Parser ):
                     else:
                         self._errHandler.reportMatch(self)
                         self.consume()
-                    self.state = 106
+                    self.state = 110
                     self.mul_div_expression(0) 
-                self.state = 111
+                self.state = 115
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,5,self._ctx)
 
@@ -863,10 +860,10 @@ class CGrammarParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 113
+            self.state = 117
             self.add_sub_expression(0)
             self._ctx.stop = self._input.LT(-1)
-            self.state = 120
+            self.state = 124
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,6,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -876,11 +873,11 @@ class CGrammarParser ( Parser ):
                     _prevctx = localctx
                     localctx = CGrammarParser.Relational_expressionContext(self, _parentctx, _parentState)
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_relational_expression)
-                    self.state = 115
+                    self.state = 119
                     if not self.precpred(self._ctx, 2):
                         from antlr4.error.Errors import FailedPredicateException
                         raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
-                    self.state = 116
+                    self.state = 120
                     localctx.op = self._input.LT(1)
                     _la = self._input.LA(1)
                     if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 258048) != 0)):
@@ -888,9 +885,9 @@ class CGrammarParser ( Parser ):
                     else:
                         self._errHandler.reportMatch(self)
                         self.consume()
-                    self.state = 117
+                    self.state = 121
                     self.add_sub_expression(0) 
-                self.state = 122
+                self.state = 126
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,6,self._ctx)
 
@@ -948,10 +945,10 @@ class CGrammarParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 124
+            self.state = 128
             self.relational_expression(0)
             self._ctx.stop = self._input.LT(-1)
-            self.state = 131
+            self.state = 135
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,7,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -961,11 +958,11 @@ class CGrammarParser ( Parser ):
                     _prevctx = localctx
                     localctx = CGrammarParser.Logical_expressionContext(self, _parentctx, _parentState)
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_logical_expression)
-                    self.state = 126
+                    self.state = 130
                     if not self.precpred(self._ctx, 2):
                         from antlr4.error.Errors import FailedPredicateException
                         raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
-                    self.state = 127
+                    self.state = 131
                     localctx.op = self._input.LT(1)
                     _la = self._input.LA(1)
                     if not(_la==18 or _la==19):
@@ -973,9 +970,9 @@ class CGrammarParser ( Parser ):
                     else:
                         self._errHandler.reportMatch(self)
                         self.consume()
-                    self.state = 128
+                    self.state = 132
                     self.relational_expression(0) 
-                self.state = 133
+                self.state = 137
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,7,self._ctx)
 
@@ -1025,7 +1022,7 @@ class CGrammarParser ( Parser ):
         self.enterRule(localctx, 20, self.RULE_assignment_expression)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 134
+            self.state = 138
             self.logical_expression(0)
         except RecognitionException as re:
             localctx.exception = re
@@ -1072,20 +1069,20 @@ class CGrammarParser ( Parser ):
         localctx = CGrammarParser.PointerContext(self, self._ctx, self.state)
         self.enterRule(localctx, 22, self.RULE_pointer)
         try:
-            self.state = 139
+            self.state = 143
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,8,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 136
+                self.state = 140
                 self.match(CGrammarParser.T__2)
-                self.state = 137
+                self.state = 141
                 self.pointer()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 138
+                self.state = 142
                 self.match(CGrammarParser.T__2)
                 pass
 
@@ -1145,38 +1142,38 @@ class CGrammarParser ( Parser ):
         localctx = CGrammarParser.Declaration_specificationContext(self, self._ctx, self.state)
         self.enterRule(localctx, 24, self.RULE_declaration_specification)
         try:
-            self.state = 152
+            self.state = 156
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,9,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 141
+                self.state = 145
                 localctx.typ = self.type_()
-                self.state = 142
+                self.state = 146
                 localctx.ptr = self.pointer()
-                self.state = 143
+                self.state = 147
                 localctx.var = self.match(CGrammarParser.IDENTIFIER)
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 145
+                self.state = 149
                 localctx.typ = self.type_()
-                self.state = 146
+                self.state = 150
                 localctx.var = self.match(CGrammarParser.IDENTIFIER)
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 148
+                self.state = 152
                 localctx.var = self.match(CGrammarParser.IDENTIFIER)
                 pass
 
             elif la_ == 4:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 149
+                self.state = 153
                 localctx.ptr = self.pointer()
-                self.state = 150
+                self.state = 154
                 localctx.var = self.match(CGrammarParser.IDENTIFIER)
                 pass
 
@@ -1233,22 +1230,22 @@ class CGrammarParser ( Parser ):
         localctx = CGrammarParser.DeclarationContext(self, self._ctx, self.state)
         self.enterRule(localctx, 26, self.RULE_declaration)
         try:
-            self.state = 159
+            self.state = 163
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,10,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 154
+                self.state = 158
                 localctx.lvalue = self.declaration_specification()
-                self.state = 155
+                self.state = 159
                 localctx.assign = self.match(CGrammarParser.T__19)
-                self.state = 156
+                self.state = 160
                 localctx.rvalue = self.assignment_expression()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 158
+                self.state = 162
                 localctx.lvalue = self.declaration_specification()
                 pass
 
@@ -1297,6 +1294,10 @@ class CGrammarParser ( Parser ):
             return self.getTypedRuleContext(CGrammarParser.CommentContext,0)
 
 
+        def jumps(self):
+            return self.getTypedRuleContext(CGrammarParser.JumpsContext,0)
+
+
         def expr(self):
             return self.getTypedRuleContext(CGrammarParser.ExprContext,0)
 
@@ -1329,53 +1330,58 @@ class CGrammarParser ( Parser ):
         self.enterRecursionRule(localctx, 28, self.RULE_expr, _p)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 175
+            self.state = 180
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,11,self._ctx)
             if la_ == 1:
-                self.state = 162
+                self.state = 166
                 self.assignment_expression()
-                self.state = 163
+                self.state = 167
                 self.match(CGrammarParser.T__20)
                 pass
 
             elif la_ == 2:
-                self.state = 165
+                self.state = 169
                 self.declaration()
-                self.state = 166
+                self.state = 170
                 self.match(CGrammarParser.T__20)
                 pass
 
             elif la_ == 3:
-                self.state = 168
+                self.state = 172
                 self.conditional_statement()
                 pass
 
             elif la_ == 4:
-                self.state = 169
+                self.state = 173
                 self.loops()
                 pass
 
             elif la_ == 5:
-                self.state = 170
+                self.state = 174
                 self.scope()
                 pass
 
             elif la_ == 6:
-                self.state = 171
+                self.state = 175
                 self.printf()
-                self.state = 172
+                self.state = 176
                 self.match(CGrammarParser.T__20)
                 pass
 
             elif la_ == 7:
-                self.state = 174
+                self.state = 178
                 self.comment()
+                pass
+
+            elif la_ == 8:
+                self.state = 179
+                self.jumps()
                 pass
 
 
             self._ctx.stop = self._input.LT(-1)
-            self.state = 181
+            self.state = 186
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,12,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -1385,13 +1391,13 @@ class CGrammarParser ( Parser ):
                     _prevctx = localctx
                     localctx = CGrammarParser.ExprContext(self, _parentctx, _parentState)
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                    self.state = 177
-                    if not self.precpred(self._ctx, 2):
+                    self.state = 182
+                    if not self.precpred(self._ctx, 3):
                         from antlr4.error.Errors import FailedPredicateException
-                        raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
-                    self.state = 178
+                        raise FailedPredicateException(self, "self.precpred(self._ctx, 3)")
+                    self.state = 183
                     self.comment() 
-                self.state = 183
+                self.state = 188
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,12,self._ctx)
 
@@ -1404,6 +1410,66 @@ class CGrammarParser ( Parser ):
         return localctx
 
 
+    class Expr_loopContext(ParserRuleContext):
+        __slots__ = 'parser'
+
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
+            self.parser = parser
+
+        def expr(self, i:int=None):
+            if i is None:
+                return self.getTypedRuleContexts(CGrammarParser.ExprContext)
+            else:
+                return self.getTypedRuleContext(CGrammarParser.ExprContext,i)
+
+
+        def getRuleIndex(self):
+            return CGrammarParser.RULE_expr_loop
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterExpr_loop" ):
+                listener.enterExpr_loop(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitExpr_loop" ):
+                listener.exitExpr_loop(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_loop" ):
+                return visitor.visitExpr_loop(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+
+
+    def expr_loop(self):
+
+        localctx = CGrammarParser.Expr_loopContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 30, self.RULE_expr_loop)
+        self._la = 0 # Token type
+        try:
+            self.enterOuterAlt(localctx, 1)
+            self.state = 192
+            self._errHandler.sync(self)
+            _la = self._input.LA(1)
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2198968729918) != 0):
+                self.state = 189
+                self.expr(0)
+                self.state = 194
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
+
+        except RecognitionException as re:
+            localctx.exception = re
+            self._errHandler.reportError(self, re)
+            self._errHandler.recover(self, re)
+        finally:
+            self.exitRule()
+        return localctx
+
+
     class Conditional_statementContext(ParserRuleContext):
         __slots__ = 'parser'
 
@@ -1411,18 +1477,18 @@ class CGrammarParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
             self.condition = None # Assignment_expressionContext
-            self.ifbody = None # ExprContext
-            self.elsebody = None # ExprContext
+            self.ifbody = None # Expr_loopContext
+            self.elsebody = None # Expr_loopContext
 
         def assignment_expression(self):
             return self.getTypedRuleContext(CGrammarParser.Assignment_expressionContext,0)
 
 
-        def expr(self, i:int=None):
+        def expr_loop(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(CGrammarParser.ExprContext)
+                return self.getTypedRuleContexts(CGrammarParser.Expr_loopContext)
             else:
-                return self.getTypedRuleContext(CGrammarParser.ExprContext,i)
+                return self.getTypedRuleContext(CGrammarParser.Expr_loopContext,i)
 
 
         def getRuleIndex(self):
@@ -1448,77 +1514,52 @@ class CGrammarParser ( Parser ):
     def conditional_statement(self):
 
         localctx = CGrammarParser.Conditional_statementContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 30, self.RULE_conditional_statement)
-        self._la = 0 # Token type
+        self.enterRule(localctx, 32, self.RULE_conditional_statement)
         try:
-            self.state = 219
+            self.state = 215
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,16,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,14,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 184
-                self.match(CGrammarParser.T__21)
-                self.state = 185
-                self.match(CGrammarParser.T__7)
-                self.state = 186
-                localctx.condition = self.assignment_expression()
-                self.state = 187
-                self.match(CGrammarParser.T__8)
-                self.state = 188
-                self.match(CGrammarParser.T__22)
-                self.state = 192
-                self._errHandler.sync(self)
-                _la = self._input.LA(1)
-                while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2198968729918) != 0):
-                    self.state = 189
-                    localctx.ifbody = self.expr(0)
-                    self.state = 194
-                    self._errHandler.sync(self)
-                    _la = self._input.LA(1)
-
                 self.state = 195
+                self.match(CGrammarParser.T__21)
+                self.state = 196
+                self.match(CGrammarParser.T__7)
+                self.state = 197
+                localctx.condition = self.assignment_expression()
+                self.state = 198
+                self.match(CGrammarParser.T__8)
+                self.state = 199
+                self.match(CGrammarParser.T__22)
+                self.state = 200
+                localctx.ifbody = self.expr_loop()
+                self.state = 201
                 self.match(CGrammarParser.T__23)
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 197
+                self.state = 203
                 self.match(CGrammarParser.T__21)
-                self.state = 198
+                self.state = 204
                 self.match(CGrammarParser.T__7)
-                self.state = 199
-                localctx.condition = self.assignment_expression()
-                self.state = 200
-                self.match(CGrammarParser.T__8)
-                self.state = 201
-                self.match(CGrammarParser.T__22)
                 self.state = 205
-                self._errHandler.sync(self)
-                _la = self._input.LA(1)
-                while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2198968729918) != 0):
-                    self.state = 202
-                    localctx.ifbody = self.expr(0)
-                    self.state = 207
-                    self._errHandler.sync(self)
-                    _la = self._input.LA(1)
-
-                self.state = 208
-                self.match(CGrammarParser.T__23)
-                self.state = 209
-                self.match(CGrammarParser.T__24)
-                self.state = 210
+                localctx.condition = self.assignment_expression()
+                self.state = 206
+                self.match(CGrammarParser.T__8)
+                self.state = 207
                 self.match(CGrammarParser.T__22)
-                self.state = 214
-                self._errHandler.sync(self)
-                _la = self._input.LA(1)
-                while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2198968729918) != 0):
-                    self.state = 211
-                    localctx.elsebody = self.expr(0)
-                    self.state = 216
-                    self._errHandler.sync(self)
-                    _la = self._input.LA(1)
-
-                self.state = 217
+                self.state = 208
+                localctx.ifbody = self.expr_loop()
+                self.state = 209
+                self.match(CGrammarParser.T__23)
+                self.state = 210
+                self.match(CGrammarParser.T__24)
+                self.state = 211
+                self.match(CGrammarParser.T__22)
+                self.state = 212
+                localctx.elsebody = self.expr_loop()
+                self.state = 213
                 self.match(CGrammarParser.T__23)
                 pass
 
@@ -1538,16 +1579,25 @@ class CGrammarParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
+            self.loop = None # Token
+            self.condition = None # Assignment_expressionContext
+            self.body = None # Expr_loopContext
+            self.before = None # DeclarationContext
+            self.after = None # Assignment_expressionContext
 
-        def assignment_expression(self):
-            return self.getTypedRuleContext(CGrammarParser.Assignment_expressionContext,0)
-
-
-        def expr(self, i:int=None):
+        def assignment_expression(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(CGrammarParser.ExprContext)
+                return self.getTypedRuleContexts(CGrammarParser.Assignment_expressionContext)
             else:
-                return self.getTypedRuleContext(CGrammarParser.ExprContext,i)
+                return self.getTypedRuleContext(CGrammarParser.Assignment_expressionContext,i)
+
+
+        def expr_loop(self):
+            return self.getTypedRuleContext(CGrammarParser.Expr_loopContext,0)
+
+
+        def declaration(self):
+            return self.getTypedRuleContext(CGrammarParser.DeclarationContext,0)
 
 
         def getRuleIndex(self):
@@ -1573,82 +1623,121 @@ class CGrammarParser ( Parser ):
     def loops(self):
 
         localctx = CGrammarParser.LoopsContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 32, self.RULE_loops)
+        self.enterRule(localctx, 34, self.RULE_loops)
         self._la = 0 # Token type
         try:
-            self.state = 255
+            self.state = 239
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [26]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 221
-                self.match(CGrammarParser.T__25)
-                self.state = 222
+                self.state = 217
+                localctx.loop = self.match(CGrammarParser.T__25)
+                self.state = 218
                 self.match(CGrammarParser.T__7)
-                self.state = 223
-                self.assignment_expression()
-                self.state = 224
+                self.state = 219
+                localctx.condition = self.assignment_expression()
+                self.state = 220
                 self.match(CGrammarParser.T__8)
-                self.state = 225
+                self.state = 221
                 self.match(CGrammarParser.T__22)
-                self.state = 229
-                self._errHandler.sync(self)
-                _la = self._input.LA(1)
-                while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2198968729918) != 0):
-                    self.state = 226
-                    self.expr(0)
-                    self.state = 231
-                    self._errHandler.sync(self)
-                    _la = self._input.LA(1)
-
-                self.state = 232
+                self.state = 222
+                localctx.body = self.expr_loop()
+                self.state = 223
                 self.match(CGrammarParser.T__23)
                 pass
             elif token in [27]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 234
-                self.match(CGrammarParser.T__26)
-                self.state = 235
+                self.state = 225
+                localctx.loop = self.match(CGrammarParser.T__26)
+                self.state = 226
                 self.match(CGrammarParser.T__7)
-                self.state = 236
-                self.expr(0)
-                self.state = 237
+                self.state = 227
+                localctx.before = self.declaration()
+                self.state = 228
                 self.match(CGrammarParser.T__20)
-                self.state = 238
-                self.expr(0)
-                self.state = 239
+                self.state = 229
+                localctx.condition = self.assignment_expression()
+                self.state = 230
                 self.match(CGrammarParser.T__20)
-                self.state = 240
-                self.expr(0)
-                self.state = 241
-                self.match(CGrammarParser.T__8)
-                self.state = 242
-                self.match(CGrammarParser.T__22)
-                self.state = 246
+                self.state = 232
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2198968729918) != 0):
-                    self.state = 243
-                    self.expr(0)
-                    self.state = 248
-                    self._errHandler.sync(self)
-                    _la = self._input.LA(1)
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & 2061584302398) != 0):
+                    self.state = 231
+                    localctx.after = self.assignment_expression()
 
-                self.state = 249
+
+                self.state = 234
+                self.match(CGrammarParser.T__8)
+                self.state = 235
+                self.match(CGrammarParser.T__22)
+                self.state = 236
+                localctx.body = self.expr_loop()
+                self.state = 237
                 self.match(CGrammarParser.T__23)
                 pass
-            elif token in [28]:
-                self.enterOuterAlt(localctx, 3)
-                self.state = 251
-                self.match(CGrammarParser.T__27)
-                self.state = 252
+            else:
+                raise NoViableAltException(self)
+
+        except RecognitionException as re:
+            localctx.exception = re
+            self._errHandler.reportError(self, re)
+            self._errHandler.recover(self, re)
+        finally:
+            self.exitRule()
+        return localctx
+
+
+    class JumpsContext(ParserRuleContext):
+        __slots__ = 'parser'
+
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
+            self.parser = parser
+            self.jump = None # Token
+
+
+        def getRuleIndex(self):
+            return CGrammarParser.RULE_jumps
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterJumps" ):
+                listener.enterJumps(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitJumps" ):
+                listener.exitJumps(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitJumps" ):
+                return visitor.visitJumps(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+
+
+    def jumps(self):
+
+        localctx = CGrammarParser.JumpsContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 36, self.RULE_jumps)
+        try:
+            self.state = 245
+            self._errHandler.sync(self)
+            token = self._input.LA(1)
+            if token in [28]:
+                self.enterOuterAlt(localctx, 1)
+                self.state = 241
+                localctx.jump = self.match(CGrammarParser.T__27)
+                self.state = 242
                 self.match(CGrammarParser.T__20)
                 pass
             elif token in [29]:
-                self.enterOuterAlt(localctx, 4)
-                self.state = 253
-                self.match(CGrammarParser.T__28)
-                self.state = 254
+                self.enterOuterAlt(localctx, 2)
+                self.state = 243
+                localctx.jump = self.match(CGrammarParser.T__28)
+                self.state = 244
                 self.match(CGrammarParser.T__20)
                 pass
             else:
@@ -1702,23 +1791,23 @@ class CGrammarParser ( Parser ):
     def scope(self):
 
         localctx = CGrammarParser.ScopeContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 34, self.RULE_scope)
+        self.enterRule(localctx, 38, self.RULE_scope)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 257
+            self.state = 247
             localctx.startscope = self.match(CGrammarParser.T__22)
-            self.state = 261
+            self.state = 251
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2198968729918) != 0):
-                self.state = 258
+                self.state = 248
                 self.expr(0)
-                self.state = 263
+                self.state = 253
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
-            self.state = 264
+            self.state = 254
             localctx.endscope = self.match(CGrammarParser.T__23)
         except RecognitionException as re:
             localctx.exception = re
@@ -1768,11 +1857,11 @@ class CGrammarParser ( Parser ):
     def constant(self):
 
         localctx = CGrammarParser.ConstantContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 36, self.RULE_constant)
+        self.enterRule(localctx, 40, self.RULE_constant)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 266
+            self.state = 256
             _la = self._input.LA(1)
             if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 1511828488192) != 0)):
                 self._errHandler.recoverInline(self)
@@ -1826,21 +1915,21 @@ class CGrammarParser ( Parser ):
     def type_(self):
 
         localctx = CGrammarParser.TypeContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 38, self.RULE_type)
+        self.enterRule(localctx, 42, self.RULE_type)
         try:
-            self.state = 272
+            self.state = 262
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [33]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 268
+                self.state = 258
                 self.reserved_word()
-                self.state = 269
+                self.state = 259
                 self.type_specifier()
                 pass
             elif token in [30, 31, 32]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 271
+                self.state = 261
                 self.type_specifier()
                 pass
             else:
@@ -1887,24 +1976,24 @@ class CGrammarParser ( Parser ):
     def type_specifier(self):
 
         localctx = CGrammarParser.Type_specifierContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 40, self.RULE_type_specifier)
+        self.enterRule(localctx, 44, self.RULE_type_specifier)
         try:
-            self.state = 277
+            self.state = 267
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [30]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 274
+                self.state = 264
                 localctx.typ = self.match(CGrammarParser.T__29)
                 pass
             elif token in [31]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 275
+                self.state = 265
                 localctx.typ = self.match(CGrammarParser.T__30)
                 pass
             elif token in [32]:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 276
+                self.state = 266
                 localctx.typ = self.match(CGrammarParser.T__31)
                 pass
             else:
@@ -1950,10 +2039,10 @@ class CGrammarParser ( Parser ):
     def reserved_word(self):
 
         localctx = CGrammarParser.Reserved_wordContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 42, self.RULE_reserved_word)
+        self.enterRule(localctx, 46, self.RULE_reserved_word)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 279
+            self.state = 269
             self.match(CGrammarParser.T__32)
         except RecognitionException as re:
             localctx.exception = re
@@ -2002,19 +2091,19 @@ class CGrammarParser ( Parser ):
     def comment(self):
 
         localctx = CGrammarParser.CommentContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 44, self.RULE_comment)
+        self.enterRule(localctx, 48, self.RULE_comment)
         try:
-            self.state = 283
+            self.state = 273
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [35]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 281
+                self.state = 271
                 localctx.block = self.match(CGrammarParser.BLOCKCOMMENT)
                 pass
             elif token in [36]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 282
+                self.state = 272
                 localctx.sl = self.match(CGrammarParser.SINGLE_LINE_COMMENT)
                 pass
             else:
@@ -2066,28 +2155,28 @@ class CGrammarParser ( Parser ):
     def printf(self):
 
         localctx = CGrammarParser.PrintfContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 46, self.RULE_printf)
+        self.enterRule(localctx, 50, self.RULE_printf)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 285
+            self.state = 275
             self.match(CGrammarParser.T__33)
-            self.state = 286
+            self.state = 276
             self.match(CGrammarParser.T__7)
-            self.state = 289
+            self.state = 279
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [39]:
-                self.state = 287
+                self.state = 277
                 self.match(CGrammarParser.IDENTIFIER)
                 pass
             elif token in [37, 38, 40]:
-                self.state = 288
+                self.state = 278
                 self.constant()
                 pass
             else:
                 raise NoViableAltException(self)
 
-            self.state = 291
+            self.state = 281
             self.match(CGrammarParser.T__8)
         except RecognitionException as re:
             localctx.exception = re
@@ -2145,7 +2234,7 @@ class CGrammarParser ( Parser ):
 
     def expr_sempred(self, localctx:ExprContext, predIndex:int):
             if predIndex == 6:
-                return self.precpred(self._ctx, 2)
+                return self.precpred(self._ctx, 3)
          
 
 

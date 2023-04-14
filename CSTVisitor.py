@@ -166,6 +166,7 @@ class CSTVisitor(CGrammarVisitor):
         return self.visitChildren(ctx)
 
 
+
     def visitDeclaration_specification(self, ctx:CGrammarParser.Declaration_specificationContext):
         print("DeclarationSpecifier")
         decl = Declaration("VariableDeclartion")
@@ -316,16 +317,60 @@ class CSTVisitor(CGrammarVisitor):
             node.elsebody = elsebody
         return node
 
+    def visitExpr_loop(self, ctx:CGrammarParser.Expr_loopContext):
+        print("Looping expressions")
+        loop = ASTNode("Loop")
+        for child in ctx.children:
+            node = self.visit(child)
+            loop.adopt(node)
+        return loop
 
     # Visit a parse tree produced by CGrammarParser#loops.
     def visitLoops(self, ctx:CGrammarParser.LoopsContext):
         print("Loop")
-        node = ASTNode("Loop")
-        for child in ctx.content:
-            childnode = self.visit(child)
-            node.adopt(childnode)
+
+        match ctx.loop.text:
+            case "while":
+                print("This is a while-loop")
+                node = While("Loop")
+                condition = self.visit(ctx.condition)
+                node.condition = condition
+                node.adopt(condition)
+                body = self.visit(ctx.body)
+                scope = Scope("While-Scope")
+                scope.children = body.children
+                node.body = scope
+            case "for":
+                print("This is a for-loop")
+                node = While("Loop")
+                condition = self.visit(ctx.condition)
+                after = self.visit(ctx.after)
+                before = self.visit(ctx.before)
+                node.afterLoop = after
+                node.beforeLoop = before
+                node.condition = condition
+                node.adopt(condition)
+                body = self.visit(ctx.body)
+                scope = Scope("While-Scope")
+                scope.children = body.children
+                node.body = scope
+            case _:
+                print("Not implemented")
         return node
 
+    def visitJumps(self, ctx:CGrammarParser.JumpsContext):
+        print("Jumps")
+        print(ctx.jump)
+        match ctx.jump.text:
+            case "break":
+                print("This is a break")
+                node = Jump("break")
+            case "continue":
+                print("This is a continue")
+                node = Jump("continue")
+            case _:
+                print("Not implemented")
+        return node
 
     # Visit a parse tree produced by CGrammarParser#scope.
     def visitScope(self, ctx:CGrammarParser.ScopeContext):

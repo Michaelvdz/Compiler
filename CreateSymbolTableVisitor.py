@@ -48,6 +48,12 @@ class CreateSymbolTableVisitor(Visitor):
             node = child.accept(self)
         return currentNode
 
+    def VisitWhile(self, currentNode):
+        #print("Scope")
+        for child in currentNode.children:
+            node = child.accept(self)
+        return currentNode
+
     def VisitBinaryOperation(self, currentNode):
         #print("Binary")
         for child in currentNode.children:

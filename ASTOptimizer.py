@@ -487,6 +487,14 @@ class ASTOptimizer(Visitor):
         #print("Constant")
         return currentNode
 
+    def VisitWhile(self, currentNode):
+        print("While")
+        newNode = copy.copy(currentNode)
+        newNode.children = []
+        for child in currentNode.children:
+            node = child.accept(self)
+            newNode.children.append(node)
+        return newNode
     def VisitConditional(self, currentNode):
         print("Conditional")
         newNode = copy.copy(currentNode)
