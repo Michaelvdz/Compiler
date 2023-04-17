@@ -24,51 +24,195 @@ class AST2LLVMVisitor(Visitor):
         self.llvm = llvm
         self.symbolTable = symbolTable
         self.currentTable = symbolTable
+        self.allocateRegisters(self.currentTable)
+        self.currentTable.print()
+
+    def allocateRegister(self, table, name, var):
+        type = var.type
+        attr = var.attr
+        match type:
+            case "int":
+                self.llvm += "%" + str(self.instr) + " = alloca i32, align 4\n"
+                table.insertRegister(name, str(self.instr))
+                self.instr += 1
+            case "float":
+                self.llvm += "%" + str(self.instr) + " = alloca float, align 4\n"
+                table.insertRegister(name, str(self.instr))
+                self.instr += 1
+            case "char":
+                self.llvm += "%" + str(self.instr) + " = alloca i8, align 1\n"
+                table.insertRegister(name, str(self.instr))
+                self.instr += 1
+            case "int*":
+                self.llvm += "%" + str(self.instr) + " = alloca i32*, align 8\n"
+                table.insertRegister(name, str(self.instr))
+                self.instr += 1
+            case "float*":
+                self.llvm += "%" + str(self.instr) + " = alloca float*, align 8\n"
+                table.insertRegister(name, str(self.instr))
+                self.instr += 1
+            case "char*":
+                self.llvm += "%" + str(self.instr) + " = alloca i8*, align 8\n"
+                table.insertRegister(name, str(self.instr))
+                self.instr += 1
+            case other:
+                x = "test"
+                #print("Type not implemented or literal")
+
+    def allocateRegisters(self, table):
+        print("Allocating registers:")
+        for key, value in table.vars.items():
+            print(key)
+            print(value)
+            self.allocateRegister(table, key, value)
+
+        for child in table.children:
+            self.allocateRegisters(child)
+
 
     def VisitASTNode(self, currentNode):
         print("Node")
-        print(currentNode.value)
-        if self.symbolTable.lookup(currentNode.value):
-            return (str(self.symbolTable.lookup(currentNode.value).register), str(self.symbolTable.lookup(currentNode.value).type), "reg")
+        if self.currentTable.lookup(currentNode.value):
+            return (str(self.currentTable.lookup(currentNode.value).register), str(self.currentTable.lookup(currentNode.value).type), "reg")
         else:
-            print("DOETEM DEES OOIT")
             for child in currentNode.children:
                 node = child.accept(self)
             return currentNode
 
     def VisitConditional(self, currentNode):
         print("Conditional")
-        for child in currentNode.children:
-            node = child.accept(self)
+        # Get the usefull nodes from AST
+        cond = currentNode.condition
+        ifbody = currentNode.ifbody
+        elsebody = currentNode.elsebody
+
+        # Visit condition to get code
+        reg = cond.accept(self)
+
+        # Assign a label to the if body
+        iflabel = self.instr
+        self.instr += 1
+
+
+
+
+
+        # If else body then add the label to the break instruction
+        if elsebody:
+            self.llvm += "br i1 %" + str(reg[0]) + ", label %" + str(iflabel) + ", label %" + "ELSE" + str(id(currentNode)) + "\n"
+        else:
+            self.llvm += "br i1 %" + str(reg[0]) + ", label %" + str(iflabel) + ", label %" + "CONTINUE" + str(id(currentNode)) + "\n"
+
+        # Add the label of the if body and visit the ifbody
+        self.llvm += "\n"
+        self.llvm += str(iflabel) + ":\n"
+        ifbody.accept(self)
+        self.llvm += "br label %" + "CONTINUE" + str(id(currentNode))  + "\n"
+
+        # If else body then add the label and visit the else body
+        if elsebody:
+            # If it has else, label else body
+            elselabel = self.instr
+            self.instr += 1
+            self.llvm = self.llvm.replace("ELSE" + str(id(currentNode)), str(elselabel))
+            self.llvm += "\n"
+            self.llvm += str(elselabel) + ":\n"
+            elsebody.accept(self)
+            self.llvm += "br label %" + "CONTINUE" + str(id(currentNode)) + "\n"
+
+        # Add label to next instructions
+        # Label the next instruction, so we can jump when ending if or else
+        continuelabel = self.instr
+        self.instr += 1
+        self.llvm = self.llvm.replace("CONTINUE" + str(id(currentNode)), str(continuelabel))
+        self.llvm += "\n"
+        self.llvm += str(continuelabel) + ":\n"
         return currentNode
+
     def VisitScope(self, currentNode):
         #print("Scope")
-        print("Opening scope")
+        print("Opening scope " + currentNode.value )
+
+        # Open a new scope by selecting the right symbol table
         parent = self.currentTable
         self.currentTable = self.currentTable.children[0]
-        self.currentTable.print()
+        print("-----------------------------------")
+        print(self.currentTable.name)
+        print(currentNode.children[0].value)
+        #self.currentTable.print()
+
+        # Visit scope body
         for child in currentNode.children:
             node = child.accept(self)
+
+        # After visiting scope, delete the symbol table
         self.currentTable.parent.children.remove(self.currentTable)
         self.currentTable = parent
         return currentNode
 
     def VisitWhile(self, currentNode):
-        #print("Scope")
+        print("While")
+        # Open a new scope by selecting the right symbol table
+        parent = self.currentTable
+        self.currentTable = self.currentTable.children[0]
+
+        # Get corresponding nodes from AST
+        condition = currentNode.condition
+        body = currentNode.body
+        beforeloop = currentNode.beforeLoop
+        afterloop = currentNode.afterLoop
+
+        # Label condition
+        conditionlabel = self.instr
+        self.instr +=1
+
+
+
+        self.llvm += "br label %" + str(conditionlabel) + "\n"
+
+        # Condition part
+        self.llvm += "\n"
+        self.llvm += str(conditionlabel) + ":\n"
+        reg = condition.accept(self)
+        # Label body
+        bodylabel = self.instr
+        self.instr += 1
+        self.llvm += "br i1 %" + str(reg[0]) + ", label %" + str(bodylabel) + " , label %" + str(id(currentNode)) + "\n"
+
+        # Body part
+        self.llvm += "\n"
+        self.llvm += str(bodylabel) + ":\n"
+        body.accept(self)
+        # Label continue
+        continuelabel = self.instr
+        self.instr += 1
+        self.llvm += "br label %" + str(conditionlabel) + "\n"
+
+        # Continue part
+        self.llvm += "\n"
+        self.llvm += str(continuelabel) + ":\n"
+        self.llvm = self.llvm.replace(str(id(currentNode)), str(continuelabel))
+
+
+        '''
         for child in currentNode.children:
             node = child.accept(self)
+        '''
+        # After visiting scope, delete the symbol table
+        self.currentTable.parent.children.remove(self.currentTable)
+        self.currentTable = parent
         return currentNode
 
     def VisitVariable(self, currentNode):
         print("Variable")
+        # For lvalue's look for the register
         if self.lvalue:
-            print("This is an lvalue")
-            if self.symbolTable.lookup(currentNode.value):
-                return (str(self.symbolTable.lookup(currentNode.value).register), str(self.symbolTable.lookup(currentNode.value).type), "reg")
+            if self.currentTable.lookup(currentNode.value):
+                return (str(self.currentTable.lookup(currentNode.value).register), str(self.currentTable.lookup(currentNode.value).type), "reg")
             else:
                 return currentNode
         else:
-            symbol = self.symbolTable.lookup(currentNode.value)
+            symbol = self.currentTable.lookup(currentNode.value)
             type = symbol.type
             if type == "int":
                 self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(
@@ -91,12 +235,9 @@ class AST2LLVMVisitor(Visitor):
         children = []
         self.lvalue = False
 
-
         for child in currentNode.children:
             if isinstance(child, Variable):
-                print("No constant")
-                print(child.value)
-                newType = self.symbolTable.lookup(child.value).type
+                newType = self.currentTable.lookup(child.value).type
                 if BinType is None:
                     BinType = newType
                 elif newType == "float":
@@ -106,22 +247,17 @@ class AST2LLVMVisitor(Visitor):
             children.append(child)
 
         left = currentNode.children[0].accept(self)
-        print("left node has reg or value")
-        print(left)
         right = currentNode.children[1].accept(self)
-        print("Right node has reg or value")
-        print(right)
-        print(isinstance(right, Variable))
         lefttype = ""
         righttype = ""
         if not isinstance(currentNode.children[0], Constant):
-            var0 = self.symbolTable.lookup(currentNode.children[0].value)
+            var0 = self.currentTable.lookup(currentNode.children[0].value)
             lefttype = left[1]
             leftvalue = "%" + left[0]
         else:
             leftvalue = left[0]
         if not isinstance(currentNode.children[1], Constant):
-            var1 = self.symbolTable.lookup(currentNode.children[1].value)
+            var1 = self.currentTable.lookup(currentNode.children[1].value)
             righttype = right[1]
             rightvalue = "%" + right[0]
         else:
@@ -129,10 +265,6 @@ class AST2LLVMVisitor(Visitor):
         if lefttype == "float" or righttype == "float":
             BinType = "float"
 
-        print("BinType------------------------------------")
-        print(BinType)
-        print(lefttype)
-        print(righttype)
 
         if BinType == "float":
             if lefttype == "int":
@@ -180,8 +312,8 @@ class AST2LLVMVisitor(Visitor):
                 elif BinType == "float":
                     self.llvm += "%" + str(self.instr) + " = fcmp oeq float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                 self.instr += 1
-                self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
-                self.instr += 1
+                #self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
+                #self.instr += 1
                 BinType = "int"
             case "<":
                 if BinType == "int":
@@ -189,8 +321,8 @@ class AST2LLVMVisitor(Visitor):
                 elif BinType == "float":
                     self.llvm += "%" + str(self.instr) + " = fcmp olt float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                 self.instr += 1
-                self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
-                self.instr += 1
+                #self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
+                #self.instr += 1
                 BinType = "int"
             case "<=":
                 if BinType == "int":
@@ -198,8 +330,8 @@ class AST2LLVMVisitor(Visitor):
                 elif BinType == "float":
                     self.llvm += "%" + str(self.instr) + " = fcmp ole float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                 self.instr += 1
-                self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
-                self.instr += 1
+                #self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
+                #self.instr += 1
                 BinType = "int"
             case ">":
                 if BinType == "int":
@@ -207,8 +339,8 @@ class AST2LLVMVisitor(Visitor):
                 elif BinType == "float":
                     self.llvm += "%" + str(self.instr) + " = fcmp ogt float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                 self.instr += 1
-                self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
-                self.instr += 1
+                #self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
+                #self.instr += 1
                 BinType = "int"
             case ">=":
                 if BinType == "int":
@@ -216,8 +348,8 @@ class AST2LLVMVisitor(Visitor):
                 elif BinType == "float":
                     self.llvm += "%" + str(self.instr) + " = fcmp oge float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                 self.instr += 1
-                self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
-                self.instr += 1
+                #self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
+                #self.instr += 1
                 BinType = "int"
             case "!=":
                 if BinType == "int":
@@ -225,8 +357,8 @@ class AST2LLVMVisitor(Visitor):
                 elif BinType == "float":
                     self.llvm += "%" + str(self.instr) + " = fcmp one float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                 self.instr += 1
-                self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
-                self.instr += 1
+                #self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
+                #self.instr += 1
                 BinType = "int"
 
         return (str(self.instr-1), BinType, "reg")
@@ -241,8 +373,6 @@ class AST2LLVMVisitor(Visitor):
                 #node = currentNode.children[0].accept(self)
                 for child in currentNode.children:
                     node = child.accept(self)
-                    print(node)
-                    print(type(node))
                     if isinstance(node, ASTNode):
                         match self.symbolTable.lookup(node.value).type:
                             case "int*":
@@ -262,7 +392,6 @@ class AST2LLVMVisitor(Visitor):
                     else:
                         #type = self.symbolTable.lookupByRegister(node).type
                         var = child.value
-                        print(node[0])
                         match self.symbolTable.lookupByRegister(node[0]).type:
                             case "int*":
                                 self.llvm += "%" + str(self.instr) + " = load i32*, i32** %" + str(self.symbolTable.lookup(var).register) + ", align 8\n"
@@ -296,7 +425,7 @@ class AST2LLVMVisitor(Visitor):
         return currentNode
 
     def VisitConstant(self, currentNode):
-        print("Constant----")
+        print("Constant")
         #self.llvm+= " "+currentNode.value
         return (currentNode.value, "", "value")
 
@@ -305,55 +434,52 @@ class AST2LLVMVisitor(Visitor):
         var = currentNode.var
         type = currentNode.type
         attr = currentNode.attr
+        '''
         match type:
             case "int":
                 self.llvm += "%" + str(self.instr) + " = alloca i32, align 4\n"
-                print("Inserting register")
-                print("in table: " + self.currentTable.name)
-                print(var)
-
+                print("Current table:")
+                print(self.currentTable.name)
                 self.currentTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case "float":
                 self.llvm += "%" + str(self.instr) + " = alloca float, align 4\n"
-                self.symbolTable.insertRegister(var, str(self.instr))
+                self.currentTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case "char":
                 self.llvm += "%" + str(self.instr) + " = alloca i8, align 1\n"
-                self.symbolTable.insertRegister(var, str(self.instr))
+                self.currentTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case "int*":
                 self.llvm += "%" + str(self.instr) + " = alloca i32*, align 8\n"
-                self.symbolTable.insertRegister(var, str(self.instr))
+                self.currentTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case "float*":
                 self.llvm += "%" + str(self.instr) + " = alloca float*, align 8\n"
-                self.symbolTable.insertRegister(var, str(self.instr))
+                self.currentTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case "char*":
                 self.llvm += "%" + str(self.instr) + " = alloca i8*, align 8\n"
-                self.symbolTable.insertRegister(var, str(self.instr))
+                self.currentTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case other:
                 x = "test"
                 #print("Type not implemented or literal")
-
+            '''
         return currentNode
 
     def VisitAssignment(self, currentNode):
         #print("Assignment2LLVM")
+
         # Test if the left value is a declaration
         if isinstance(currentNode.lvalue, Declaration):
             currentNode.lvalue.accept(self)
             value = currentNode.rvalue.accept(self)
             self.lvalue = True
-            print(value)
-            self.currentTable.print()
             ltype = self.currentTable.lookup(currentNode.lvalue.var).type
+            print(ltype)
+            print(value)
             if value[2] is not "reg":
-                print("test")
-                print(ltype)
-                print(value)
                 if ltype == "int":
                     try:
                         value = int(value[0])
@@ -366,48 +492,41 @@ class AST2LLVMVisitor(Visitor):
                         value = float(value[0])
                     except ValueError:
                         print("failiure")
-                    self.llvm += "store float " + str(value) + ", float* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                    self.llvm += "store float " + str(value) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                 elif ltype == "char":
                     value = value[0].replace("'","")
-                    self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
+                    self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
                 elif ltype == "int*":
-                    self.llvm += "store i32* %" + str(value) + ", i32** %" + self.symbolTable.lookup(
+                    self.llvm += "store i32* %" + str(value) + ", i32** %" + self.currentTable.lookup(
                         currentNode.lvalue.var).register + ", align 8\n"
                 elif ltype == "float*":
-                    self.llvm += "store float* %" + str(value) + ", float** %" + self.symbolTable.lookup(
+                    self.llvm += "store float* %" + str(value) + ", float** %" + self.currentTable.lookup(
                         currentNode.lvalue.var).register + ", align 8\n"
                 elif ltype == "char*":
-                    self.llvm += "store i8* %" + str(value) + ", i8** %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 8\n"
+                    self.llvm += "store i8* %" + str(value) + ", i8** %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 8\n"
             else:
                 if ltype == "int":
                     if value[1] == "float":
                         self.llvm += "%" + str(self.instr) + " = fptosi float %" + str(value[0]) + " to i32\n"
                         self.instr += 1
-                    self.llvm += "store i32 %" + str(self.instr - 1) + ", i32* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                    self.llvm += "store i32 %" + str(self.instr - 1) + ", i32* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                 elif ltype == "float":
                     if value[1] == "int":
                         self.llvm += "%" + str(self.instr) + " = sitofp i32 %" + str(value[0]) + " to float\n"
                         self.instr += 1
-                    self.llvm += "store float %" + str(self.instr - 1) + ", float* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                    self.llvm += "store float %" + str(self.instr - 1) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                 elif ltype == "char":
-                    self.llvm += "store i8 %" + str(self.instr - 1) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
+                    self.llvm += "store i8 %" + str(self.instr - 1) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
                 else:
                     print("test")
 
         # The lvalue is no declaration but a variable
         elif isinstance(currentNode.lvalue, Variable):
-            print("No decl")
             value = currentNode.rvalue.accept(self)
             self.lvalue = True
-            print("rvalue:")
-            print(value)
             reg = currentNode.lvalue.accept(self)
-            print("lvalue reg:")
-            print(reg)
             #ltype = self.symbolTable.lookup(currentNode.lvalue.children[0].value).type
             ltype = self.currentTable.lookup(currentNode.lvalue.value).type
-            print("ltype:")
-            print(ltype)
             #self.instr += 1
             if ltype == "int*":
                 self.llvm += "store i32* %" + str(value[0]) + ", i32** %" + str(reg) + ", align 8\n"
@@ -428,31 +547,25 @@ class AST2LLVMVisitor(Visitor):
                         value = float(value[0])
                     except ValueError:
                         print("failiure")
-                    self.llvm += "store float " + str(value) + ", float* %" + self.symbolTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
+                    self.llvm += "store float " + str(value) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
                 elif ltype == "char":
                     value = value.replace("'","")
-                    self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.symbolTable.lookup(currentNode.lvalue.value).register + ", align 1\n"
+                    self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 1\n"
             else:
                 if ltype == "int":
-                    self.llvm += "store i32 " + str(value[0]) + ", i32* %" + reg[0] + ", align 4\n"
+                    self.llvm += "store i32 %" + str(value[0]) + ", i32* %" + reg[0] + ", align 4\n"
                 elif ltype == "float":
-                    self.llvm += "store float " + str(value[0]) + ", float* %" + reg[0] + ", align 4\n"
+                    self.llvm += "store float %" + str(value[0]) + ", float* %" + reg[0] + ", align 4\n"
                 elif ltype == "char":
                     value = value.replace("'","")
                     self.llvm += "store i8 " + str(ord(value[0])) + ", i8* %" + reg[0] + ", align 1\n"
         else:
             # In this case the lvalue is a pointer dereference
-            print("Not yet implemented")
             value = currentNode.rvalue.accept(self)
             self.lvalue = True
-            print("value:")
-            print(value)
             reg = currentNode.lvalue.accept(self)
-            print("reg:")
-            print(reg)
             var = self.symbolTable.lookupByRegister(reg)
             type = var.type
-            print(type)
             if type == "int*":
                 try:
                     value = int(value[0])
@@ -491,17 +604,13 @@ class AST2LLVMVisitor(Visitor):
         return currentNode
 
     def VisitPrintf(self, currentNode):
-        print("Printffff")
+        print("Printf")
         node = currentNode.children[0].accept(self)
-        print("Printing:")
-        print(node)
         #symbol = self.symbolTable.lookup(node.value)
         symbol = 0
         if not isinstance(node, ASTNode):
             symbol = self.currentTable.lookupByRegister(node[0])
 
-        print("Symbol:")
-        print(symbol)
         if symbol:
             if not self.printing:
                 self.llvm = "declare i32 @printf(i8* noundef, ...)\n" + self.llvm
@@ -547,8 +656,6 @@ class AST2LLVMVisitor(Visitor):
                                  "@.char, i64 0, i64 0), i32 noundef %" + str(int(self.instr) - 1) + ")\n"
                     self.instr += 1
         else:
-            print("test:")
-            print(node)
             if '\'' not in node.value:
                 try:
                     value = int(node.value)

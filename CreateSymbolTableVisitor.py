@@ -85,8 +85,12 @@ class CreateSymbolTableVisitor(Visitor):
         print(newtable.name)
         print("Table with #children " + str(len(newtable.children)))
         self.table.push(newtable)
+        '''
         for child in currentNode.children:
             node = child.accept(self)
+        '''
+        currentNode.condition.accept(self)
+        currentNode.body.accept(self)
         self.table.pop()
         return currentNode
 

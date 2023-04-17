@@ -94,7 +94,7 @@ class CSTVisitor(CGrammarVisitor):
         else:
             if ctx.iden:
                 #print("Id")
-                var = ASTNode(ctx.getText())
+                var = Variable(ctx.getText())
                 return var
         return self.visitChildren(ctx)
 
@@ -153,7 +153,6 @@ class CSTVisitor(CGrammarVisitor):
             logOp = BinaryOperation(ctx.op.text)
             for child in ctx.children:
                 node = self.visit(child)
-
                 if isinstance(node, ASTNode):
                     #node.print()
                     logOp.adopt(node)
@@ -334,7 +333,7 @@ class CSTVisitor(CGrammarVisitor):
                 node = While("Loop")
                 condition = self.visit(ctx.condition)
                 node.condition = condition
-                node.adopt(condition)
+                #node.adopt(condition)
                 body = self.visit(ctx.body)
                 scope = Scope("While-Scope")
                 scope.children = body.children

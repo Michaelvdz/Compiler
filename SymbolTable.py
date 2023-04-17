@@ -78,12 +78,10 @@ class SymbolTable:
     def insertRegister(self, name, register):
         print("Zoeken naar var: " + name + "in scope: " + self.name)
         if self.vars.get(name):
-            print("Hij vindt de var")
             self.vars[name].register = register
         else:
-            print("Hij vindt de var niet")
+            print("Hij vindt de var niet, kijk bij parent")
             if self.parent:
-                print("Zoek bij parent")
                 self.parent.insertRegister(name, register)
 
 
@@ -91,19 +89,14 @@ class SymbolTable:
     def lookup(self, name):
         var = self.vars.get(name)
         if var:
-            print("Var found, return it")
             return var
         else:
-            print("Var not found, look at parent")
-            print(self.parent)
             if self.parent:
-                print("Looking at parent")
                 return self.parent.lookup(name)
         print("Nothing found")
         return 0
 
     def lookupByRegister(self, register):
-        print("Searching vor regs")
         for key, value in self.vars.items():
             if self.vars[key].register == register:
                 return self.vars[key]
