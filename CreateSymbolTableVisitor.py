@@ -133,6 +133,10 @@ class CreateSymbolTableVisitor(Visitor):
         """
         return currentNode
 
+    def VisitJump(self, currentNode):
+        #print("Jump")
+        return currentNode
+
     def VisitDeclaration(self, currentNode):
         #print("Declaration")
 

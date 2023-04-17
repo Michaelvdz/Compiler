@@ -487,6 +487,10 @@ class ASTOptimizer(Visitor):
         #print("Constant")
         return currentNode
 
+    def VisitJump(self, currentNode):
+        print("---------------------------------------Jump")
+        return currentNode
+
     def VisitWhile(self, currentNode):
         print("Loop")
         newNode = copy.copy(currentNode)

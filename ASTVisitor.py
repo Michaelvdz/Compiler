@@ -100,6 +100,12 @@ class ASTVisitor(Visitor):
         #print("Ending Constant")
         return currentNode
 
+    def VisitJump(self, currentNode):
+        #print("Beginning Jump")
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        #print("Ending Jump")
+        return currentNode
+
     def VisitVariable(self, currentNode):
         #print("Beginning Constant")
         self.ast.node(str(id(currentNode)), currentNode.value)

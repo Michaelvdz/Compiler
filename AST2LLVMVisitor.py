@@ -18,6 +18,7 @@ class AST2LLVMVisitor(Visitor):
     printing = False
     lvalue = True
     currentTable = 0
+    currentLoop = []
 
     def __init__(self, llvm="", symbolTable=SymbolTable()):
         #print("----------------Converting AST 2 LLVM IR----------------")
@@ -25,6 +26,7 @@ class AST2LLVMVisitor(Visitor):
         self.symbolTable = symbolTable
         self.currentTable = symbolTable
         self.allocateRegisters(self.currentTable)
+        self.currentLoop = []
         self.currentTable.print()
 
     def allocateRegister(self, table, name, var):
@@ -79,6 +81,21 @@ class AST2LLVMVisitor(Visitor):
                 node = child.accept(self)
             return currentNode
 
+    def VisitJump(self, currentNode):
+        print("Jump")
+        print(currentNode.value)
+        if currentNode.value == "break":
+            currentid = self.currentLoop.pop()
+            self.llvm += "br label %" + "CONTINUE" + currentid[0] + "            ;break\n"
+            self.llvm += "BREAK"
+            self.currentLoop.append((currentid[0], "break"))
+        else:
+            currentid = self.currentLoop.pop()
+            self.llvm += "br label %" + "CONDITION" + currentid[0] + "            ;continue\n"
+            self.llvm += "NEXTLOOP"
+            self.currentLoop.append((currentid[0], "continue"))
+        return currentNode
+
     def VisitConditional(self, currentNode):
         print("Conditional")
         # Get the usefull nodes from AST
@@ -93,10 +110,6 @@ class AST2LLVMVisitor(Visitor):
         iflabel = self.instr
         self.instr += 1
 
-
-
-
-
         # If else body then add the label to the break instruction
         if elsebody:
             self.llvm += "br i1 %" + str(reg[0]) + ", label %" + str(iflabel) + ", label %" + "ELSE" + str(id(currentNode)) + "\n"
@@ -107,7 +120,12 @@ class AST2LLVMVisitor(Visitor):
         self.llvm += "\n"
         self.llvm += str(iflabel) + ":\n"
         ifbody.accept(self)
-        self.llvm += "br label %" + "CONTINUE" + str(id(currentNode))  + "\n"
+        if "BREAK" in self.llvm:
+            self.llvm = self.llvm[:(self.llvm.rfind("BREAK"))]
+        elif "NEXTLOOP" in self.llvm:
+            self.llvm = self.llvm[:(self.llvm.rfind("NEXTLOOP"))]
+        else:
+            self.llvm += "br label %" + "CONTINUE" + str(id(currentNode))  + "\n"
 
         # If else body then add the label and visit the else body
         if elsebody:
@@ -118,7 +136,12 @@ class AST2LLVMVisitor(Visitor):
             self.llvm += "\n"
             self.llvm += str(elselabel) + ":\n"
             elsebody.accept(self)
-            self.llvm += "br label %" + "CONTINUE" + str(id(currentNode)) + "\n"
+            if "BREAK" in self.llvm:
+                self.llvm = self.llvm[:(self.llvm.rfind("BREAK"))]
+            elif "NEXTLOOP" in self.llvm:
+                self.llvm = self.llvm[:(self.llvm.rfind("NEXTLOOP"))]
+            else:
+                self.llvm += "br label %" + "CONTINUE" + str(id(currentNode)) + "\n"
 
         # Add label to next instructions
         # Label the next instruction, so we can jump when ending if or else
@@ -152,6 +175,8 @@ class AST2LLVMVisitor(Visitor):
 
     def VisitWhile(self, currentNode):
         print("While")
+        self.currentLoop.append((str(id(currentNode)), ""))
+
         # Open a new scope by selecting the right symbol table
         parent = self.currentTable
         self.currentTable = self.currentTable.children[0]
@@ -168,8 +193,6 @@ class AST2LLVMVisitor(Visitor):
         conditionlabel = self.instr
         self.instr +=1
 
-
-
         self.llvm += "br label %" + str(conditionlabel) + "\n"
 
         # Condition part
@@ -185,6 +208,9 @@ class AST2LLVMVisitor(Visitor):
         self.llvm += "\n"
         self.llvm += str(bodylabel) + ":\n"
         body.accept(self)
+        if "BREAK" in self.llvm:
+            self.llvm = self.llvm[:(self.llvm.rfind("BREAK"))]
+
 
         # After loop
         if afterloop:
@@ -195,10 +221,8 @@ class AST2LLVMVisitor(Visitor):
             self.llvm += "\n"
             self.llvm += str(afterlabel) + ":\n"
             afterloop.accept(self)
-        else:
-            self.llvm += "br label %" + "CONTINUE" + str(id(currentNode)) + "\n"
 
-
+            #self.llvm += "br label %" + "CONTINUE" + str(id(currentNode)) + "\n"
 
         # Label continue
         continuelabel = self.instr
@@ -208,12 +232,9 @@ class AST2LLVMVisitor(Visitor):
         self.llvm += "\n"
         self.llvm += str(continuelabel) + ":\n"
         self.llvm = self.llvm.replace("CONTINUE" + str(id(currentNode)), str(continuelabel))
+        self.llvm = self.llvm.replace("CONDITION" + str(id(currentNode)), str(conditionlabel))
 
-
-        '''
-        for child in currentNode.children:
-            node = child.accept(self)
-        '''
+        self.currentLoop.append(str(id(currentNode)))
         # After visiting scope, delete the symbol table
         self.currentTable.parent.children.remove(self.currentTable)
         self.currentTable = parent
@@ -342,7 +363,7 @@ class AST2LLVMVisitor(Visitor):
                 BinType = "int"
             case "<=":
                 if BinType == "int":
-                    self.llvm += "%" + str(self.instr) + " = icmp lte i32 " + str(leftvalue) + ", " + str(rightvalue) + "\n"
+                    self.llvm += "%" + str(self.instr) + " = icmp sle i32 " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                 elif BinType == "float":
                     self.llvm += "%" + str(self.instr) + " = fcmp ole float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                 self.instr += 1
@@ -360,7 +381,7 @@ class AST2LLVMVisitor(Visitor):
                 BinType = "int"
             case ">=":
                 if BinType == "int":
-                    self.llvm += "%" + str(self.instr) + " = icmp sgt i32 " + str(leftvalue) + ", " + str(rightvalue) + "\n"
+                    self.llvm += "%" + str(self.instr) + " = icmp sge i32 " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                 elif BinType == "float":
                     self.llvm += "%" + str(self.instr) + " = fcmp oge float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                 self.instr += 1
@@ -433,6 +454,18 @@ class AST2LLVMVisitor(Visitor):
                                 self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(var.register) + ", align 4\n"
                                 self.instr += 1
                                 self.llvm += "%" + str(self.instr) + " = add nsw i32 %" + str(self.instr-1) + ", 1\n"
+                                self.instr += 1
+                                self.llvm += "store i32 %" + str(self.instr-1) + ", i32* %" + str(var.register) + ", align 4\n"
+                                return var.register
+            case "--":
+                for child in currentNode.children:
+                    if isinstance(child, Variable):
+                        var = self.currentTable.lookup(child.value)
+                        match var.type:
+                            case "int":
+                                self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(var.register) + ", align 4\n"
+                                self.instr += 1
+                                self.llvm += "%" + str(self.instr) + " = sub nsw i32 %" + str(self.instr-1) + ", 1\n"
                                 self.instr += 1
                                 self.llvm += "store i32 %" + str(self.instr-1) + ", i32* %" + str(var.register) + ", align 4\n"
                                 return var.register

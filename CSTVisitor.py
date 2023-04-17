@@ -367,9 +367,11 @@ class CSTVisitor(CGrammarVisitor):
             case "break":
                 print("This is a break")
                 node = Jump("break")
+                return node
             case "continue":
                 print("This is a continue")
                 node = Jump("continue")
+                return node
             case _:
                 print("Not implemented")
         return node

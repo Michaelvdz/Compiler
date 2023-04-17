@@ -210,7 +210,7 @@ class Jump:
             self.children.append(node)
 
     def accept(self, visitor: Visitor):
-        value = visitor.VisitASTNode(self)
+        value = visitor.VisitJump(self)
         return value
 
     def acceptWithNoOptimization(self, visitor: Visitor):
