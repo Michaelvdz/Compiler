@@ -89,6 +89,11 @@ class CreateSymbolTableVisitor(Visitor):
         for child in currentNode.children:
             node = child.accept(self)
         '''
+        if currentNode.beforeLoop:
+            currentNode.beforeLoop.accept(self)
+        if currentNode.afterLoop:
+            currentNode.afterLoop.accept(self)
+
         currentNode.condition.accept(self)
         currentNode.body.accept(self)
         self.table.pop()

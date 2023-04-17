@@ -161,6 +161,8 @@ class AST2LLVMVisitor(Visitor):
         body = currentNode.body
         beforeloop = currentNode.beforeLoop
         afterloop = currentNode.afterLoop
+        if beforeloop:
+            beforeloop.accept(self)
 
         # Label condition
         conditionlabel = self.instr
@@ -177,21 +179,35 @@ class AST2LLVMVisitor(Visitor):
         # Label body
         bodylabel = self.instr
         self.instr += 1
-        self.llvm += "br i1 %" + str(reg[0]) + ", label %" + str(bodylabel) + " , label %" + str(id(currentNode)) + "\n"
+        self.llvm += "br i1 %" + str(reg[0]) + ", label %" + str(bodylabel) + " , label %" + "CONTINUE" + str(id(currentNode)) + "\n"
 
         # Body part
         self.llvm += "\n"
         self.llvm += str(bodylabel) + ":\n"
         body.accept(self)
+
+        # After loop
+        if afterloop:
+            # After label
+            afterlabel = self.instr
+            self.instr += 1
+            self.llvm += "br label %" + str(afterlabel) + "\n"
+            self.llvm += "\n"
+            self.llvm += str(afterlabel) + ":\n"
+            afterloop.accept(self)
+        else:
+            self.llvm += "br label %" + "CONTINUE" + str(id(currentNode)) + "\n"
+
+
+
         # Label continue
         continuelabel = self.instr
         self.instr += 1
         self.llvm += "br label %" + str(conditionlabel) + "\n"
-
         # Continue part
         self.llvm += "\n"
         self.llvm += str(continuelabel) + ":\n"
-        self.llvm = self.llvm.replace(str(id(currentNode)), str(continuelabel))
+        self.llvm = self.llvm.replace("CONTINUE" + str(id(currentNode)), str(continuelabel))
 
 
         '''
@@ -408,6 +424,18 @@ class AST2LLVMVisitor(Visitor):
                                 self.instr += 1
                                 return self.symbolTable.lookup(var).register
                         return node
+            case "++":
+                for child in currentNode.children:
+                    if isinstance(child, Variable):
+                        var = self.currentTable.lookup(child.value)
+                        match var.type:
+                            case "int":
+                                self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(var.register) + ", align 4\n"
+                                self.instr += 1
+                                self.llvm += "%" + str(self.instr) + " = add nsw i32 %" + str(self.instr-1) + ", 1\n"
+                                self.instr += 1
+                                self.llvm += "store i32 %" + str(self.instr-1) + ", i32* %" + str(var.register) + ", align 4\n"
+                                return var.register
             case other:
                 print("not implemented yet")
         return currentNode
