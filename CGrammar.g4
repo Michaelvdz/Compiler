@@ -92,7 +92,7 @@ jumps:
     ;
 
 scope:
-    startscope='{' expr* endscope='}'
+    startscope='{' expr_loop endscope='}'
     ;
 
 constant:   INT

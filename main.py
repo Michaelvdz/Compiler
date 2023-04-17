@@ -47,14 +47,19 @@ def main(argv):
         #optimizedTree = asttree
 
 
-
+        print("Creating STS")
         #print("SymbolTable Part")
-        table = SymbolTable()
-        STCreator = CreateSymbolTableVisitor(table)
+        STStack = SymbolTables()
+        STCreator = CreateSymbolTableVisitor(STStack)
         optimizedTree.root.accept(STCreator)
         #print("\n\nThe generated symbol table:")
         #print(table)
 
+        print("-------------------------------")
+        print(STStack.tables[0].name)
+        print(len(STStack.tables[0].children))
+        STStack.tables[0].print()
+        print("-------------------------------")
 
         #print("Printing tree")
         astVisitor = ASTVisitor(filename)
@@ -62,13 +67,13 @@ def main(argv):
         #print("ending")
         astVisitor.ast.view()
 
+        print("------- Creating LLVM IR -------")
         llvm = ""
         llvm += "define dso_local i32 @main(){\n"
-        LLVMCreator = AST2LLVMVisitor(llvm, table)
+        LLVMCreator = AST2LLVMVisitor(llvm, STStack.tables[0])
         optimizedTree.root.accept(LLVMCreator)
         LLVMCreator.llvm += "ret i32 0\n}"
         #print(LLVMCreator.llvm)
-        print(table)
         llvm = open(filename+".ll", "w")
         llvm.write(LLVMCreator.llvm)
         llvm.close()

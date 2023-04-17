@@ -17,11 +17,13 @@ class AST2LLVMVisitor(Visitor):
     charprinting = False
     printing = False
     lvalue = True
+    currentTable = 0
 
     def __init__(self, llvm="", symbolTable=SymbolTable()):
         #print("----------------Converting AST 2 LLVM IR----------------")
         self.llvm = llvm
         self.symbolTable = symbolTable
+        self.currentTable = symbolTable
 
     def VisitASTNode(self, currentNode):
         print("Node")
@@ -35,14 +37,20 @@ class AST2LLVMVisitor(Visitor):
             return currentNode
 
     def VisitConditional(self, currentNode):
-        #print("Scope")
+        print("Conditional")
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
     def VisitScope(self, currentNode):
         #print("Scope")
+        print("Opening scope")
+        parent = self.currentTable
+        self.currentTable = self.currentTable.children[0]
+        self.currentTable.print()
         for child in currentNode.children:
             node = child.accept(self)
+        self.currentTable.parent.children.remove(self.currentTable)
+        self.currentTable = parent
         return currentNode
 
     def VisitWhile(self, currentNode):
@@ -300,7 +308,11 @@ class AST2LLVMVisitor(Visitor):
         match type:
             case "int":
                 self.llvm += "%" + str(self.instr) + " = alloca i32, align 4\n"
-                self.symbolTable.insertRegister(var, str(self.instr))
+                print("Inserting register")
+                print("in table: " + self.currentTable.name)
+                print(var)
+
+                self.currentTable.insertRegister(var, str(self.instr))
                 self.instr += 1
             case "float":
                 self.llvm += "%" + str(self.instr) + " = alloca float, align 4\n"
@@ -336,7 +348,8 @@ class AST2LLVMVisitor(Visitor):
             value = currentNode.rvalue.accept(self)
             self.lvalue = True
             print(value)
-            ltype = self.symbolTable.lookup(currentNode.lvalue.var).type
+            self.currentTable.print()
+            ltype = self.currentTable.lookup(currentNode.lvalue.var).type
             if value[2] is not "reg":
                 print("test")
                 print(ltype)
@@ -347,7 +360,7 @@ class AST2LLVMVisitor(Visitor):
                     except ValueError:
                         value = float(value[0])
                     if isinstance(value, float) or isinstance(value, int):
-                        self.llvm += "store i32 " + str(value) + ", i32* %" + self.symbolTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                        self.llvm += "store i32 " + str(value) + ", i32* %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 4\n"
                 elif ltype == "float":
                     try:
                         value = float(value[0])
@@ -392,7 +405,7 @@ class AST2LLVMVisitor(Visitor):
             print("lvalue reg:")
             print(reg)
             #ltype = self.symbolTable.lookup(currentNode.lvalue.children[0].value).type
-            ltype = self.symbolTable.lookup(currentNode.lvalue.value).type
+            ltype = self.currentTable.lookup(currentNode.lvalue.value).type
             print("ltype:")
             print(ltype)
             #self.instr += 1
@@ -409,7 +422,7 @@ class AST2LLVMVisitor(Visitor):
                     except ValueError:
                         value = float(value[0])
                     if isinstance(value, float) or isinstance(value, int):
-                        self.llvm += "store i32 " + str(value) + ", i32* %" + self.symbolTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
+                        self.llvm += "store i32 " + str(value) + ", i32* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
                 elif ltype == "float":
                     try:
                         value = float(value[0])
@@ -485,8 +498,9 @@ class AST2LLVMVisitor(Visitor):
         #symbol = self.symbolTable.lookup(node.value)
         symbol = 0
         if not isinstance(node, ASTNode):
-            symbol = self.symbolTable.lookupByRegister(node[0])
+            symbol = self.currentTable.lookupByRegister(node[0])
 
+        print("Symbol:")
         print(symbol)
         if symbol:
             if not self.printing:

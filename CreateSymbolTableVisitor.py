@@ -1,6 +1,7 @@
 import copy
 
 from AST import *
+from SymbolTable import *
 import graphviz
 from colorama import Fore
 
@@ -14,7 +15,11 @@ class CreateSymbolTableVisitor(Visitor):
         self.table = table
         self.lineNr = 0
         self.positionNr = 0
+        self.scopeNr = 0
         #print("----------------Creating Symbol Table----------------")
+        globaltable = SymbolTable()
+        globaltable.name = "Global"
+        self.table.push(globaltable)
 
     def VisitASTNode(self, currentNode):
         #print("Node")
@@ -29,7 +34,7 @@ class CreateSymbolTableVisitor(Visitor):
         
         #print(len(currentNode.children))
         if len(currentNode.children) == 0 and currentNode.value is not "Inst":
-            if self.table.lookup(currentNode.value) == 0:
+            if self.table.peek().lookup(currentNode.value) == 0:
                 print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line "+ str(self.lineNr) + ": variable " + currentNode.value + " has not been declared yet! \n")
 
         for child in currentNode.children:
@@ -43,15 +48,46 @@ class CreateSymbolTableVisitor(Visitor):
         return currentNode
 
     def VisitScope(self, currentNode):
-        #print("Scope")
+        print("Scope - Creating new ST for the scope")
+        newtable = SymbolTable()
+        newtable.name = "Scope " + str(self.scopeNr)
+        self.scopeNr += 1
+        parenttable = self.table.peek()
+        print("Parent with name")
+        print(parenttable.name)
+        print("Parent with #children: " + str(len(parenttable.children)))
+        newtable.parent = parenttable
+        print("Parent with #children: " + str(len(parenttable.children)))
+        parenttable.children.append(newtable)
+        print("Parent with #children: " + str(len(parenttable.children)))
+        print("Table with #children " + str(len(newtable.children)))
+        self.table.push(newtable)
+        print("staring scope")
         for child in currentNode.children:
             node = child.accept(self)
+        print("end scope")
+        self.table.pop()
         return currentNode
 
     def VisitWhile(self, currentNode):
-        #print("Scope")
+        print("While")
+        newtable = SymbolTable()
+        newtable.name = "While-loop"
+        parenttable = self.table.peek()
+        print("Parent with name")
+        print(parenttable.name)
+        print("Parent with #children: " + str(len(parenttable.children)))
+        newtable.parent = parenttable
+        print("Parent with #children: " + str(len(parenttable.children)))
+        parenttable.children.append(newtable)
+        print("Parent with #children: " + str(len(parenttable.children)))
+        print("Newtable with name:")
+        print(newtable.name)
+        print("Table with #children " + str(len(newtable.children)))
+        self.table.push(newtable)
         for child in currentNode.children:
             node = child.accept(self)
+        self.table.pop()
         return currentNode
 
     def VisitBinaryOperation(self, currentNode):
@@ -112,25 +148,31 @@ class CreateSymbolTableVisitor(Visitor):
 
         # int i = 3;
         # int i = 7; Redeclaration
-        if self.table.lookup(currentNode.var) != 0 and len(currType) != 0:
+        if self.table.peek().lookup(currentNode.var) != 0 and len(currType) != 0:
             print(
                 "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(self.lineNr) + ": variable " + currentNode.var + " has already been declared! \n")
 
         # int i = 3;
         # k = 7; Undefined variable
-        if self.table.lookup(currentNode.var) == 0 and len(currType) == 0:
+        if self.table.peek().lookup(currentNode.var) == 0 and len(currType) == 0:
             print(
                 "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(self.lineNr) + ": variable " + currentNode.var + " has not been declared yet! \n")
 
         # const int i = 4;
         # i = 5; const can't be changed
-        if self.table.lookup(currentNode.var) != 0 and len(currType) == 0:
-            if self.table.vars[currentNode.var].attr == "const":
+        if self.table.peek().lookup(currentNode.var) != 0 and len(currType) == 0:
+            if self.table.peek().vars[currentNode.var].attr == "const":
                 print(
                     "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(self.lineNr) + ": variable " + currentNode.var + " can not be changed because it's a const! \n")
 
-        if self.table.lookup(currentNode.var) == 0 and len(currType) != 0:
-            self.table.insert(currentNode.var, currConst, currType, currentNode.attr)
+        if self.table.peek().lookup(currentNode.var) == 0 and len(currType) != 0:
+            print("Hij wilt dit toevoegen:")
+            print(currentNode.var)
+            print(currConst)
+            print(currType)
+            print(currentNode.attr)
+            self.table.peek().insert(currentNode.var, currConst, currType, currentNode.attr)
+            self.table.peek().print()
 
         """
         for child in currentNode.children:

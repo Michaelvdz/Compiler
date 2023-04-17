@@ -319,7 +319,7 @@ class CSTVisitor(CGrammarVisitor):
 
     def visitExpr_loop(self, ctx:CGrammarParser.Expr_loopContext):
         print("Looping expressions")
-        loop = ASTNode("Loop")
+        loop = ASTNode("Loop Expr")
         for child in ctx.children:
             node = self.visit(child)
             loop.adopt(node)
@@ -328,7 +328,6 @@ class CSTVisitor(CGrammarVisitor):
     # Visit a parse tree produced by CGrammarParser#loops.
     def visitLoops(self, ctx:CGrammarParser.LoopsContext):
         print("Loop")
-
         match ctx.loop.text:
             case "while":
                 print("This is a while-loop")
@@ -340,20 +339,24 @@ class CSTVisitor(CGrammarVisitor):
                 scope = Scope("While-Scope")
                 scope.children = body.children
                 node.body = scope
+                node.adopt(scope)
             case "for":
                 print("This is a for-loop")
                 node = While("Loop")
                 condition = self.visit(ctx.condition)
                 after = self.visit(ctx.after)
                 before = self.visit(ctx.before)
-                node.afterLoop = after
                 node.beforeLoop = before
+                node.adopt(before)
+                node.afterLoop = after
+                node.adopt(after)
                 node.condition = condition
                 node.adopt(condition)
                 body = self.visit(ctx.body)
                 scope = Scope("While-Scope")
                 scope.children = body.children
                 node.body = scope
+                node.adopt(scope)
             case _:
                 print("Not implemented")
         return node
