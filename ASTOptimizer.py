@@ -479,6 +479,16 @@ class ASTOptimizer(Visitor):
             newNode.children.append(node)
         return newNode
 
+    def VisitFunction(self, currentNode):
+        #print("Function")
+        newNode = copy.copy(currentNode)
+        newNode.children = []
+        newNode.body = currentNode.body.accept(self)
+        for child in currentNode.children:
+            node = child.accept(self)
+            newNode.children.append(node)
+        return newNode
+
     def VisitConstant(self, currentNode):
         #print("Constant")
         return currentNode
@@ -510,6 +520,22 @@ class ASTOptimizer(Visitor):
             newNode.children.append(node)
         return newNode
 
+    def VisitExprLoop(self, currentNode):
+        print("LoopExpr")
+        newNode = copy.copy(currentNode)
+        newNode.children = []
+        for child in currentNode.children:
+            node = child.accept(self)
+            newNode.children.append(node)
+            if isinstance(node, Jump):
+                if node.value == "return":
+                    return newNode
+                if node.value == "break":
+                    return newNode
+                if node.value == "continue":
+                    return newNode
+        return newNode
+
     def VisitScope(self, currentNode):
         print("Scope")
         newNode = copy.copy(currentNode)
@@ -517,10 +543,17 @@ class ASTOptimizer(Visitor):
         for child in currentNode.children:
             node = child.accept(self)
             newNode.children.append(node)
+            if isinstance(node, Jump):
+                if node.value == "return":
+                    return newNode
+                if node.value == "break":
+                    return newNode
+                if node.value == "continue":
+                    return newNode
         return newNode
 
     def VisitDeclaration(self, currentNode):
-        #print("Declaration")
+        print("Declaration")
         newNode = copy.copy(currentNode)
         newNode.children = []
         for child in currentNode.children:

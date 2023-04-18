@@ -74,6 +74,16 @@ class ASTVisitor(Visitor):
         #print("Ending Node")
         return currentNode
 
+    def VisitExprLoop(self, currentNode):
+        #print("Beginning Node")
+        self.ast.node(str(id(currentNode)), currentNode.name)
+        for child in currentNode.children:
+            node = child.accept(self)
+            self.ast.edge(str(id(currentNode)), str(id(node)))
+        #print("Ending Node")
+        return currentNode
+
+
     def VisitCall(self, currentNode):
         #print("Beginning Node")
         self.ast.node(str(id(currentNode)), currentNode.value)

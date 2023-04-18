@@ -331,7 +331,7 @@ class CSTVisitor(CGrammarVisitor):
 
     def visitExpr_loop(self, ctx:CGrammarParser.Expr_loopContext):
         print("Looping expressions")
-        loop = ASTNode("Loop Expr")
+        loop = ExprLoop("Loop Expr")
         for child in ctx.children:
             node = self.visit(child)
             loop.adopt(node)
@@ -453,10 +453,12 @@ class CSTVisitor(CGrammarVisitor):
 
         if ctx.funcbody:
             body = self.visit(ctx.funcbody)
-            scope = Scope("While-Scope")
-            scope.children = body.children
-            function.body = scope
-            function.adopt(scope)
+            print("BODY NODE")
+            print(body)
+            #scope = Scope("While-Scope")
+            #scope.children = body.children
+            function.body = body
+            function.adopt(body)
 
         return function
 

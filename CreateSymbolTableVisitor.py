@@ -99,6 +99,17 @@ class CreateSymbolTableVisitor(Visitor):
         self.table.pop()
         return currentNode
 
+    def VisitFunction(self, currentNode):
+        #print("Binary")
+        for child in currentNode.children:
+            node = child.accept(self)
+        return currentNode
+
+    def VisitExprLoop(self, currentNode):
+        #print("Binary")
+        for child in currentNode.children:
+            node = child.accept(self)
+        return currentNode
     def VisitBinaryOperation(self, currentNode):
         #print("Binary")
         for child in currentNode.children:
