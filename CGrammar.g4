@@ -98,10 +98,10 @@ parameterlist:
     ;
 
 function:
-    type_specifier id=IDENTIFIER '(' parameterlist ')' '{' funcbody=expr_loop '}'
-    | type_specifier id=IDENTIFIER '(' parameterlist ')' ';'
-    | type_specifier id=IDENTIFIER '(' ')' '{' funcbody=expr_loop '}'
-    | type_specifier id=IDENTIFIER '(' ')' ';'
+    returntype=type_specifier funcname=IDENTIFIER '(' param=parameterlist ')' '{' funcbody=expr_loop '}'
+    | returntype=type_specifier funcname=IDENTIFIER '(' param=parameterlist ')' ';'
+    | returntype=type_specifier funcname=IDENTIFIER '(' ')' '{' funcbody=expr_loop '}'
+    | returntype=type_specifier funcname=IDENTIFIER '(' ')' ';'
     ;
 
 conditional_statement:
@@ -154,5 +154,5 @@ SINGLE_LINE_COMMENT: '//'~( '\r' | '\n' )*;
 INT: [0-9]+;
 FLOAT: [0-9]*? '.' [0-9]+;
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
-CHAR: ['] . ['];
+CHAR: (['].[']|['][\\].[']);
 WS: [ \n\t\r]+ -> skip;

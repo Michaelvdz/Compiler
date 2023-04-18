@@ -555,7 +555,9 @@ class AST2LLVMVisitor(Visitor):
                         print("failiure")
                     self.llvm += "store float " + str(value) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                 elif ltype == "char":
-                    value = value[0].replace("'","")
+                    value = value[0].replace("'", "")
+                    if len(value) > 1:
+                        value= value.encode('utf-8').decode('unicode-escape')
                     self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
                 elif ltype == "int*":
                     self.llvm += "store i32* %" + str(value) + ", i32** %" + self.currentTable.lookup(
