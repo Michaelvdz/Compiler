@@ -44,6 +44,15 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CGrammarParser#function_call.
+    def enterFunction_call(self, ctx:CGrammarParser.Function_callContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#function_call.
+    def exitFunction_call(self, ctx:CGrammarParser.Function_callContext):
+        pass
+
+
     # Enter a parse tree produced by CGrammarParser#parenthesis_expression.
     def enterParenthesis_expression(self, ctx:CGrammarParser.Parenthesis_expressionContext):
         pass

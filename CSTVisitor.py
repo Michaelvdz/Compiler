@@ -61,6 +61,16 @@ class CSTVisitor(CGrammarVisitor):
         #op.print()
         return op
 
+    def visitFunction_call(self, ctx: CGrammarParser.Function_callContext):
+        print("Call")
+        node = Call(ctx.iden.text+"()")
+        if ctx.args:
+            children = self.visit(ctx.args)
+            node.children = children.children
+        #op.print()
+        return node
+
+
     # Visit a parse tree produced by CGrammarParser#parenthesis_expression.
     def visitParenthesis_expression(self, ctx: CGrammarParser.Parenthesis_expressionContext):
         #print("ParenthesisExpression")
@@ -78,7 +88,10 @@ class CSTVisitor(CGrammarVisitor):
     def visitUnary_expression(self, ctx: CGrammarParser.Unary_expressionContext):
         #print("UnaryExpression")
         #print("#children: " + str(ctx.getChildCount()))
-        if len(ctx.children) == 2:
+        if ctx.call:
+            node = self.visit(ctx.call)
+            return node
+        elif len(ctx.children) == 2:
             newnode = UnaryOperation("")
             for child in ctx.children:
                 node = self.visit(child)
@@ -362,7 +375,6 @@ class CSTVisitor(CGrammarVisitor):
 
     def visitJumps(self, ctx:CGrammarParser.JumpsContext):
         print("Jumps")
-        print(ctx.jump)
         match ctx.jump.text:
             case "break":
                 print("This is a break")
@@ -372,9 +384,16 @@ class CSTVisitor(CGrammarVisitor):
                 print("This is a continue")
                 node = Jump("continue")
                 return node
+            case "return":
+                print("This is a return")
+                node = Jump("return")
+                if ctx.beforereturn:
+                    beforereturn = self.visit(ctx.beforereturn)
+                    node.adopt(beforereturn)
+                return node
             case _:
                 print("Not implemented")
-        return node
+        return None
 
     # Visit a parse tree produced by CGrammarParser#scope.
     def visitScope(self, ctx:CGrammarParser.ScopeContext):
@@ -385,6 +404,61 @@ class CSTVisitor(CGrammarVisitor):
                 childnode = self.visit(child)
                 node.adopt(childnode)
         return node
+
+    def visitParameterlist(self, ctx:CGrammarParser.ParameterlistContext):
+        print("Parameters")
+        params = ASTNode("Params")
+        if ctx.typ:
+            typ = self.visit(ctx.typ)
+            params.adopt(typ)
+        if ctx.decl:
+            decl = self.visit(ctx.decl)
+            params.adopt(decl)
+        if ctx.param:
+            param = self.visit(ctx.param)
+            if isinstance(param, ASTNode):
+                print(len(param.children))
+                for child in param.children:
+                    params.adopt(child)
+        return params
+
+    def visitArgumentlist(self, ctx:CGrammarParser.ArgumentlistContext):
+        print("Arguments")
+        args = ASTNode("Arguments")
+        if ctx.ass:
+            ass = self.visit(ctx.ass)
+            args.adopt(ass)
+        if ctx.args:
+            param = self.visit(ctx.args)
+            if isinstance(param, ASTNode):
+                for child in param.children:
+                    args.adopt(child)
+        return args
+    def visitFunction(self, ctx:CGrammarParser.FunctionContext):
+        print("Function declaration/definition")
+        returntype = self.visit(ctx.returntype)
+        print("Return type:")
+        print(returntype.value)
+        print("Function name:")
+        funcname = ctx.funcname.text
+        print(funcname)
+        function = Function(str(funcname))
+        function.returnType = returntype
+        if ctx.param:
+            print("Function param:")
+            params = self.visit(ctx.param)
+            function.params = params.children
+            for child in function.params:
+                print(child.type)
+
+        if ctx.funcbody:
+            body = self.visit(ctx.funcbody)
+            scope = Scope("While-Scope")
+            scope.children = body.children
+            function.body = scope
+            function.adopt(scope)
+
+        return function
 
 
     # Visit a parse tree produced by CGrammarParser#constant.
@@ -401,6 +475,10 @@ class CSTVisitor(CGrammarVisitor):
             node = self.visit(child)
             if isinstance(node, ASTNode):
                 type.adopt(node)
+                if node.type == "type":
+                    type.type = node.value
+                if node.type == "reserverd_word":
+                    type.attr = node.value
             else:
                 type.name = str(child)
         #print("EndOfType")

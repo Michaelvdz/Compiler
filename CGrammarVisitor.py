@@ -29,6 +29,11 @@ class CGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CGrammarParser#function_call.
+    def visitFunction_call(self, ctx:CGrammarParser.Function_callContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CGrammarParser#parenthesis_expression.
     def visitParenthesis_expression(self, ctx:CGrammarParser.Parenthesis_expressionContext):
         return self.visitChildren(ctx)

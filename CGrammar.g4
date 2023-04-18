@@ -16,9 +16,13 @@ unary_operator:  '+'
 
 post_unary_operator:  '++'
     |   '--'
-    | '(' ')'
-    | '(' argumentlist ')'
     ;
+
+function_call:
+    iden=IDENTIFIER func='(' ')'
+    | iden=IDENTIFIER func='(' args=argumentlist ')'
+    ;
+
 parenthesis_expression: '(' assignment_expression ')'
     ;
 
@@ -29,6 +33,7 @@ unary_expression:   unary_operator iden=IDENTIFIER
     |   iden=IDENTIFIER
     |   unary_operator unary_expression
     |   unary_expression post_unary_operator
+    |   call=function_call
     ;
 
 mul_div_expression: mul_div_expression op=('*'|'/'|'%') unary_expression
@@ -81,8 +86,8 @@ expr_loop:
     ;
 
 argumentlist:
-    assignment_expression
-    | argumentlist ',' assignment_expression
+    ass=assignment_expression
+    | args=argumentlist ',' ass=assignment_expression
     ;
 
 identifierlist:
@@ -91,10 +96,10 @@ identifierlist:
     ;
 
 parameterlist:
-    type
-    | type IDENTIFIER
-    | parameterlist ',' type
-    | parameterlist ',' type IDENTIFIER
+    typ=type
+    | decl=declaration_specification
+    | param=parameterlist ',' typ=type
+    | param=parameterlist ',' decl=declaration_specification
     ;
 
 function:
@@ -117,7 +122,7 @@ loops:
 jumps:
     jump='break' ';'
     | jump='continue' ';'
-    | jump='return' assignment_expression ';'
+    | jump='return' beforereturn=assignment_expression ';'
     | jump='return' ';'
     ;
 

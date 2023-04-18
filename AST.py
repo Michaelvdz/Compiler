@@ -180,7 +180,7 @@ class While(ASTNode):
     def accept(self, visitor: Visitor):
         return visitor.VisitWhile(self)
 
-class Jump:
+class Jump(ASTNode):
 
     name = ""
     value = ""
@@ -211,6 +211,46 @@ class Jump:
 
     def accept(self, visitor: Visitor):
         value = visitor.VisitJump(self)
+        return value
+
+    def acceptWithNoOptimization(self, visitor: Visitor):
+        value = visitor.VisitASTNode(self, False)
+        return value
+
+class Function(ASTNode):
+
+    name = ""
+    value = ""
+    returnType = ""
+    body = []
+    params = []
+    children = []
+    def __init__(self, name="Free"):
+        #print("___init-ASTNode___");
+        self.children = []
+        self.name = name
+        self.value = name
+        #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def print(self):
+        if not self.children:
+            print(self.name)
+        else:
+            print(self.name)
+            print("With children")
+            for node in self.children:
+                node.print()
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            #print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def accept(self, visitor: Visitor):
+        value = visitor.VisitFunction(self)
         return value
 
     def acceptWithNoOptimization(self, visitor: Visitor):
@@ -370,6 +410,7 @@ class Variable(ASTNode):
     children = []
     value = ""
     type = ""
+    attr = ""
 
     def __init__(self, value):
         #print("___init-Variable__")
@@ -387,6 +428,27 @@ class Variable(ASTNode):
     def accept(self, visitor: Visitor):
         return visitor.VisitVariable(self)
 
+class Call(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+
+    def __init__(self, value):
+        #print("___init-Variable__")
+        self.children = []
+        self.name = "Call"
+        self.value = value
+        #print("___Node-Created-With-Name:" + self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def print(self):
+        print("Variable: " + str(self.value))
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitCall(self)
 
 class UnaryOperator(ASTNode):
 

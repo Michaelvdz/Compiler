@@ -49,12 +49,38 @@ class ASTVisitor(Visitor):
         #print("Ending Node")
         return currentNode
 
+    def VisitFunction(self, currentNode):
+        #print("Beginning Function")
+        self.ast.node(str(id(currentNode)), currentNode.name+"()")
+        ret = currentNode.returnType.accept(self)
+        self.ast.edge(str(id(currentNode)), str(id(ret)), "Return Type")
+
+        if currentNode.params:
+            for child in currentNode.params:
+                param = child.accept(self)
+                self.ast.edge(str(id(currentNode)), str(id(param)), "Parameter")
+
+        body = currentNode.body.accept(self)
+        self.ast.edge(str(id(currentNode)), str(id(body)), "Body")
+        #print("Ending Function")
+        return currentNode
+
     def VisitScope(self, currentNode):
         #print("Beginning Node")
         self.ast.node(str(id(currentNode)), currentNode.name)
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
+        #print("Ending Node")
+        return currentNode
+
+    def VisitCall(self, currentNode):
+        #print("Beginning Node")
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        if currentNode.children:
+            for child in currentNode.children:
+                node = child.accept(self)
+                self.ast.edge(str(id(currentNode)), str(id(node)))
         #print("Ending Node")
         return currentNode
 
@@ -96,19 +122,30 @@ class ASTVisitor(Visitor):
 
     def VisitConstant(self, currentNode):
         #print("Beginning Constant")
-        self.ast.node(str(id(currentNode)), currentNode.value)
+        print(currentNode.value.replace("'",""))
+        self.ast.node(str(id(currentNode)), str(currentNode.value.replace("'","")))
         #print("Ending Constant")
         return currentNode
 
     def VisitJump(self, currentNode):
         #print("Beginning Jump")
         self.ast.node(str(id(currentNode)), currentNode.value)
+        for child in currentNode.children:
+            node = child.accept(self)
+            self.ast.edge(str(id(currentNode)), str(id(node)))
         #print("Ending Jump")
         return currentNode
+
 
     def VisitVariable(self, currentNode):
         #print("Beginning Constant")
         self.ast.node(str(id(currentNode)), currentNode.value)
+        if currentNode.type:
+            self.ast.node(str(id(currentNode.type)), currentNode.type)
+            self.ast.edge(str(id(currentNode)), str(id(currentNode.type)))
+        if currentNode.attr:
+            self.ast.node(str(id(currentNode.attr)), str(id(currentNode.type)))
+            self.ast.edge(str(id(currentNode)), str(id(currentNode.attr)))
         #print("Ending Constant")
         return currentNode
 
