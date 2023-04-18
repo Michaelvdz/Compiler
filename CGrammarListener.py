@@ -152,6 +152,42 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CGrammarParser#argumentlist.
+    def enterArgumentlist(self, ctx:CGrammarParser.ArgumentlistContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#argumentlist.
+    def exitArgumentlist(self, ctx:CGrammarParser.ArgumentlistContext):
+        pass
+
+
+    # Enter a parse tree produced by CGrammarParser#identifierlist.
+    def enterIdentifierlist(self, ctx:CGrammarParser.IdentifierlistContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#identifierlist.
+    def exitIdentifierlist(self, ctx:CGrammarParser.IdentifierlistContext):
+        pass
+
+
+    # Enter a parse tree produced by CGrammarParser#parameterlist.
+    def enterParameterlist(self, ctx:CGrammarParser.ParameterlistContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#parameterlist.
+    def exitParameterlist(self, ctx:CGrammarParser.ParameterlistContext):
+        pass
+
+
+    # Enter a parse tree produced by CGrammarParser#function.
+    def enterFunction(self, ctx:CGrammarParser.FunctionContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#function.
+    def exitFunction(self, ctx:CGrammarParser.FunctionContext):
+        pass
+
+
     # Enter a parse tree produced by CGrammarParser#conditional_statement.
     def enterConditional_statement(self, ctx:CGrammarParser.Conditional_statementContext):
         pass

@@ -4,6 +4,7 @@ prog: instr+ EOF
 	;
 
 instr: expr
+    | ';'
 	;
 
 unary_operator:  '+'
@@ -15,6 +16,8 @@ unary_operator:  '+'
 
 post_unary_operator:  '++'
     |   '--'
+    | '(' ')'
+    | '(' argumentlist ')'
     ;
 parenthesis_expression: '(' assignment_expression ')'
     ;
@@ -70,10 +73,35 @@ expr:   assignment_expression ';'
     | expr comment
     | comment
     | jumps
+    | function
 	;
 
 expr_loop:
     expr*
+    ;
+
+argumentlist:
+    assignment_expression
+    | argumentlist ',' assignment_expression
+    ;
+
+identifierlist:
+    IDENTIFIER
+    | identifierlist ',' IDENTIFIER
+    ;
+
+parameterlist:
+    type
+    | type IDENTIFIER
+    | parameterlist ',' type
+    | parameterlist ',' type IDENTIFIER
+    ;
+
+function:
+    type_specifier id=IDENTIFIER '(' parameterlist ')' '{' funcbody=expr_loop '}'
+    | type_specifier id=IDENTIFIER '(' parameterlist ')' ';'
+    | type_specifier id=IDENTIFIER '(' ')' '{' funcbody=expr_loop '}'
+    | type_specifier id=IDENTIFIER '(' ')' ';'
     ;
 
 conditional_statement:
@@ -89,6 +117,8 @@ loops:
 jumps:
     jump='break' ';'
     | jump='continue' ';'
+    | jump='return' assignment_expression ';'
+    | jump='return' ';'
     ;
 
 scope:
