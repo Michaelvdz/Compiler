@@ -13,9 +13,7 @@ class CSTVisitor(CGrammarVisitor):
 
     def visitProg(self, ctx):
         print("Prog")
-        #print("#children: " + str(ctx.getChildCount()))
         self.tree.Name = "Prog" + str(ctx.getRuleIndex())
-        #print("Visiting Prog children")
         prog = ASTNode("Prog")
         for child in ctx.children:
             node = self.visit(child)
@@ -23,27 +21,14 @@ class CSTVisitor(CGrammarVisitor):
                 #print("Printing:")
                 prog.adopt(node)
         self.tree.setRoot(prog)
-        #print("Printing whole tree: ")
-        #self.tree.print()
-        #print("Done visiting Prog children")
 
 
     def visitInstr(self, ctx):
         print("Inst")
-        #print("#children: " + str(ctx.getChildCount()))
         instr = ASTNode("Inst")
-        '''
-        if ctx.bc:
-            comment = MLComment(ctx.bc.text)
-            instr.adopt(comment)
-        else:
-        '''
         for child in ctx.children:
             node = self.visit(child)
-            print("Node recieved from child")
-            print(node)
             if isinstance(node, ASTNode):
-                #node.print()
                 instr.adopt(node)
         return instr
 
@@ -51,14 +36,12 @@ class CSTVisitor(CGrammarVisitor):
     def visitUnary_operator(self, ctx: CGrammarParser.Unary_operatorContext):
         #print("UnaryOperator")
         op = UnaryOperator(ctx.getText())
-        #op.print()
         return op
 
     # Visit a parse tree produced by CGrammarParser#unary_operator.
     def visitPost_unary_operator(self, ctx: CGrammarParser.Unary_operatorContext):
         #print("PostUnaryOperator")
         op = UnaryOperator(ctx.getText())
-        #op.print()
         return op
 
     def visitFunction_call(self, ctx: CGrammarParser.Function_callContext):
@@ -67,27 +50,23 @@ class CSTVisitor(CGrammarVisitor):
         if ctx.args:
             children = self.visit(ctx.args)
             node.children = children.children
-        #op.print()
         return node
 
 
     # Visit a parse tree produced by CGrammarParser#parenthesis_expression.
     def visitParenthesis_expression(self, ctx: CGrammarParser.Parenthesis_expressionContext):
         #print("ParenthesisExpression")
-        #print("--------------------------------------------")
         if len(ctx.children) == 3:
             for child in ctx.children:
                 if not child.getText() == '(' and not child.getText() == ')':
                     #print("No parenthesis")
                     node = self.visit(child)
                     return node
-
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by CGrammarParser#unary_expression.
     def visitUnary_expression(self, ctx: CGrammarParser.Unary_expressionContext):
         #print("UnaryExpression")
-        #print("#children: " + str(ctx.getChildCount()))
         if ctx.call:
             node = self.visit(ctx.call)
             return node
@@ -96,7 +75,6 @@ class CSTVisitor(CGrammarVisitor):
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, UnaryOperator):
-                    #print("This is an operator")
                     newnode.value = node.value
                 elif node is None:
                     newvar = ASTNode(ctx.iden.text)
@@ -106,7 +84,6 @@ class CSTVisitor(CGrammarVisitor):
             return newnode
         else:
             if ctx.iden:
-                #print("Id")
                 var = Variable(ctx.getText())
                 return var
         return self.visitChildren(ctx)
@@ -114,15 +91,12 @@ class CSTVisitor(CGrammarVisitor):
     # Visit a parse tree produced by CGrammarParser#mul_div_expression.
     def visitMul_div_expression(self, ctx: CGrammarParser.Mul_div_expressionContext):
         #print("MulDivExpression")
-        #print("#children: " + str(ctx.getChildCount()))
         if ctx.getChildCount() > 1:
             binOp = BinaryOperation(ctx.op.text)
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, ASTNode):
-                    #node.print()
                     binOp.adopt(node)
-            #binOp.print()
             return binOp
         else:
             return self.visitChildren(ctx)
@@ -130,15 +104,12 @@ class CSTVisitor(CGrammarVisitor):
     # Visit a parse tree produced by CGrammarParser#add_sub_expression.
     def visitAdd_sub_expression(self, ctx: CGrammarParser.Add_sub_expressionContext):
         #print("AddSubExpression")
-        #print("#children: " + str(ctx.getChildCount()))
         if ctx.getChildCount() > 1:
             binOp = BinaryOperation(ctx.op.text)
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, ASTNode):
-                    #node.print()
                     binOp.adopt(node)
-            #binOp.print()
             return binOp
         else:
             return self.visitChildren(ctx)
@@ -146,15 +117,12 @@ class CSTVisitor(CGrammarVisitor):
     # Visit a parse tree produced by CGrammarParser#relational_expression.
     def visitRelational_expression(self, ctx: CGrammarParser.Relational_expressionContext):
         #print("RelationalExpression")
-        #print("#children: " + str(ctx.getChildCount()))
         if ctx.getChildCount() > 1:
             relOp = BinaryOperation(ctx.op.text)
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, ASTNode):
-                    #node.print()
                     relOp.adopt(node)
-            #relOp.print()
             return relOp
         else:
             return self.visitChildren(ctx)
@@ -167,87 +135,25 @@ class CSTVisitor(CGrammarVisitor):
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, ASTNode):
-                    #node.print()
                     logOp.adopt(node)
-            #logOp.print()
             return logOp
         else:
             return self.visitChildren(ctx)
 
     def visitAssignment_expression(self, ctx:CGrammarParser.Assignment_expressionContext):
+        if ctx.assign:
+            assign = Assigment(ctx.assign.text)
+            assign.rvalue = self.visit(ctx.rvalue)
+            assign.lvalue = self.visit(ctx.lvalue)
+            assign.adopt(assign.lvalue)
+            assign.adopt(assign.rvalue)
+            return assign
         return self.visitChildren(ctx)
-
-
 
     def visitDeclaration_specification(self, ctx:CGrammarParser.Declaration_specificationContext):
         print("DeclarationSpecifier")
         decl = Declaration("VariableDeclartion")
         decl.attr = ""
-        '''
-        if ctx.ptr:
-            #print("Contains pointer")
-            # lvalue contains a pointer, which can either be a declaration/definition or assignment
-            if ctx.typ:
-                # This is a declaration/definition
-                for child in ctx.children:
-                    node = self.visit(child)
-                    #print("child:")
-                    #print(ctx.var.text)
-                    if isinstance(node, Variable):
-                        for child2 in node.children:
-                            if child2.type == "reserved_word":
-                                decl.adopt(child2)
-                                decl.attr = child2.value
-                            if child2.type == "type":
-                                #print("Doetem dees wel?")
-                                decl.adopt(child2)
-                                decl.type = child2.value + "*"
-                                #print(decl.type)
-                    elif child is ctx.ptr:
-                        pointer = ASTNode("*")
-                        decl.adopt(pointer)
-                    else:
-                        #print("test")
-                        var = ASTNode(ctx.var.text)
-                        decl.adopt(var)
-                        decl.var = var.value
-            else:
-                # This is just an assignment to the value the pointer is pointing to
-                #print("Zijn we hier")
-                #print(self.visit(ctx.ptr).value)
-                op = UnaryOperation(self.visit(ctx.ptr).value)
-                var = ASTNode(ctx.var.text)
-                op.adopt(var)
-                return op
-
-            #print(decl.var)
-            #print(decl.type)
-            #print(decl.attr)
-            #print("Pointer declaration with:")
-            #print("Varname: " + decl.var)
-            #print("Type: " + decl.type)
-            #print("Attr: " + decl.attr)
-        else:
-            # We are assigning a value to
-            print("Declaring var not pointer")
-            for child in ctx.children:
-                node = self.visit(child)
-                if isinstance(node, Variable):
-                    for child2 in node.children:
-                        if child2.type == "reserved_word":
-                            decl.adopt(child2)
-                            decl.attr = child2.value
-                        if child2.type == "type":
-                            decl.adopt(child2)
-                            decl.type = child2.value
-                elif str(child) == '*':
-                    pointer = ASTNode("*")
-                    decl.adopt(pointer)
-                else:
-                    var = ASTNode(ctx.var.text)
-                    decl.adopt(var)
-                    decl.var = var.value
-        '''
         # Test for declaration/definition or just var assignment
         if ctx.typ:
             # We are in decl/def
@@ -270,7 +176,6 @@ class CSTVisitor(CGrammarVisitor):
                     pointer = ASTNode("*")
                     decl.adopt(pointer)
                 else:
-                    # print("test")
                     var = ASTNode(ctx.var.text)
                     decl.adopt(var)
                     decl.var = var.value
@@ -285,21 +190,12 @@ class CSTVisitor(CGrammarVisitor):
                 for child in ctx.children:
                     node = self.visit(child)
                     var = Variable(ctx.var.text)
-                    #decl.adopt(var)
-                    #decl.var = var.value
                     return var
         # We return decl if we have a declaration
         return decl
 
     def visitDeclaration(self, ctx:CGrammarParser.DeclarationContext):
         print("Declaration")
-        if ctx.assign:
-            assign = Assigment(ctx.assign.text)
-            assign.rvalue = self.visit(ctx.rvalue)
-            assign.lvalue = self.visit(ctx.lvalue)
-            assign.adopt(assign.lvalue)
-            assign.adopt(assign.rvalue)
-            return assign
         return self.visitChildren(ctx)
 
 
@@ -348,10 +244,10 @@ class CSTVisitor(CGrammarVisitor):
                 node.condition = condition
                 #node.adopt(condition)
                 body = self.visit(ctx.body)
-                scope = Scope("While-Scope")
-                scope.children = body.children
-                node.body = scope
-                node.adopt(scope)
+                #scope = Scope("While-Scope")
+                #scope.children = body.children
+                node.body = body
+                #node.adopt(scope)
             case "for":
                 print("This is a for-loop")
                 node = While("Loop")
@@ -365,10 +261,10 @@ class CSTVisitor(CGrammarVisitor):
                 node.condition = condition
                 node.adopt(condition)
                 body = self.visit(ctx.body)
-                scope = Scope("While-Scope")
-                scope.children = body.children
-                node.body = scope
-                node.adopt(scope)
+                #scope = Scope("While-Scope")
+                #scope.children = body.children
+                node.body = body
+                #node.adopt(scope)
             case _:
                 print("Not implemented")
         return node
@@ -458,7 +354,7 @@ class CSTVisitor(CGrammarVisitor):
             #scope = Scope("While-Scope")
             #scope.children = body.children
             function.body = body
-            function.adopt(body)
+            #function.adopt(body)
 
         return function
 

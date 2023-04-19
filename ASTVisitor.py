@@ -132,7 +132,7 @@ class ASTVisitor(Visitor):
 
     def VisitConstant(self, currentNode):
         #print("Beginning Constant")
-        print(currentNode.value.replace("'",""))
+        #print(currentNode.value.replace("'",""))
         self.ast.node(str(id(currentNode)), str(currentNode.value.replace("'","")))
         #print("Ending Constant")
         return currentNode

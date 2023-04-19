@@ -1,9 +1,10 @@
 class Node:
-    def __init__(self, constant, type, value, attr=""):
+    def __init__(self, constant, type, value, attr="", node=""):
         self.constant = constant
         self.type = type
         self.attr = attr
         self.register = None
+        self.astnode = node
 
     def __str__(self):
         return f'{self.type} and attr: {self.attr} and register: {self.register}'
@@ -22,8 +23,8 @@ class SymbolTables:
 
     def peek(self):
         table = self.tables.pop()
-        print("Peeking at:")
-        print(table.name)
+        #print("Peeking at:")
+        #print(table.name)
         self.tables.append(table)
         return table
 
@@ -66,21 +67,16 @@ class SymbolTable:
             child.print()
         print("End of table: " + self.name)
 
-
-        '''
-        for child in self.children:
-            child.print()
-        '''
-
     def insert(self, name, constant, type, attribute=""):
         self.vars[name] = Node(constant, type, "", attribute)
+    def insertFunction(self, name, constant, type, attribute="", node=""):
+        self.vars[name] = Node(constant, type, "", attribute, node)
 
     def insertRegister(self, name, register):
-        print("Zoeken naar var: " + name + "in scope: " + self.name)
+        #print("Zoeken naar var: " + name + "in scope: " + self.name)
         if self.vars.get(name):
             self.vars[name].register = register
         else:
-            print("Hij vindt de var niet, kijk bij parent")
             if self.parent:
                 self.parent.insertRegister(name, register)
 
@@ -93,8 +89,15 @@ class SymbolTable:
         else:
             if self.parent:
                 return self.parent.lookup(name)
-        print("Nothing found")
+        #print("Nothing found")
         return 0
+
+    def lookupInThisTable(self, name):
+        var = self.vars.get(name)
+        if var:
+            return var
+        else:
+            return 0
 
     def lookupByRegister(self, register):
         for key, value in self.vars.items():

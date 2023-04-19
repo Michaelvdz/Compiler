@@ -11,7 +11,7 @@ class AST2LLVMVisitor(Visitor):
 
     llvm = ""
     symbolTable = 0
-    instr = 1
+    instr = 0
     intprinting = False
     floatprinting = False
     charprinting = False
@@ -25,9 +25,9 @@ class AST2LLVMVisitor(Visitor):
         self.llvm = llvm
         self.symbolTable = symbolTable
         self.currentTable = symbolTable
-        self.allocateRegisters(self.currentTable)
+        #self.allocateRegisters(self.currentTable)
         self.currentLoop = []
-        self.currentTable.print()
+        #self.currentTable.print()
 
     def allocateRegister(self, table, name, var):
         type = var.type
@@ -59,17 +59,19 @@ class AST2LLVMVisitor(Visitor):
                 self.instr += 1
             case other:
                 x = "test"
-                #print("Type not implemented or literal")
 
     def allocateRegisters(self, table):
         print("Allocating registers:")
         for key, value in table.vars.items():
-            print(key)
-            print(value)
             self.allocateRegister(table, key, value)
 
         for child in table.children:
             self.allocateRegisters(child)
+
+    def allocateRegistersCurrentScope(self, table):
+        print("Allocating registers:")
+        for key, value in table.vars.items():
+            self.allocateRegister(table, key, value)
 
 
     def VisitASTNode(self, currentNode):
@@ -77,23 +79,175 @@ class AST2LLVMVisitor(Visitor):
         if self.currentTable.lookup(currentNode.value):
             return (str(self.currentTable.lookup(currentNode.value).register), str(self.currentTable.lookup(currentNode.value).type), "reg")
         else:
+            if len(currentNode.children) == 1:
+                return currentNode.children[0].accept(self)
             for child in currentNode.children:
                 node = child.accept(self)
             return currentNode
 
+    def VisitExprLoop(self, currentNode):
+        print("ExprLoop")
+        for child in currentNode.children:
+            node = child.accept(self)
+        return currentNode
+
+    def VisitCall(self, currentNode):
+        print("VisitCall")
+        print("Look for :")
+        print(currentNode.value)
+        params = []
+        for child in currentNode.children:
+            print(child)
+            node = child.accept(self)
+            self.currentTable.print()
+            if node[2] == "reg":
+                print(node)
+                symbol = self.currentTable.lookup(node[3])
+                print(symbol)
+                print(self.llvm)
+                type = symbol.type
+                if type == "int":
+                    self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(
+                        symbol.register) + ", align 4\n"
+                    self.instr += 1
+                if type == "float":
+                    self.llvm += "%" + str(self.instr) + " = load float, float* %" + str(
+                        symbol.register) + ", align 4\n"
+                    self.instr += 1
+                if type == "char":
+                    self.llvm += "%" + str(self.instr) + " = load i8, i8* %" + str(
+                        symbol.register) + ", align 1\n"
+                    self.instr += 1
+                newnode = (self.instr - 1, node[1], node[2])
+                params.append(newnode)
+            else:
+                params.append(node)
+        func = self.currentTable.lookup(currentNode.value.replace("()",""))
+        if func and func.attr == "func":
+            self.llvm += "%" + str(self.instr) + " = call i32" + " @" + currentNode.value.replace("()","")
+            self.llvm += "("
+            print("Parameters:")
+            i = 1
+            numberParams = len(currentNode.children)
+            for node in params:
+                if node[1] == "int":
+                    self.llvm += "i32"
+                elif node[1] == "float":
+                    self.llvm += "float"
+                else:
+                    self.llvm += "i8"
+
+                if node[2] == "reg":
+                    self.llvm += " noundef %" + str(node[0])
+                elif node[2] == "value":
+                    self.llvm += " noundef " + node[0]
+                if i != numberParams:
+                    self.llvm += ", "
+                i += 1
+            self.llvm += ")"
+            self.llvm += "\n"
+            self.instr +=1
+        return (self.instr-1, "", "reg")
+
+    def VisitFunction(self, currentNode):
+        print("Function")
+        self.instr = 0
+        # Open a new scope by selecting the right symbol table
+        parent = self.currentTable
+        self.currentTable = self.currentTable.children[0]
+
+        returntype = currentNode.returnType.value
+        funcname = currentNode.value
+        self.llvm += "define dso_local "
+        if returntype == "int":
+            self.llvm += "i32 "
+        elif returntype == "float":
+            self.llvm += "float "
+        elif returntype == "char":
+            self.llvm += "i8 "
+        else:
+            print("Not supported")
+        self.llvm += "@" + funcname
+        if currentNode.params:
+            self.llvm += "("
+            params = currentNode.params
+            numberParams = len(params)
+            i = 1
+            for param in params:
+                node = param.accept(self)
+                paramtype = node.type
+                if paramtype == "int":
+                    paramtype = "i32"
+                elif paramtype == "float":
+                    paramtype= "float"
+                elif paramtype == "char":
+                    paramtype= "i8"
+                self.llvm += paramtype + " noundef %" + str(self.instr)
+                if i != numberParams:
+                    self.llvm += ", "
+                self.instr += 1
+                i += 1
+            self.llvm += "){\n"
+        else:
+            self.llvm += "(){\n"
+        self.instr += 1
+        self.allocateRegistersCurrentScope(self.currentTable)
+        instr = self.instr - ((2*len(currentNode.params))+1)
+        if currentNode.params:
+            params = currentNode.params
+            for param in params:
+                node = param.accept(self)
+                paramtype = node.type
+                reg = self.currentTable.lookupInThisTable(node.var).register
+                if paramtype == "int":
+                    self.llvm += "store i32 %" + str(instr) + " , i32* %" + str(reg) + ", align 4\n"
+                elif paramtype == "float":
+                    self.llvm += "store float %" + str(instr) + " , float %" + str(reg) + ", align 4\n"
+                elif paramtype == "char":
+                    self.llvm += "store i8 %" + str(instr) + " , i8* %" + str(reg) + ", align 1\n"
+                else:
+                    print("None")
+                instr += 1
+
+        node = currentNode.body.accept(self)
+        # After visiting scope, delete the symbol table
+        self.currentTable.parent.children.remove(self.currentTable)
+        self.currentTable = parent
+        self.llvm += "}\n"
+        return currentNode
+
     def VisitJump(self, currentNode):
         print("Jump")
-        print(currentNode.value)
         if currentNode.value == "break":
             currentid = self.currentLoop.pop()
             self.llvm += "br label %" + "CONTINUE" + currentid[0] + "            ;break\n"
             self.llvm += "BREAK"
             self.currentLoop.append((currentid[0], "break"))
-        else:
+        elif currentNode.value == "continue":
             currentid = self.currentLoop.pop()
             self.llvm += "br label %" + "CONDITION" + currentid[0] + "            ;continue\n"
             self.llvm += "NEXTLOOP"
             self.currentLoop.append((currentid[0], "continue"))
+        elif currentNode.value == "return":
+            if currentNode.children:
+                result = currentNode.children[0].accept(self)
+            else:
+                result = ("0", "", "value")
+            if currentNode.type == "int":
+                if result[2] == "reg":
+                    self.llvm += "ret i32 %" + str(result[0]) + "\n"
+                else:
+                    self.llvm += "ret i32 " + str(result[0]) + "\n"
+            if currentNode.type == "float":
+                if result[2] == "reg":
+                    self.llvm += "ret float %" + str(result[0]) + "\n"
+                else:
+                    self.llvm += "ret float " + str(result[0]) + "\n"
+            if currentNode.type == "char":
+                if result[2] == "reg":
+                    self.llvm += "ret i8 %" + str(result[0]) + "\n"
+                else:
+                    self.llvm += "ret i8 " + str(result[0]) + "\n"
         return currentNode
 
     def VisitConditional(self, currentNode):
@@ -119,7 +273,16 @@ class AST2LLVMVisitor(Visitor):
         # Add the label of the if body and visit the ifbody
         self.llvm += "\n"
         self.llvm += str(iflabel) + ":\n"
+
+        # Open a new scope by selecting the right symbol table
+        parent = self.currentTable
+        self.currentTable = self.currentTable.children[0]
+        self.allocateRegistersCurrentScope(self.currentTable)
         ifbody.accept(self)
+        # After visiting scope, delete the symbol table
+        self.currentTable.parent.children.remove(self.currentTable)
+        self.currentTable = parent
+
         if "BREAK" in self.llvm:
             self.llvm = self.llvm[:(self.llvm.rfind("BREAK"))]
         elif "NEXTLOOP" in self.llvm:
@@ -135,7 +298,15 @@ class AST2LLVMVisitor(Visitor):
             self.llvm = self.llvm.replace("ELSE" + str(id(currentNode)), str(elselabel))
             self.llvm += "\n"
             self.llvm += str(elselabel) + ":\n"
+
+            # Open a new scope by selecting the right symbol table
+            parent = self.currentTable
+            self.currentTable = self.currentTable.children[0]
             elsebody.accept(self)
+            # After visiting scope, delete the symbol table
+            self.currentTable.parent.children.remove(self.currentTable)
+            self.currentTable = parent
+
             if "BREAK" in self.llvm:
                 self.llvm = self.llvm[:(self.llvm.rfind("BREAK"))]
             elif "NEXTLOOP" in self.llvm:
@@ -159,10 +330,6 @@ class AST2LLVMVisitor(Visitor):
         # Open a new scope by selecting the right symbol table
         parent = self.currentTable
         self.currentTable = self.currentTable.children[0]
-        print("-----------------------------------")
-        print(self.currentTable.name)
-        print(currentNode.children[0].value)
-        #self.currentTable.print()
 
         # Visit scope body
         for child in currentNode.children:
@@ -181,6 +348,7 @@ class AST2LLVMVisitor(Visitor):
         parent = self.currentTable
         self.currentTable = self.currentTable.children[0]
 
+        self.allocateRegistersCurrentScope(self.currentTable)
         # Get corresponding nodes from AST
         condition = currentNode.condition
         body = currentNode.body
@@ -263,8 +431,7 @@ class AST2LLVMVisitor(Visitor):
                 self.llvm += "%" + str(self.instr) + " = load i8, i8* %" + str(
                     symbol.register) + ", align 1\n"
                 self.instr += 1
-            return (str(self.instr-1), type, "reg")
-
+            return (str(self.instr-1), type, "reg", currentNode.value)
 
     def VisitBinaryOperation(self, currentNode):
         print("Binary-----------")
@@ -487,12 +654,23 @@ class AST2LLVMVisitor(Visitor):
 
     def VisitConstant(self, currentNode):
         print("Constant")
-        #self.llvm+= " "+currentNode.value
-        return (currentNode.value, "", "value")
+        value = currentNode.value
+        try:
+            value = int(value[0])
+        except ValueError:
+            value = float(value[0])
+        if isinstance(value, int):
+            return (currentNode.value, "int", "value")
+        elif isinstance(value, float):
+            return (currentNode.value, "float", "value")
+        else:
+            return (currentNode.value, "char", "value")
+
 
     def VisitDeclaration(self, currentNode):
         #print("Declaration2LLVM")
         var = currentNode.var
+        #print(var)
         type = currentNode.type
         attr = currentNode.attr
         '''
@@ -527,6 +705,7 @@ class AST2LLVMVisitor(Visitor):
                 x = "test"
                 #print("Type not implemented or literal")
             '''
+
         return currentNode
 
     def VisitAssignment(self, currentNode):
@@ -540,7 +719,7 @@ class AST2LLVMVisitor(Visitor):
             ltype = self.currentTable.lookup(currentNode.lvalue.var).type
             print(ltype)
             print(value)
-            if value[2] is not "reg":
+            if value[2] != "reg":
                 if ltype == "int":
                     try:
                         value = int(value[0])
@@ -597,7 +776,7 @@ class AST2LLVMVisitor(Visitor):
                 self.llvm += "store float* %" + str(value[0]) + ", float** %" + str(reg) + ", align 8\n"
             if ltype == "char*":
                 self.llvm += "store i8* %" + str(value[0]) + ", i8** %" + str(reg) + ", align 1\n"
-            if value[2] is not "reg":
+            if value[2] != "reg":
                 if ltype == "int":
                     try:
                         value = int(value[0])

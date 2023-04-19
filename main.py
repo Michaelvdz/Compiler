@@ -67,16 +67,16 @@ def main(argv):
         #print("ending")
         astVisitor.ast.view()
 
+
         print("------- Creating LLVM IR -------")
-        llvm = ""
-        llvm += "define dso_local i32 @main(){\n"
+        llvm=""
         LLVMCreator = AST2LLVMVisitor(llvm, STStack.tables[0])
         optimizedTree.root.accept(LLVMCreator)
-        LLVMCreator.llvm += "ret i32 0\n}"
         #print(LLVMCreator.llvm)
         llvm = open(filename+".ll", "w")
         llvm.write(LLVMCreator.llvm)
         llvm.close()
+
 
     else:
         print("Compiler interrupted after finding syntax errors")

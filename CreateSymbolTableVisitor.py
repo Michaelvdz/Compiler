@@ -23,7 +23,6 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitASTNode(self, currentNode):
         #print("Node")
-        #currentNode.print()
         if currentNode.children:
             if currentNode.children[0].name == "Comment":
                 for i in range(currentNode.children[0].value.count('\n')):
@@ -31,9 +30,8 @@ class CreateSymbolTableVisitor(Visitor):
         
         if currentNode.name == "Inst":
             self.lineNr += 1
-        
-        #print(len(currentNode.children))
-        if len(currentNode.children) == 0 and currentNode.value is not "Inst":
+
+        if len(currentNode.children) == 0 and currentNode.value != "Inst":
             if self.table.peek().lookup(currentNode.value) == 0:
                 print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line "+ str(self.lineNr) + ": variable " + currentNode.value + " has not been declared yet! \n")
 
@@ -43,66 +41,101 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitConditional(self, currentNode):
         #print("Scope")
-        for child in currentNode.children:
-            node = child.accept(self)
+        # Creating Symbol Table for condition
+        newtable = SymbolTable()
+        newtable.name = currentNode.value
+        # Get current ST als parent table
+        parenttable = self.table.peek()
+        newtable.parent = parenttable
+        # Append new ST as child of parent ST
+        parenttable.children.append(newtable)
+        # Push ST to stack
+        self.table.push(newtable)
+        currentNode.ifbody.accept(self)
+        # Pop after runthrough
+        self.table.pop()
+        if currentNode.elsebody:
+            # Creating Symbol Table for condition
+            newtable = SymbolTable()
+            newtable.name = currentNode.value
+            # Get current ST als parent table
+            parenttable = self.table.peek()
+            newtable.parent = parenttable
+            # Append new ST as child of parent ST
+            parenttable.children.append(newtable)
+            # Push ST to stack
+            self.table.push(newtable)
+            currentNode.elsebody.accept(self)
+            # Pop after runthrough
+            self.table.pop()
         return currentNode
 
     def VisitScope(self, currentNode):
-        print("Scope - Creating new ST for the scope")
+        # Creating Symbol Table for scope
         newtable = SymbolTable()
+        # Name scope
         newtable.name = "Scope " + str(self.scopeNr)
         self.scopeNr += 1
+        # Get current ST als parent table
         parenttable = self.table.peek()
-        print("Parent with name")
-        print(parenttable.name)
-        print("Parent with #children: " + str(len(parenttable.children)))
         newtable.parent = parenttable
-        print("Parent with #children: " + str(len(parenttable.children)))
+        # Append new ST as child of parent ST
         parenttable.children.append(newtable)
-        print("Parent with #children: " + str(len(parenttable.children)))
-        print("Table with #children " + str(len(newtable.children)))
+        # Push ST to stack
         self.table.push(newtable)
-        print("staring scope")
         for child in currentNode.children:
             node = child.accept(self)
-        print("end scope")
+        # Pop after run through
         self.table.pop()
         return currentNode
 
     def VisitWhile(self, currentNode):
-        print("While")
+        #print("While")
+        # Creating Symbol Table for while
         newtable = SymbolTable()
+        # Name scope
         newtable.name = "While-loop"
         parenttable = self.table.peek()
-        print("Parent with name")
-        print(parenttable.name)
-        print("Parent with #children: " + str(len(parenttable.children)))
         newtable.parent = parenttable
-        print("Parent with #children: " + str(len(parenttable.children)))
+        # Append new ST as child of parent ST
         parenttable.children.append(newtable)
-        print("Parent with #children: " + str(len(parenttable.children)))
-        print("Newtable with name:")
-        print(newtable.name)
-        print("Table with #children " + str(len(newtable.children)))
+        # Push ST to stack
         self.table.push(newtable)
-        '''
-        for child in currentNode.children:
-            node = child.accept(self)
-        '''
+        # if it has for loop and before part
         if currentNode.beforeLoop:
             currentNode.beforeLoop.accept(self)
+        # if it has for loop and before part
         if currentNode.afterLoop:
             currentNode.afterLoop.accept(self)
-
+        # Visit condition
         currentNode.condition.accept(self)
+        # Visit body
         currentNode.body.accept(self)
+        # Pop after run through
         self.table.pop()
         return currentNode
 
     def VisitFunction(self, currentNode):
-        #print("Binary")
-        for child in currentNode.children:
-            node = child.accept(self)
+        #print("Function - Creating new ST for the function")
+        # Creating Symbol Table for function
+        newtable = SymbolTable()
+        # Name scope
+        newtable.name = currentNode.value
+        parenttable = self.table.peek()
+        newtable.parent = parenttable
+        # Append new ST as child of parent ST
+        parenttable.children.append(newtable)
+        # Push ST to stack
+        self.table.push(newtable)
+        # if it has params, visit them
+        for param in currentNode.params:
+            node = param.accept(self)
+        # Visit body
+        currentNode.body.accept(self)
+        # Pop after run through
+        self.table.pop()
+        # Add function to ST
+        self.table.peek().insertFunction(currentNode.value, "", currentNode.returnType.value, "func")
         return currentNode
 
     def VisitExprLoop(self, currentNode):
@@ -135,13 +168,6 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitConstant(self, currentNode):
         #print("Constant")
-        """
-        if len(self.table.vars[currentNode.varName]) == 3:
-            if len(currentNode.varType) == 0 and len(self.table.vars[currentNode.varName][0]) == 0:
-                self.table.vars[currentNode.varName][2] = currentNode.value
-        else:
-            self.table.vars[currentNode.varName].append(currentNode.value)
-        """
         return currentNode
 
     def VisitJump(self, currentNode):
@@ -153,7 +179,6 @@ class CreateSymbolTableVisitor(Visitor):
 
         currConst = ""
         currType = ""
-        #print(currentNode.type)
 
 
         if currentNode.type != "int" and currentNode.type != "float" and currentNode.type != "char" and currentNode.type != "char*"\
@@ -190,23 +215,16 @@ class CreateSymbolTableVisitor(Visitor):
                     "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(self.lineNr) + ": variable " + currentNode.var + " can not be changed because it's a const! \n")
 
         if self.table.peek().lookup(currentNode.var) == 0 and len(currType) != 0:
-            print("Hij wilt dit toevoegen:")
-            print(currentNode.var)
-            print(currConst)
-            print(currType)
-            print(currentNode.attr)
-            self.table.peek().insert(currentNode.var, currConst, currType, currentNode.attr)
-            self.table.peek().print()
+            # self.table.peek().insert(currentNode.var, currConst, currType, currentNode.attr)
+            '''none'''
 
-        """
-        for child in currentNode.children:
-            node = child.accept(self)
-        """
+        if not self.table.peek().lookupInThisTable(currentNode.var):
+            self.table.peek().insert(currentNode.var, currConst, currType, currentNode.attr)
+
         #currentNode.print()
         return currentNode
     
     def VisitAssignment(self, currentNode):
-        #print("Assignment")
         if isinstance(currentNode.lvalue, Variable):
             '''
             varName = currentNode.lvalue.var
@@ -227,7 +245,7 @@ class CreateSymbolTableVisitor(Visitor):
         return currentNode
 
     def VisitVariable(self, currentNode):
-        print("Variable")
+        #print("Variable")
         return currentNode
 
     def VisitMLComment(self, currentNode):

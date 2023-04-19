@@ -214,6 +214,8 @@ class Jump(ASTNode):
     name = ""
     value = ""
     children = []
+    type = ""
+    
     def __init__(self, name="Free"):
         #print("___init-ASTNode___");
         self.children = []
@@ -315,66 +317,6 @@ class UnaryOperation(ASTNode):
     def accept(self, visitor: Visitor):
         return visitor.VisitUnaryOperation(self)
 
-'''
-class RelationOperation(ASTNode):
-
-    name = ""
-    children = []
-    value = ""
-
-    def __init__(self, name):
-        #print("___init-RelationOperation___");
-        self.children = []
-        self.name = "RelationOperation"
-        self.value = name
-        #print("___Node-Created-With-Name:"+ self.name + "___")
-
-    def adopt(self, node):
-        self.children.append(node)
-
-    def adoptChildren(self, nodes):
-        for node in nodes:
-            print("Adding node: " + node.name)
-            self.children.append(node)
-
-    def print(self):
-        print("This is a relation operation node with operator: " + str(self.value) + " and nodes:")
-        for node in self.children:
-            node.print()
-
-    def accept(self, visitor: Visitor):
-        return visitor.VisitRelationOperation(self)
-
-class LogicalOperation(ASTNode):
-
-    name = ""
-    children = []
-    value = ""
-
-    def __init__(self, name):
-        #print("___init-LogicalOperation___");
-        self.children = []
-        self.name = "LogicalOperation"
-        self.value = name
-        #print("___Node-Created-With-Name:"+ self.name + "___")
-
-    def adopt(self, node):
-        self.children.append(node)
-
-    def adoptChildren(self, nodes):
-        for node in nodes:
-            #print("Adding node: " + node.name)
-            self.children.append(node)
-
-    def print(self):
-        print("This is a logical operation node with operator: " + str(self.value) + " and nodes:")
-        for node in self.children:
-            node.print()
-
-    def accept(self, visitor: Visitor):
-        return visitor.VisitLogicalOperation(self)
-'''
-
 class Declaration(ASTNode):
 
     name = ""
@@ -410,7 +352,6 @@ class Declaration(ASTNode):
 
     def acceptWithValue(self, visitor: Visitor, value=0):
         return visitor.VisitDeclaration(self, value)
-
 
 class Constant(ASTNode):
 
@@ -586,3 +527,65 @@ class PrintF(ASTNode):
 
     def adopt(self, node):
         self.children.append(node)
+
+
+
+'''
+class RelationOperation(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+
+    def __init__(self, name):
+        #print("___init-RelationOperation___");
+        self.children = []
+        self.name = "RelationOperation"
+        self.value = name
+        #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def print(self):
+        print("This is a relation operation node with operator: " + str(self.value) + " and nodes:")
+        for node in self.children:
+            node.print()
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitRelationOperation(self)
+
+class LogicalOperation(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+
+    def __init__(self, name):
+        #print("___init-LogicalOperation___");
+        self.children = []
+        self.name = "LogicalOperation"
+        self.value = name
+        #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            #print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def print(self):
+        print("This is a logical operation node with operator: " + str(self.value) + " and nodes:")
+        for node in self.children:
+            node.print()
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitLogicalOperation(self)
+'''

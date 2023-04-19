@@ -53,6 +53,7 @@ logical_expression:  logical_expression op=('&&'|'||') relational_expression
     ;
 
 assignment_expression:  logical_expression
+    | lvalue=declaration_specification assign='=' rvalue=assignment_expression
     ;
 
 pointer:    '*' pointer
@@ -65,8 +66,8 @@ declaration_specification:  typ=type ptr=pointer var=IDENTIFIER
     | ptr=pointer var=IDENTIFIER
     ;
 
-declaration:    lvalue=declaration_specification assign='=' rvalue=assignment_expression
-    | lvalue=declaration_specification
+declaration:
+    lvalue=declaration_specification
     ;
 
 expr:   assignment_expression ';'
@@ -87,7 +88,7 @@ expr_loop:
 
 argumentlist:
     ass=assignment_expression
-    | args=argumentlist ',' ass=assignment_expression
+    | ass=assignment_expression  ',' args=argumentlist
     ;
 
 identifierlist:
@@ -97,9 +98,9 @@ identifierlist:
 
 parameterlist:
     typ=type
-    | decl=declaration_specification
-    | param=parameterlist ',' typ=type
-    | param=parameterlist ',' decl=declaration_specification
+    | decl=declaration
+    | typ=type ',' param=parameterlist
+    | decl=declaration ',' param=parameterlist
     ;
 
 function:

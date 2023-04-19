@@ -484,8 +484,16 @@ class ASTOptimizer(Visitor):
         newNode = copy.copy(currentNode)
         newNode.children = []
         newNode.body = currentNode.body.accept(self)
-        for child in currentNode.children:
+        print("TTTTTTTTTTTTTTTTTTTTT")
+        print(currentNode.body.value)
+        for child in currentNode.body.children:
             node = child.accept(self)
+            if isinstance(node, Jump):
+                print("Jumper")
+                print(node.value)
+                if node.value == "return":
+                    print(currentNode.returnType.value)
+                    node.type = currentNode.returnType.value
             newNode.children.append(node)
         return newNode
 
@@ -558,6 +566,15 @@ class ASTOptimizer(Visitor):
         newNode.children = []
         for child in currentNode.children:
             node = child.acceptWithNoOptimization(self)
+            newNode.children.append(node)
+        return newNode
+
+    def VisitCall(self, currentNode):
+        print("VisitCall")
+        newNode = copy.copy(currentNode)
+        newNode.children = []
+        for child in currentNode.children:
+            node = child.accept(self)
             newNode.children.append(node)
         return newNode
 
