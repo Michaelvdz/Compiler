@@ -26,6 +26,8 @@ class CSTVisitor(CGrammarVisitor):
     def visitInstr(self, ctx):
         print("Inst")
         instr = ASTNode("Inst")
+        if ctx.stdio:
+            print(ctx.stdio.text)
         for child in ctx.children:
             node = self.visit(child)
             if isinstance(node, ASTNode):

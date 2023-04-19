@@ -4,6 +4,7 @@ prog: instr+ EOF
 	;
 
 instr: expr
+    | stdio=IO
     | ';'
 	;
 
@@ -161,4 +162,5 @@ INT: [0-9]+;
 FLOAT: [0-9]*? '.' [0-9]+;
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
 CHAR: (['].[']|['][\\].[']);
+IO: '#include <stdio.h>';
 WS: [ \n\t\r]+ -> skip;
