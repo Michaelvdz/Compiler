@@ -159,7 +159,7 @@ printf: 'printf' '(' (IDENTIFIER | constant) ')'
 
 BLOCKCOMMENT: '/*' .*? '*/';
 SINGLE_LINE_COMMENT: '//'~( '\r' | '\n' )*;
-INT: [0-9]+;
+INT: ([1-9][0-9]*|[0]);
 FLOAT: [0-9]*? '.' [0-9]+;
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
 CHAR: (['].[']|['][\\].[']);
