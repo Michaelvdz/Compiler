@@ -709,18 +709,7 @@ class AST2LLVMVisitor(Visitor):
 
     def VisitConstant(self, currentNode):
         print("Constant")
-        value = currentNode.value
-        try:
-            value = int(value)
-        except ValueError:
-            value = float(value)
-        if isinstance(value, int):
-            return (currentNode.value, "int", "value")
-        elif isinstance(value, float):
-            return (currentNode.value, "float", "value")
-        else:
-            return (currentNode.value, "char", "value")
-
+        return (currentNode.value, "char", "value")
 
     def VisitDeclaration(self, currentNode):
         #print("Declaration2LLVM")
@@ -768,6 +757,7 @@ class AST2LLVMVisitor(Visitor):
 
         # Test if the left value is a declaration
         if isinstance(currentNode.lvalue, Declaration):
+            print("TEEEEEEEEEST")
             currentNode.lvalue.accept(self)
             value = currentNode.rvalue.accept(self)
             self.lvalue = True
@@ -787,7 +777,9 @@ class AST2LLVMVisitor(Visitor):
                         value = float(value[0])
                     except ValueError:
                         print("failiure")
-                    self.llvm += "store float " + str(value) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                    packed = struct.pack("f", value)
+                    unpacked = struct.unpack("f", packed)[0]
+                    self.llvm += "store float " + str(unpacked) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                 elif ltype == "char":
                     value = value[0].replace("'", "")
                     if len(value) > 1:
@@ -852,7 +844,9 @@ class AST2LLVMVisitor(Visitor):
                 if ltype == "int":
                     self.llvm += "store i32 %" + str(value[0]) + ", i32* %" + reg[0] + ", align 4\n"
                 elif ltype == "float":
-                    self.llvm += "store float %" + str(value[0]) + ", float* %" + reg[0] + ", align 4\n"
+                    packed = struct.pack("f", value[0])
+                    unpacked = struct.unpack("f", packed)[0]
+                    self.llvm += "store float %" + str(unpacked) + ", float* %" + reg[0] + ", align 4\n"
                 elif ltype == "char":
                     value = value.replace("'","")
                     self.llvm += "store i8 " + str(ord(value[0])) + ", i8* %" + reg[0] + ", align 1\n"
@@ -877,8 +871,9 @@ class AST2LLVMVisitor(Visitor):
                 except ValueError:
                     print("failiure")
                 if isinstance(value, float) or isinstance(value, int):
-                    self.llvm += "store float " + str(value) + ", float* %" + str(self.instr-1) + ", align 4\n"
-                    #self.symbolTable.replaceRegisters(reg, str(self.instr-1))
+                    packed = struct.pack("f", value[0])
+                    unpacked = struct.unpack("f", packed)[0]
+                    self.llvm += "store float " + str(unpacked) + ", float* %" + str(self.instr-1) + ", align 4\n"
             if type == "char*":
                 value = value[0].replace("'", "")
                 self.llvm += "store i8 " + str(ord(value[0])) + ", i8* %" + str(self.instr-1) + ", align 1\n"

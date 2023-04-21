@@ -504,7 +504,10 @@ class ASTOptimizer(Visitor):
         try:
             value = int(value)
         except ValueError:
-            value = float(value)
+            try:
+                value = float(value)
+            except ValueError:
+                value = value
         if isinstance(value, int):
             if value > 2147483647 or value < -2147483648:
                 print("Dees kan ni")
@@ -515,6 +518,10 @@ class ASTOptimizer(Visitor):
                     while(value > 2147483647):
                         value += 2147483647
                 currentNode.value = value
+        elif isinstance(value, float):
+            return  currentNode
+        else:
+            return currentNode
         return currentNode
 
     def VisitVariable(self, currentNode):
