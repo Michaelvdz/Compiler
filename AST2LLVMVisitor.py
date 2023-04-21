@@ -711,9 +711,9 @@ class AST2LLVMVisitor(Visitor):
         print("Constant")
         value = currentNode.value
         try:
-            value = int(value[0])
+            value = int(value)
         except ValueError:
-            value = float(value[0])
+            value = float(value)
         if isinstance(value, int):
             return (currentNode.value, "int", "value")
         elif isinstance(value, float):

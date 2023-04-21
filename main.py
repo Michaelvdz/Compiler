@@ -20,6 +20,14 @@ def main(argv):
 
     filename = argv[1]
     filename = os.path.splitext(filename)[0]
+    if "/" in filename:
+        split = filename.split("/")
+        size = len(split)
+        filename2 = split[size-1]
+        filename = filename2
+
+    if argv[2]:
+        outputmap = argv[2]
 
     input_stream = FileStream(argv[1])
     lexer = CGrammarLexer(input_stream)
@@ -35,7 +43,7 @@ def main(argv):
         visitor.visit(tree)
 
         #print("Printing tree before optimization")
-        astVisitor = ASTVisitor(filename+"_beforeOptimization")
+        astVisitor = ASTVisitor(filename+"_beforeOptimization",outputmap)
         asttree.root.accept(astVisitor)
         #print("ending")
         astVisitor.ast.view()
@@ -63,7 +71,7 @@ def main(argv):
         print("-------------------------------")
 
         #print("Printing tree")
-        astVisitor = ASTVisitor(filename)
+        astVisitor = ASTVisitor(filename, outputmap)
         optimizedTree.root.accept(astVisitor)
         #print("ending")
         astVisitor.ast.view()
@@ -75,7 +83,7 @@ def main(argv):
         LLVMCreator = AST2LLVMVisitor(llvm, STStack.tables[0])
         optimizedTree.root.accept(LLVMCreator)
         #print(LLVMCreator.llvm)
-        llvm = open(filename+".ll", "w")
+        llvm = open(outputmap + "/" + filename+".ll", "w")
         llvm.write(LLVMCreator.llvm)
         llvm.close()
         ST.print()

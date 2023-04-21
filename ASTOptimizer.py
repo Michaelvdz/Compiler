@@ -499,6 +499,22 @@ class ASTOptimizer(Visitor):
 
     def VisitConstant(self, currentNode):
         #print("Constant")
+        value = currentNode.value
+        print(currentNode.varType)
+        try:
+            value = int(value)
+        except ValueError:
+            value = float(value)
+        if isinstance(value, int):
+            if value > 2147483647 or value < -2147483648:
+                print("Dees kan ni")
+                if value > 2147483647:
+                    while(value > 2147483647):
+                        value -= 2147483647
+                elif value < -2147483648:
+                    while(value > 2147483647):
+                        value += 2147483647
+                currentNode.value = value
         return currentNode
 
     def VisitVariable(self, currentNode):
