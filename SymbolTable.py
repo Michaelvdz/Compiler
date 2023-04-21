@@ -9,6 +9,19 @@ class Node:
     def __str__(self):
         return f'{self.type} and attr: {self.attr} and register: {self.register}'
 
+class Function(Node):
+    def __init__(self, constant, type, value, attr="", node="", params=[]):
+        self.constant = constant
+        self.type = type
+        self.attr = attr
+        self.register = None
+        self.astnode = node
+        self.params = []
+
+    def __str__(self):
+        return f'{self.type} and attr: {self.attr} and register: {self.register} and params:'
+
+
 class SymbolTables:
 
     tables = []
@@ -69,8 +82,9 @@ class SymbolTable:
 
     def insert(self, name, constant, type, attribute=""):
         self.vars[name] = Node(constant, type, "", attribute)
-    def insertFunction(self, name, constant, type, attribute="", node=""):
-        self.vars[name] = Node(constant, type, "", attribute, node)
+
+    def insertFunction(self, name, constant, type, attribute="", node="", params=[]):
+        self.vars[name] = Function(constant, type, "", attribute, node, params)
 
     def insertRegister(self, name, register):
         #print("Zoeken naar var: " + name + "in scope: " + self.name)

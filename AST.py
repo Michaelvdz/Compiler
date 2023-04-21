@@ -253,6 +253,7 @@ class Function(ASTNode):
     name = ""
     value = ""
     returnType = ""
+    hasbody = False
     body = []
     params = []
     children = []

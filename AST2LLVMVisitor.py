@@ -19,6 +19,7 @@ class AST2LLVMVisitor(Visitor):
     lvalue = True
     currentTable = 0
     currentLoop = []
+    context = []
 
     def __init__(self, llvm="", symbolTable=SymbolTable()):
         #print("----------------Converting AST 2 LLVM IR----------------")
@@ -70,8 +71,11 @@ class AST2LLVMVisitor(Visitor):
 
     def allocateRegistersCurrentScope(self, table):
         print("Allocating registers:")
+        i = 0
         for key, value in table.vars.items():
             self.allocateRegister(table, key, value)
+            i += 1
+        return i
 
 
     def VisitASTNode(self, currentNode):
@@ -124,7 +128,17 @@ class AST2LLVMVisitor(Visitor):
                 params.append(node)
         func = self.currentTable.lookup(currentNode.value.replace("()",""))
         if func and func.attr == "func":
-            self.llvm += "%" + str(self.instr) + " = call i32" + " @" + currentNode.value.replace("()","")
+            print("FUNCTION TYPE")
+            print(func.type)
+            if func.type == "int":
+                self.llvm += "%" + str(self.instr) + " = call i32" + " @" + currentNode.value.replace("()","")
+            elif func.type == "float":
+                self.llvm += "%" + str(self.instr) + " = call float" + " @" + currentNode.value.replace("()","")
+            elif func.type == "char":
+                self.llvm += "%" + str(self.instr) + " = call i8" + " @" + currentNode.value.replace("()","")
+            else:
+                self.llvm += "call void" + " @" + currentNode.value.replace("()", "")
+                self.instr -= 1
             self.llvm += "("
             print("Parameters:")
             i = 1
@@ -152,68 +166,86 @@ class AST2LLVMVisitor(Visitor):
     def VisitFunction(self, currentNode):
         print("Function")
         self.instr = 0
-        # Open a new scope by selecting the right symbol table
-        parent = self.currentTable
-        self.currentTable = self.currentTable.children[0]
+        hasreturn = len(self.context)
+        print("Current #return in stack")
+        print(hasreturn)
+        if currentNode.hasbody:
+            # Open a new scope by selecting the right symbol table
+            parent = self.currentTable
+            self.currentTable = self.currentTable.children[0]
 
-        returntype = currentNode.returnType.value
-        funcname = currentNode.value
-        self.llvm += "define dso_local "
-        if returntype == "int":
-            self.llvm += "i32 "
-        elif returntype == "float":
-            self.llvm += "float "
-        elif returntype == "char":
-            self.llvm += "i8 "
-        else:
-            print("Not supported")
-        self.llvm += "@" + funcname
-        if currentNode.params:
-            self.llvm += "("
-            params = currentNode.params
-            numberParams = len(params)
-            i = 1
-            for param in params:
-                node = param.accept(self)
-                paramtype = node.type
-                if paramtype == "int":
-                    paramtype = "i32"
-                elif paramtype == "float":
-                    paramtype= "float"
-                elif paramtype == "char":
-                    paramtype= "i8"
-                self.llvm += paramtype + " noundef %" + str(self.instr)
-                if i != numberParams:
-                    self.llvm += ", "
-                self.instr += 1
-                i += 1
-            self.llvm += "){\n"
-        else:
-            self.llvm += "(){\n"
-        self.instr += 1
-        self.allocateRegistersCurrentScope(self.currentTable)
-        instr = self.instr - ((2*len(currentNode.params))+1)
-        if currentNode.params:
-            params = currentNode.params
-            for param in params:
-                node = param.accept(self)
-                paramtype = node.type
-                reg = self.currentTable.lookupInThisTable(node.var).register
-                if paramtype == "int":
-                    self.llvm += "store i32 %" + str(instr) + " , i32* %" + str(reg) + ", align 4\n"
-                elif paramtype == "float":
-                    self.llvm += "store float %" + str(instr) + " , float %" + str(reg) + ", align 4\n"
-                elif paramtype == "char":
-                    self.llvm += "store i8 %" + str(instr) + " , i8* %" + str(reg) + ", align 1\n"
-                else:
-                    print("None")
-                instr += 1
+            returntype = currentNode.returnType.value
+            funcname = currentNode.value
+            self.llvm += "define dso_local "
+            if returntype == "int":
+                self.llvm += "i32 "
+            elif returntype == "float":
+                self.llvm += "float "
+            elif returntype == "char":
+                self.llvm += "i8 "
+            else:
+                self.llvm += "void "
+            self.llvm += "@" + funcname
+            if currentNode.params:
+                self.llvm += "("
+                params = currentNode.params
+                numberParams = len(params)
+                i = 1
+                for param in params:
+                    node = param.accept(self)
+                    paramtype = node.type
+                    if paramtype == "int":
+                        paramtype = "i32"
+                    elif paramtype == "float":
+                        paramtype= "float"
+                    elif paramtype == "char":
+                        paramtype= "i8"
+                    self.llvm += paramtype + " noundef %" + str(self.instr)
+                    if i != numberParams:
+                        self.llvm += ", "
+                    self.instr += 1
+                    i += 1
+                self.llvm += "){\n"
+            else:
+                self.llvm += "(){\n"
+            self.instr += 1
+            number = self.allocateRegistersCurrentScope(self.currentTable)
+            print("Allocated regs:")
+            print(number)
+            print("Self.instr")
+            print(str(self.instr))
+            instr = self.instr - (len(currentNode.params) + number + 1)
+            print("Instr")
+            print(str(instr))
+            if currentNode.params:
+                params = currentNode.params
+                for param in params:
+                    node = param.accept(self)
+                    paramtype = node.type
+                    reg = self.currentTable.lookupInThisTable(node.var).register
+                    if paramtype == "int":
+                        self.llvm += "store i32 %" + str(instr) + " , i32* %" + str(reg) + ", align 4\n"
+                    elif paramtype == "float":
+                        self.llvm += "store float %" + str(instr) + " , float %" + str(reg) + ", align 4\n"
+                    elif paramtype == "char":
+                        self.llvm += "store i8 %" + str(instr) + " , i8* %" + str(reg) + ", align 1\n"
+                    else:
+                        print("None")
+                    instr += 1
 
-        node = currentNode.body.accept(self)
-        # After visiting scope, delete the symbol table
-        self.currentTable.parent.children.remove(self.currentTable)
-        self.currentTable = parent
-        self.llvm += "}\n"
+            if currentNode.body:
+                node = currentNode.body.accept(self)
+            newhasreturn = len(self.context)
+            print("New #return in stack")
+            print(newhasreturn)
+            if newhasreturn != hasreturn + 1:
+                self.llvm += "ret void\n"
+            else:
+                self.context.pop()
+            # After visiting scope, delete the symbol table
+            self.currentTable.parent.children.remove(self.currentTable)
+            self.currentTable = parent
+            self.llvm += "}\n"
         return currentNode
 
     def VisitJump(self, currentNode):
@@ -235,20 +267,43 @@ class AST2LLVMVisitor(Visitor):
                 result = ("0", "", "value")
             if currentNode.type == "int":
                 if result[2] == "reg":
-                    self.llvm += "ret i32 %" + str(result[0]) + "\n"
+                    reg = self.loadRegister(result[0])
+                    self.llvm += "ret i32 %" + str(reg) + "\n"
                 else:
                     self.llvm += "ret i32 " + str(result[0]) + "\n"
             if currentNode.type == "float":
                 if result[2] == "reg":
-                    self.llvm += "ret float %" + str(result[0]) + "\n"
+                    reg = self.loadRegister(result[0])
+                    self.llvm += "ret float %" + str(reg) + "\n"
                 else:
                     self.llvm += "ret float " + str(result[0]) + "\n"
             if currentNode.type == "char":
                 if result[2] == "reg":
-                    self.llvm += "ret i8 %" + str(result[0]) + "\n"
+                    reg = self.loadRegister(result[0])
+                    self.llvm += "ret i8 %" + str(reg) + "\n"
                 else:
                     self.llvm += "ret i8 " + str(result[0]) + "\n"
+            if currentNode.type == "void":
+                self.llvm += "ret void\n"
+            self.context.append("return")
         return currentNode
+
+    def loadRegister(self, register):
+        symbol = self.currentTable.lookupByRegister(register)
+        type = symbol.type
+        if type == "int":
+            self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(
+                symbol.register) + ", align 4\n"
+            self.instr += 1
+        if type == "float":
+            self.llvm += "%" + str(self.instr) + " = load float, float* %" + str(
+                symbol.register) + ", align 4\n"
+            self.instr += 1
+        if type == "char":
+            self.llvm += "%" + str(self.instr) + " = load i8, i8* %" + str(
+                symbol.register) + ", align 1\n"
+            self.instr += 1
+        return self.instr - 1
 
     def VisitConditional(self, currentNode):
         print("Conditional")
@@ -413,7 +468,7 @@ class AST2LLVMVisitor(Visitor):
         # For lvalue's look for the register
         if self.lvalue:
             if self.currentTable.lookup(currentNode.value):
-                return (str(self.currentTable.lookup(currentNode.value).register), str(self.currentTable.lookup(currentNode.value).type), "reg")
+                return (str(self.currentTable.lookup(currentNode.value).register), str(self.currentTable.lookup(currentNode.value).type), "reg", currentNode.value)
             else:
                 return currentNode
         else:

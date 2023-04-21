@@ -105,9 +105,9 @@ parameterlist:
     ;
 
 function:
-    returntype=type_specifier funcname=IDENTIFIER '(' param=parameterlist ')' '{' funcbody=expr_loop '}'
+    returntype=type_specifier funcname=IDENTIFIER '(' param=parameterlist ')' body='{' funcbody=expr_loop '}'
     | returntype=type_specifier funcname=IDENTIFIER '(' param=parameterlist ')' ';'
-    | returntype=type_specifier funcname=IDENTIFIER '(' ')' '{' funcbody=expr_loop '}'
+    | returntype=type_specifier funcname=IDENTIFIER '(' ')' body='{' funcbody=expr_loop '}'
     | returntype=type_specifier funcname=IDENTIFIER '(' ')' ';'
     ;
 
@@ -144,6 +144,7 @@ type:   reserved_word type_specifier
 type_specifier: typ='int'
     |   typ='float'
     |   typ='char'
+    |   typ='void'
    ;
 
 reserved_word:  'const'

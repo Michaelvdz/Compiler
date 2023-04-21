@@ -117,25 +117,32 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitFunction(self, currentNode):
         #print("Function - Creating new ST for the function")
-        # Creating Symbol Table for function
-        newtable = SymbolTable()
-        # Name scope
-        newtable.name = currentNode.value
-        parenttable = self.table.peek()
-        newtable.parent = parenttable
-        # Append new ST as child of parent ST
-        parenttable.children.append(newtable)
-        # Push ST to stack
-        self.table.push(newtable)
-        # if it has params, visit them
-        for param in currentNode.params:
-            node = param.accept(self)
-        # Visit body
-        currentNode.body.accept(self)
-        # Pop after run through
-        self.table.pop()
-        # Add function to ST
-        self.table.peek().insertFunction(currentNode.value, "", currentNode.returnType.value, "func")
+        if currentNode.hasbody:
+            # Creating Symbol Table for function
+            newtable = SymbolTable()
+            # Name scope
+            newtable.name = currentNode.value
+            parenttable = self.table.peek()
+            newtable.parent = parenttable
+            # Append new ST as child of parent ST
+            parenttable.children.append(newtable)
+            # Push ST to stack
+            self.table.push(newtable)
+            if currentNode.body:
+                # if it has params, visit them
+                for param in currentNode.params:
+                    node = param.accept(self)
+                # Visit body
+                if currentNode.body:
+                    currentNode.body.accept(self)
+            # Pop after run through
+            self.table.pop()
+            # Add function to ST
+            self.table.peek().insertFunction(currentNode.value, "", currentNode.returnType.value, "func")
+        else:
+            for param in currentNode.params:
+                print(param.type)
+            self.table.peek().insertFunction(currentNode.value, "", currentNode.returnType.value, "func")
         return currentNode
 
     def VisitExprLoop(self, currentNode):
@@ -246,6 +253,10 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitVariable(self, currentNode):
         #print("Variable")
+        return currentNode
+
+    def VisitCall(self, currentNode):
+        #print("Call")
         return currentNode
 
     def VisitMLComment(self, currentNode):

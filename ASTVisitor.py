@@ -60,8 +60,9 @@ class ASTVisitor(Visitor):
                 param = child.accept(self)
                 self.ast.edge(str(id(currentNode)), str(id(param)), "Parameter")
 
-        body = currentNode.body.accept(self)
-        self.ast.edge(str(id(currentNode)), str(id(body)), "Body")
+        if currentNode.body:
+            body = currentNode.body.accept(self)
+            self.ast.edge(str(id(currentNode)), str(id(body)), "Body")
         #print("Ending Function")
         return currentNode
 

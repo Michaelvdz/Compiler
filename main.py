@@ -1,3 +1,4 @@
+import copy
 import sys
 
 import os
@@ -69,6 +70,7 @@ def main(argv):
 
 
         print("------- Creating LLVM IR -------")
+        ST = copy.copy(STStack.tables[0])
         llvm=""
         LLVMCreator = AST2LLVMVisitor(llvm, STStack.tables[0])
         optimizedTree.root.accept(LLVMCreator)
@@ -76,13 +78,12 @@ def main(argv):
         llvm = open(filename+".ll", "w")
         llvm.write(LLVMCreator.llvm)
         llvm.close()
+        ST.print()
+
 
 
     else:
         print("Compiler interrupted after finding syntax errors")
-
-
-
 
 
 if __name__ == '__main__':
