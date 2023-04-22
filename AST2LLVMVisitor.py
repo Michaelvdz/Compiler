@@ -580,6 +580,7 @@ class AST2LLVMVisitor(Visitor):
                     self.llvm += "%" + str(self.instr) + " = sub nsw i32 " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                 elif BinType == "float":
                     self.llvm += "%" + str(self.instr) + " = fsub float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
+                self.instr += 1
             case "*":
                 if BinType == "int":
                     self.llvm += "%" + str(self.instr) + " = mul nsw i32 " + str(leftvalue) + ", " + str(rightvalue) + "\n"
@@ -756,8 +757,9 @@ class AST2LLVMVisitor(Visitor):
                                 self.llvm += "%" + str(self.instr) + " = add nsw i32 %" + str(self.instr-1) + ", 1\n"
                                 self.instr += 1
                                 self.llvm += "store i32 %" + str(self.instr-1) + ", i32* %" + str(var.register) + ", align 4\n"
-                                return var.register
+                                return (str(self.instr-2) , str(var.type), "reg", str(child.value))
             case "--":
+                print("Doing decrement")
                 for child in currentNode.children:
                     if isinstance(child, Variable):
                         var = self.currentTable.lookup(child.value)
@@ -768,7 +770,7 @@ class AST2LLVMVisitor(Visitor):
                                 self.llvm += "%" + str(self.instr) + " = sub nsw i32 %" + str(self.instr-1) + ", 1\n"
                                 self.instr += 1
                                 self.llvm += "store i32 %" + str(self.instr-1) + ", i32* %" + str(var.register) + ", align 4\n"
-                                return var.register
+                                return (str(self.instr-2) , str(var.type), "reg", str(child.value))
             case other:
                 print("not implemented yet")
         return currentNode
@@ -887,16 +889,16 @@ class AST2LLVMVisitor(Visitor):
             else:
                 if ltype == "int":
                     if value[1] == "float":
-                        self.llvm += "%" + str(self.instr) + " = fptosi float %" + str(value[0]) + " to i32\n"
+                        self.llvm += "%" + str(value[0]) + " = fptosi float %" + str(value[0]) + " to i32\n"
                         self.instr += 1
-                    self.llvm += "store i32 %" + str(self.instr - 1) + ", i32* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                    self.llvm += "store i32 %" + str(value[0]) + ", i32* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                 elif ltype == "float":
                     if value[1] == "int":
-                        self.llvm += "%" + str(self.instr) + " = sitofp i32 %" + str(value[0]) + " to float\n"
+                        self.llvm += "%" + str(value[0]) + " = sitofp i32 %" + str(value[0]) + " to float\n"
                         self.instr += 1
-                    self.llvm += "store float %" + str(self.instr - 1) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                    self.llvm += "store float %" + str(value[0]) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                 elif ltype == "char":
-                    self.llvm += "store i8 %" + str(self.instr - 1) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
+                    self.llvm += "store i8 %" + str(value[0]) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
                 elif "int*" == ltype:
                     self.llvm += "store i32* %" + str(value[0]) + ", i32** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
                 elif  "float*" == ltype:

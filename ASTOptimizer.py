@@ -394,69 +394,84 @@ class ASTOptimizer(Visitor):
         match currentNode.value:
             case "-":
                 value = 0
-                for child in currentNode.children:
-                    node = child.accept(self)
-                    try:
-                        value = -int(node.value)
-                    except ValueError:
-                        value = -float(node.value)
-                currentNode.children = 0
-                currentNode.value = value
-                node = Constant(str(value))
-                return node
+                if isinstance(currentNode.children[0], Constant):
+                    for child in currentNode.children:
+                        node = child.accept(self)
+                        try:
+                            value = -int(node.value)
+                        except ValueError:
+                            value = -float(node.value)
+                    currentNode.children = 0
+                    currentNode.value = value
+                    node = Constant(str(value))
+                    return node
+                else:
+                    return currentNode
             case "--":
-                for child in currentNode.children:
-                    node = child.accept(self)
-                    try:
-                        value = int(node.value) - 1
-                    except ValueError:
-                        value = float(node.value) - 1
-                currentNode.children = 0
-                currentNode.value = value
-                node = Constant(str(value))
-                return node
+                if isinstance(currentNode.children[0], Constant):
+                    for child in currentNode.children:
+                        node = child.accept(self)
+                        try:
+                            value = int(node.value) - 1
+                        except ValueError:
+                            value = float(node.value) - 1
+                    currentNode.children = 0
+                    currentNode.value = value
+                    node = Constant(str(value))
+                    return node
+                else:
+                    return currentNode
             case "+":
                 value = 0
-                for child in currentNode.children:
-                    node = child.accept(self)
-                    try:
-                        value = int(node.value)
-                    except ValueError:
-                        value = float(node.value)
-                currentNode.children = 0
-                currentNode.value = value
-                node = Constant(str(value))
-                return node
+                if isinstance(currentNode.children[0], Constant):
+                    for child in currentNode.children:
+                        node = child.accept(self)
+                        try:
+                            value = int(node.value)
+                        except ValueError:
+                            value = float(node.value)
+                    currentNode.children = 0
+                    currentNode.value = value
+                    node = Constant(str(value))
+                    return node
+                else:
+                    return  currentNode.children[0]
             case "++":
-                for child in currentNode.children:
-                    node = child.accept(self)
-                    try:
-                        value = int(node.value) + 1
-                    except ValueError:
-                        value = float(node.value) + 1
-                currentNode.children = 0
-                currentNode.value = value
-                node = Constant(str(value))
-                return node
+                if isinstance(currentNode.children[0], Constant):
+                    for child in currentNode.children:
+                        node = child.accept(self)
+                        try:
+                            value = int(node.value) + 1
+                        except ValueError:
+                            value = float(node.value) + 1
+                    currentNode.children = 0
+                    currentNode.value = value
+                    node = Constant(str(value))
+                    return node
+                else:
+                    return currentNode
             case "!":
-                for child in currentNode.children:
-                    node = child.accept(self)
-                    try:
-                        value = int(node.value)
-                    except ValueError:
-                        value = float(node.value)
-                    if abs(value) > 0:
-                        value = 1
-                    else:
-                        value = 0
-                    if value == 1:
-                        newvalue = "0"
-                    else:
-                        newvalue = "1"
-                currentNode.children = 0
-                currentNode.value = newvalue
-                node = Constant(newvalue)
-                return node
+                if isinstance(currentNode.children[0], Constant):
+                    for child in currentNode.children:
+                        node = child.accept(self)
+                        try:
+                            value = int(node.value)
+                        except ValueError:
+                            value = float(node.value)
+                        if abs(value) > 0:
+                            value = 1
+                        else:
+                            value = 0
+                        if value == 1:
+                            newvalue = "0"
+                        else:
+                            newvalue = "1"
+                    currentNode.children = 0
+                    currentNode.value = newvalue
+                    node = Constant(newvalue)
+                    return node
+                else:
+                    return currentNode
             case "_":
                 print("none")
         return currentNode
