@@ -326,6 +326,7 @@ class Declaration(ASTNode):
     type = ASTNode
     var = ASTNode
     attr = ASTNode
+    pointer = ASTNode
 
 
     def __init__(self, name):
@@ -333,6 +334,7 @@ class Declaration(ASTNode):
         self.children = []
         self.name = "Declaration"
         self.value = name
+        self.pointer = None
         #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def adopt(self, node):
@@ -353,6 +355,40 @@ class Declaration(ASTNode):
 
     def acceptWithValue(self, visitor: Visitor, value=0):
         return visitor.VisitDeclaration(self, value)
+
+class Pointer(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+    type = ASTNode
+    var = ASTNode
+    attr = ASTNode
+
+
+    def __init__(self, name):
+        #print("___init-Declaration___");
+        self.children = []
+        self.name = name
+        self.value = name
+        #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            #print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def print(self):
+        print("This is a pointer node:")
+        for node in self.children:
+            node.print()
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitPointer(self)
+
 
 class Constant(ASTNode):
 

@@ -225,12 +225,36 @@ class CreateSymbolTableVisitor(Visitor):
             # self.table.peek().insert(currentNode.var, currConst, currType, currentNode.attr)
             '''none'''
 
+        print(currentNode.pointer)
+        print(currentNode.var)
+        if currentNode.pointer:
+            node = currentNode.pointer.accept(self)
+            for star in node.children:
+                currType = currType + "*"
+            currType += "*"
+        print("Type of var")
+        print(currType)
+
+
+
+
         if not self.table.peek().lookupInThisTable(currentNode.var):
             self.table.peek().insert(currentNode.var, currConst, currType, currentNode.attr)
 
         #currentNode.print()
         return currentNode
-    
+
+    def VisitPointer(self, currentNode):
+        if currentNode.children:
+            for child in currentNode.children:
+                node = child.accept(self)
+                for child2 in node.children:
+                    currentNode.children.append(node)
+                    node.children = []
+                return currentNode
+        else:
+            return currentNode
+
     def VisitAssignment(self, currentNode):
         if isinstance(currentNode.lvalue, Variable):
             '''

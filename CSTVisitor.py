@@ -79,7 +79,7 @@ class CSTVisitor(CGrammarVisitor):
                 if isinstance(node, UnaryOperator):
                     newnode.value = node.value
                 elif node is None:
-                    newvar = ASTNode(ctx.iden.text)
+                    newvar = Variable(ctx.iden.text)
                     newnode.adopt(newvar)
                 else:
                     newnode.adopt(node)
@@ -152,6 +152,15 @@ class CSTVisitor(CGrammarVisitor):
             return assign
         return self.visitChildren(ctx)
 
+    # Visit a parse tree produced by CGrammarParser#reserved_word.
+    def visitPointer(self, ctx:CGrammarParser.PointerContext):
+        #print("Pointer")
+        pointer = Pointer("*")
+        if ctx.ptr:
+            ptr = self.visit(ctx.ptr)
+            pointer.adopt(ptr)
+        return pointer
+
     def visitDeclaration_specification(self, ctx:CGrammarParser.Declaration_specificationContext):
         print("DeclarationSpecifier")
         decl = Declaration("VariableDeclartion")
@@ -167,17 +176,15 @@ class CSTVisitor(CGrammarVisitor):
                             decl.adopt(child2)
                             decl.attr = child2.value
                         if child2.type == "type":
-                            # print("Doetem dees wel?")
+                            print("Doetem dees wel?")
                             decl.adopt(child2)
-                            if ctx.ptr:
-                                # We are in pointer decl/def
-                                decl.type = child2.value + "*"
-                            else:
-                                decl.type = child2.value
-                elif child is ctx.ptr:
-                    pointer = ASTNode("*")
-                    decl.adopt(pointer)
+                            decl.type = child2.value
+                elif child == ctx.ptr:
+                    node = self.visit(ctx.ptr)
+                    decl.adopt(node)
+                    decl.pointer = node
                 else:
+                    print("En dees?")
                     var = ASTNode(ctx.var.text)
                     decl.adopt(var)
                     decl.var = var.value
@@ -185,7 +192,7 @@ class CSTVisitor(CGrammarVisitor):
             # We are just in var assignment/definition
             if ctx.ptr:
                 op = UnaryOperation(self.visit(ctx.ptr).value)
-                var = ASTNode(ctx.var.text)
+                var = Variable(ctx.var.text)
                 op.adopt(var)
                 return op
             else:
@@ -401,12 +408,6 @@ class CSTVisitor(CGrammarVisitor):
         word.type = "reserved_word"
         return word
 
-    # Visit a parse tree produced by CGrammarParser#reserved_word.
-    def visitPointer(self, ctx:CGrammarParser.Reserved_wordContext):
-        #print("Pointer")
-        word = ASTNode(ctx.getText())
-        word.type = "pointer"
-        return word
 
     # Visit a parse tree produced by CGrammarParser#reserved_word.
     def visitComment(self, ctx: CGrammarParser.CommentContext):

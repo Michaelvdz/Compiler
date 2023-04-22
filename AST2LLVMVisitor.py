@@ -33,33 +33,37 @@ class AST2LLVMVisitor(Visitor):
     def allocateRegister(self, table, name, var):
         type = var.type
         attr = var.attr
-        match type:
-            case "int":
-                self.llvm += "%" + str(self.instr) + " = alloca i32, align 4\n"
-                table.insertRegister(name, str(self.instr))
-                self.instr += 1
-            case "float":
-                self.llvm += "%" + str(self.instr) + " = alloca float, align 4\n"
-                table.insertRegister(name, str(self.instr))
-                self.instr += 1
-            case "char":
-                self.llvm += "%" + str(self.instr) + " = alloca i8, align 1\n"
-                table.insertRegister(name, str(self.instr))
-                self.instr += 1
-            case "int*":
-                self.llvm += "%" + str(self.instr) + " = alloca i32*, align 8\n"
-                table.insertRegister(name, str(self.instr))
-                self.instr += 1
-            case "float*":
-                self.llvm += "%" + str(self.instr) + " = alloca float*, align 8\n"
-                table.insertRegister(name, str(self.instr))
-                self.instr += 1
-            case "char*":
-                self.llvm += "%" + str(self.instr) + " = alloca i8*, align 8\n"
-                table.insertRegister(name, str(self.instr))
-                self.instr += 1
-            case other:
-                x = "test"
+        print("Allocating register for var: " + str(name) + " with type: " + str(type))
+        if type == "int":
+            self.llvm += "%" + str(self.instr) + " = alloca i32, align 4\n"
+            table.insertRegister(name, str(self.instr))
+            self.instr += 1
+        elif type == "float":
+            self.llvm += "%" + str(self.instr) + " = alloca float, align 4\n"
+            table.insertRegister(name, str(self.instr))
+            self.instr += 1
+        elif type == "char":
+            self.llvm += "%" + str(self.instr) + " = alloca i8, align 1\n"
+            table.insertRegister(name, str(self.instr))
+            self.instr += 1
+        elif "int*" in type:
+            print("IER ZOEM TOCH MOETEN INZITTE?")
+            llvmtyp = type.replace("int","i32")
+            self.llvm += "%" + str(self.instr) + " = alloca " + str(llvmtyp) + ", align 8\n"
+            table.insertRegister(name, str(self.instr))
+            self.instr += 1
+        elif "float*" in type:
+            llvmtyp = type.replace("float", "float")
+            self.llvm += "%" + str(self.instr) + " = alloca " + str(llvmtyp) + ", align 8\n"
+            table.insertRegister(name, str(self.instr))
+            self.instr += 1
+        elif "char*" in type:
+            llvmtyp = type.replace("char", "i8")
+            self.llvm += "%" + str(self.instr) + " = alloca " + str(llvmtyp) + ", align 8\n"
+            table.insertRegister(name, str(self.instr))
+            self.instr += 1
+        else:
+            print("Type not implemented")
 
     def allocateRegisters(self, table):
         print("Allocating registers:")
@@ -76,7 +80,6 @@ class AST2LLVMVisitor(Visitor):
             self.allocateRegister(table, key, value)
             i += 1
         return i
-
 
     def VisitASTNode(self, currentNode):
         print("Node")
@@ -467,6 +470,7 @@ class AST2LLVMVisitor(Visitor):
         print("Variable")
         # For lvalue's look for the register
         if self.lvalue:
+            print(currentNode.value)
             if self.currentTable.lookup(currentNode.value):
                 return (str(self.currentTable.lookup(currentNode.value).register), str(self.currentTable.lookup(currentNode.value).type), "reg", currentNode.value)
             else:
@@ -485,6 +489,11 @@ class AST2LLVMVisitor(Visitor):
             if type == "char":
                 self.llvm += "%" + str(self.instr) + " = load i8, i8* %" + str(
                     symbol.register) + ", align 1\n"
+                self.instr += 1
+            if "int*" in type:
+                print("Komterm ier?")
+                self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(
+                    symbol.register) + ", align 4\n"
                 self.instr += 1
             return (str(self.instr-1), type, "reg", currentNode.value)
 
@@ -626,47 +635,92 @@ class AST2LLVMVisitor(Visitor):
         print("Unary")
         match currentNode.value:
             case "&":
+                self.lvalue = True
                 node = currentNode.children[0].accept(self)
+                print("ADREEEEEEEEEEES")
+                print(currentNode.children[0].value)
+                print(node)
                 return node
             case "*":
                 #node = currentNode.children[0].accept(self)
-                for child in currentNode.children:
-                    node = child.accept(self)
-                    if isinstance(node, ASTNode):
-                        match self.symbolTable.lookup(node.value).type:
-                            case "int*":
-                                self.llvm += "%" + str(self.instr) + " = load i32*, i32** %" + str(self.symbolTable.lookup(node.value).register) + ", align 8\n"
-                                self.instr += 1
-                                return "%"+self.symbolTable.lookup(node.value).register
-                            case "float*":
-                                self.llvm += "%" + str(self.instr) + " = load float*, float** %" + str(
-                                    self.symbolTable.lookup(node.value).register) + ", align 8\n"
-                                self.instr += 1
-                                return "%" + self.symbolTable.lookup(node.value).register
-                            case "char*":
-                                self.llvm += "%" + str(self.instr) + " = load i8*, i8** %" + str(
-                                    self.symbolTable.lookup(node.value).register) + ", align 8\n"
-                                self.instr += 1
-                                return "%" + self.symbolTable.lookup(node.value).register
+                print("#Pointers")
+                print(len(currentNode.children))
+                var = ""
+                if self.lvalue:
+                    if currentNode.children:
+                        for child in currentNode.children:
+                            if isinstance(child, Variable):
+                                variable = self.currentTable.lookup(child.value)
+                                var = (str(variable.register), str(variable.type), "reg", currentNode.value)
+
+                                if "int*" in var[1]:
+                                    llvmrtyp = var[1].replace("int", "i32")
+                                    self.llvm += "%" + str(self.instr) + " = load " + str(llvmrtyp) + ", " + str(llvmrtyp) + "* %" + str(var[0]) + ", align 8\n"
+                                    self.instr += 1
+                                elif "float*" in var[1]:
+                                    llvmrtyp = var[1].replace("float", "float")
+                                    self.llvm += "%" + str(self.instr) + " = load " + str(llvmrtyp) + ", " + str(llvmrtyp) + "* %" + str(var[0]) + ", align 8\n"
+                                    self.instr += 1
+                                else:
+                                    llvmrtyp = var[1].replace("char", "i8")
+                                    self.llvm += "%" + str(self.instr) + " = load " + str(llvmrtyp) + ", " + str(llvmrtyp) + "* %" + str(var[0]) + ", align 8\n"
+                                    self.instr += 1
+                            else:
+                                return child.visit(self)
+                else:
+                    if currentNode.children:
+                        for child in currentNode.children:
+                            if isinstance(child, Variable):
+                                print("GETTING VAR IN DEREF")
+                                variable = self.currentTable.lookup(child.value)
+                                var = (str(variable.register), str(variable.type), "reg", child.value)
+                                if "int*" in var[1]:
+                                    llvmrtyp = var[1].replace("int", "i32")
+                                    self.llvm += "%" + str(self.instr) + " = load " + str(llvmrtyp) + ", " + str(llvmrtyp) + "* %" + str(var[0]) + ", align 8\n"
+                                    self.instr += 1
+                                elif "float*" in var[1]:
+                                    llvmrtyp = var[1].replace("float", "float")
+                                    self.llvm += "%" + str(self.instr) + " = load " + str(llvmrtyp) + ", " + str(llvmrtyp) + "* %" + str(var[0]) + ", align 8\n"
+                                    self.instr += 1
+                                else:
+                                    llvmrtyp = var[1].replace("char", "i8")
+                                    self.llvm += "%" + str(self.instr) + " = load " + str(llvmrtyp) + ", " + str(llvmrtyp) + "* %" + str(var[0]) + ", align 8\n"
+                                    self.instr += 1
+                                var = (str(self.instr-1), str(variable.type[:-1]), "reg", var[3])
+                            else:
+                                print("GETTING DEREF OF DEREF")
+                                var = child.accept(self)
+                                llvmrtyp = var[1].replace("int", "i32")
+                                if "int*" in var[1]:
+                                    self.llvm += "%" + str(self.instr) + " = load " + str(llvmrtyp) + ", " + str(llvmrtyp) + "* %" + str(var[0]) + ", align 8\n"
+                                    self.instr += 1
+                                elif "float*" in var[1]:
+                                    self.llvm += "%" + str(self.instr) + " = load " + str(llvmrtyp) + ", " + str(llvmrtyp) + "* %" + str(var[0]) + ", align 8\n"
+                                    self.instr += 1
+                                else:
+                                    self.llvm += "%" + str(self.instr) + " = load " + str(llvmrtyp) + ", " + str(llvmrtyp) + "* %" + str(var[0]) + ", align 8\n"
+                                    self.instr += 1
+                                var = (str(self.instr-1), str(var[1][:-1]), "reg", var[3])
+                if "*" not in var[1]:
+                    print("IF NO MORE DEREF NEEDED, RETURN VALUE")
+                    if "int" in var[1]:
+                        self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(
+                            self.instr - 1) + ", align 8\n"
+                        self.instr += 1
+                    elif "float" in var[1]:
+                        self.llvm += "%" + str(self.instr) + " = load float, float* %" + str(
+                            self.instr - 1) + ", align 8\n"
+                        self.instr += 1
                     else:
-                        #type = self.symbolTable.lookupByRegister(node).type
-                        var = child.value
-                        match self.symbolTable.lookupByRegister(node[0]).type:
-                            case "int*":
-                                self.llvm += "%" + str(self.instr) + " = load i32*, i32** %" + str(self.symbolTable.lookup(var).register) + ", align 8\n"
-                                self.instr += 1
-                                return self.symbolTable.lookup(var).register
-                            case "float*":
-                                self.llvm += "%" + str(self.instr) + " = load float*, float** %" + str(
-                                    self.symbolTable.lookup(var).register) + ", align 8\n"
-                                self.instr += 1
-                                return self.symbolTable.lookup(var).register
-                            case "char*":
-                                self.llvm += "%" + str(self.instr) + " = load i8*, i8** %" + str(
-                                    self.symbolTable.lookup(var).register) + ", align 8\n"
-                                self.instr += 1
-                                return self.symbolTable.lookup(var).register
-                        return node
+                        self.llvm += "%" + str(self.instr) + " = load i8, i8* %" + str(
+                            self.instr - 1) + ", align 8\n"
+                        self.instr += 1
+                    var = (str(self.instr - 1), str(var[1]), "reg", var[3])
+                    return var
+                else:
+                    print("MORE DEREF NEEDED")
+                    return var
+
             case "++":
                 for child in currentNode.children:
                     if isinstance(child, Variable):
@@ -709,7 +763,19 @@ class AST2LLVMVisitor(Visitor):
 
     def VisitConstant(self, currentNode):
         print("Constant")
-        return (currentNode.value, "char", "value")
+        try:
+            value = int(currentNode.value)
+        except ValueError:
+            try:
+                value = float(currentNode.value)
+            except ValueError:
+                value = currentNode.value
+        if isinstance(value, int):
+            return (value, "int", "value")
+        elif isinstance(value, float):
+            return (value, "float", "value")
+        else:
+            return (value, "char", "value")
 
     def VisitDeclaration(self, currentNode):
         #print("Declaration2LLVM")
@@ -759,6 +825,7 @@ class AST2LLVMVisitor(Visitor):
         if isinstance(currentNode.lvalue, Declaration):
             print("TEEEEEEEEEST")
             currentNode.lvalue.accept(self)
+            self.lvalue = False
             value = currentNode.rvalue.accept(self)
             self.lvalue = True
             ltype = self.currentTable.lookup(currentNode.lvalue.var).type
@@ -806,6 +873,26 @@ class AST2LLVMVisitor(Visitor):
                     self.llvm += "store float %" + str(self.instr - 1) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                 elif ltype == "char":
                     self.llvm += "store i8 %" + str(self.instr - 1) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
+                elif "int*" == ltype:
+                    self.llvm += "store i32* %" + str(value[0]) + ", i32** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
+                elif  "float*" == ltype:
+                    self.llvm += "store float* %" + str(value[0]) + ", float** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
+                elif "char*" == ltype:
+                    self.llvm += "store i8* %" + str(value[0]) + ", i8** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 1\n"
+                elif "int*" in ltype:
+                    # We need to dereference more
+                    print("Both types:")
+                    print(ltype)
+                    print(value[1])
+                    llvmltyp = ltype.replace("int", "i32")
+                    llvmrtyp = value[1].replace("int", "i32")
+                    self.llvm += "store "+ str(llvmrtyp) + "* %" + str(value[0]) + ", " + str(llvmltyp) + "* %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
+                elif "int*" in ltype:
+                    # We need to dereference more
+                    self.llvm += "store float* %" + str(value[0]) + ", float** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
+                elif "int*" in ltype:
+                    # We need to dereference more
+                    self.llvm += "store i8* %" + str(value[0]) + ", i8** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 1\n"
                 else:
                     print("test")
 
@@ -855,8 +942,9 @@ class AST2LLVMVisitor(Visitor):
             value = currentNode.rvalue.accept(self)
             self.lvalue = True
             reg = currentNode.lvalue.accept(self)
-            var = self.symbolTable.lookupByRegister(reg)
-            type = var.type
+            print(reg)
+            var = reg[3]
+            type = reg[1]
             if type == "int*":
                 try:
                     value = int(value[0])

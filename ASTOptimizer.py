@@ -470,6 +470,15 @@ class ASTOptimizer(Visitor):
             newNode.children.append(node)
         return newNode
 
+    def VisitPointer(self, currentNode):
+        #print("Pointer")
+        newNode = copy.copy(currentNode)
+        newNode.children = []
+        for child in currentNode.children:
+            node = child.accept(self)
+            newNode.children.append(node)
+        return newNode
+
     def VisitLogicalOperation(self, currentNode):
         #print("Logical")
         newNode = copy.copy(currentNode)

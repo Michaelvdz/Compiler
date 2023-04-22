@@ -99,11 +99,6 @@ class CGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by CGrammarParser#identifierlist.
-    def visitIdentifierlist(self, ctx:CGrammarParser.IdentifierlistContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by CGrammarParser#parameterlist.
     def visitParameterlist(self, ctx:CGrammarParser.ParameterlistContext):
         return self.visitChildren(ctx)

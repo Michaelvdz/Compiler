@@ -57,8 +57,8 @@ assignment_expression:  logical_expression
     | lvalue=declaration_specification assign='=' rvalue=assignment_expression
     ;
 
-pointer:    '*' pointer
-    | '*'
+pointer:    star='*' ptr=pointer
+    | star='*'
     ;
 
 declaration_specification:  typ=type ptr=pointer var=IDENTIFIER
@@ -90,11 +90,6 @@ expr_loop:
 argumentlist:
     ass=assignment_expression
     | ass=assignment_expression  ',' args=argumentlist
-    ;
-
-identifierlist:
-    IDENTIFIER
-    | identifierlist ',' IDENTIFIER
     ;
 
 parameterlist:

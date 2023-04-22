@@ -170,15 +170,6 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by CGrammarParser#identifierlist.
-    def enterIdentifierlist(self, ctx:CGrammarParser.IdentifierlistContext):
-        pass
-
-    # Exit a parse tree produced by CGrammarParser#identifierlist.
-    def exitIdentifierlist(self, ctx:CGrammarParser.IdentifierlistContext):
-        pass
-
-
     # Enter a parse tree produced by CGrammarParser#parameterlist.
     def enterParameterlist(self, ctx:CGrammarParser.ParameterlistContext):
         pass

@@ -170,6 +170,15 @@ class ASTVisitor(Visitor):
         #print("Ending Declaration")
         return currentNode
 
+    def VisitPointer(self, currentNode):
+        #print("Beginning Declaration")
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        for child in currentNode.children:
+            node = child.accept(self)
+            self.ast.edge(str(id(currentNode)), str(id(node)))
+        #print("Ending Declaration")
+        return currentNode
+
     def VisitAssignment(self, currentNode):
         #print("Beginning Assignment")
         self.ast.node(str(id(currentNode)), currentNode.value)

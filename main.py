@@ -26,8 +26,10 @@ def main(argv):
         filename2 = split[size-1]
         filename = filename2
 
-    if argv[2]:
+    if len(argv) >=3 and argv[2]:
         outputmap = argv[2]
+    else:
+        outputmap = ""
 
     input_stream = FileStream(argv[1])
     lexer = CGrammarLexer(input_stream)
@@ -83,7 +85,9 @@ def main(argv):
         LLVMCreator = AST2LLVMVisitor(llvm, STStack.tables[0])
         optimizedTree.root.accept(LLVMCreator)
         #print(LLVMCreator.llvm)
-        llvm = open(outputmap + "/" + filename+".ll", "w")
+        if outputmap != "":
+            outputmap += "/"
+        llvm = open(outputmap + filename+".ll", "w")
         llvm.write(LLVMCreator.llvm)
         llvm.close()
         ST.print()
