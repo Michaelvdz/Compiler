@@ -55,6 +55,42 @@ class ASTNode:
         value = visitor.VisitASTNode(self, False)
         return value
 
+class Array(ASTNode):
+
+    name = ""
+    value = ""
+    children = []
+    size = ""
+    def __init__(self, name="Free"):
+        #print("___init-ASTNode___");
+        self.children = []
+        self.name = name
+        self.value = name
+        self.size = ""
+        #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def print(self):
+        if not self.children:
+            print(self.name)
+        else:
+            print(self.name)
+            print("With children")
+            for node in self.children:
+                node.print()
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def adoptChildren(self, nodes):
+        for node in nodes:
+            #print("Adding node: " + node.name)
+            self.children.append(node)
+
+    def accept(self, visitor: Visitor):
+        value = visitor.VisitArray(self)
+        return value
+
+
 class BinaryOperation(ASTNode):
 
     name = ""

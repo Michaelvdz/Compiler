@@ -183,6 +183,9 @@ class CSTVisitor(CGrammarVisitor):
                     node = self.visit(ctx.ptr)
                     decl.adopt(node)
                     decl.pointer = node
+                elif child == ctx.arr:
+                    array = self.visit(ctx.arr)
+                    decl.adopt(array)
                 else:
                     print("En dees?")
                     var = ASTNode(ctx.var.text)
@@ -312,6 +315,16 @@ class CSTVisitor(CGrammarVisitor):
                 childnode = self.visit(child)
                 node.adopt(childnode)
         return node
+
+    def visitArray(self, ctx:CGrammarParser.ArrayContext):
+        print("Array")
+        array = Array("array")
+        for child in ctx.children:
+            if not child.getText() == "[" and not child.getText() == "]":
+                size = self.visit(child)
+                array.size = size
+        return array
+
 
     def visitParameterlist(self, ctx:CGrammarParser.ParameterlistContext):
         print("Parameters")

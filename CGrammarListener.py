@@ -134,6 +134,15 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CGrammarParser#array.
+    def enterArray(self, ctx:CGrammarParser.ArrayContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#array.
+    def exitArray(self, ctx:CGrammarParser.ArrayContext):
+        pass
+
+
     # Enter a parse tree produced by CGrammarParser#declaration.
     def enterDeclaration(self, ctx:CGrammarParser.DeclarationContext):
         pass

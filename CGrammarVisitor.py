@@ -79,6 +79,11 @@ class CGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CGrammarParser#array.
+    def visitArray(self, ctx:CGrammarParser.ArrayContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CGrammarParser#declaration.
     def visitDeclaration(self, ctx:CGrammarParser.DeclarationContext):
         return self.visitChildren(ctx)

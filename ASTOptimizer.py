@@ -494,6 +494,15 @@ class ASTOptimizer(Visitor):
             newNode.children.append(node)
         return newNode
 
+    def VisitArray(self, currentNode):
+        #print("Array")
+        newNode = copy.copy(currentNode)
+        size = currentNode.size.accept(self)
+        newNode.value = "[" + " ]"
+        newNode.name = newNode.value
+        newNode.children = []
+        return newNode
+
     def VisitLogicalOperation(self, currentNode):
         #print("Logical")
         newNode = copy.copy(currentNode)
@@ -612,8 +621,12 @@ class ASTOptimizer(Visitor):
         newNode = copy.copy(currentNode)
         newNode.children = []
         for child in currentNode.children:
-            node = child.acceptWithNoOptimization(self)
-            newNode.children.append(node)
+            if not isinstance(child, Array):
+                node = child.acceptWithNoOptimization(self)
+                newNode.children.append(node)
+            else:
+                node = child.accept(self)
+                newNode.children.append(node)
         return newNode
 
     def VisitCall(self, currentNode):

@@ -160,6 +160,13 @@ class ASTVisitor(Visitor):
         #print("Ending Constant")
         return currentNode
 
+    def VisitArray(self, currentNode):
+        #print("Beginning Declaration")
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        node = currentNode.size.accept(self)
+        self.ast.edge(str(id(currentNode)), str(id(node)))
+        #print("Ending Declaration")
+        return currentNode
 
     def VisitDeclaration(self, currentNode):
         #print("Beginning Declaration")
