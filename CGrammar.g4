@@ -17,6 +17,7 @@ unary_operator:  '+'
 
 post_unary_operator:  '++'
     |   '--'
+    |   '[' assignment_expression ']'
     ;
 
 function_call:
@@ -65,6 +66,15 @@ declaration_specification:  typ=type ptr=pointer var=IDENTIFIER
     | typ=type var=IDENTIFIER
     | var=IDENTIFIER
     | ptr=pointer var=IDENTIFIER
+    | typ=type ptr=pointer var=IDENTIFIER arr=array
+    | typ=type var=IDENTIFIER arr=array
+    | var=IDENTIFIER arr=array
+    | ptr=pointer var=IDENTIFIER arr=array
+    ;
+
+array:
+    '[' ']'
+    | '[' assignment_expression ']'
     ;
 
 declaration:
