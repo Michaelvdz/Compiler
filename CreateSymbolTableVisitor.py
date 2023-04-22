@@ -131,6 +131,7 @@ class CreateSymbolTableVisitor(Visitor):
             if currentNode.body:
                 # if it has params, visit them
                 for param in currentNode.params:
+                    print("Param:")
                     node = param.accept(self)
                 # Visit body
                 if currentNode.body:
@@ -239,6 +240,7 @@ class CreateSymbolTableVisitor(Visitor):
 
 
         if not self.table.peek().lookupInThisTable(currentNode.var):
+            print("Inserting var")
             self.table.peek().insert(currentNode.var, currConst, currType, currentNode.attr)
 
         #currentNode.print()
