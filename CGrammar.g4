@@ -77,7 +77,6 @@ expr:   assignment_expression ';'
     | loops
     | scope
     | printf ';'
-    | expr comment
     | comment
     | jumps
     | function

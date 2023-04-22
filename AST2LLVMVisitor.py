@@ -1014,9 +1014,8 @@ class AST2LLVMVisitor(Visitor):
     def VisitMLComment(self, currentNode):
         #print("MLComment")
         comment = currentNode.value
-        comment = comment.replace("/*",";")
-        comment = comment.replace("*/", ";")
-        comment = comment.replace("* ", "; ")
+        comment = ";" + comment
+        comment = comment.replace("\n" , "\n;")
         self.llvm += comment + "\n"
         return currentNode
 
