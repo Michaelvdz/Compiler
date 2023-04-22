@@ -420,10 +420,15 @@ class CSTVisitor(CGrammarVisitor):
 
     def visitPrintf(self, ctx: CGrammarParser.PrintfContext):
         print("Printf")
-        result = re.search('\((.+?)\)', ctx.getText()).group(1)
-        #print("need this")
-        #print(result)
-        node = ASTNode(result)
-        printf = PrintF("printf()")
-        printf.adopt(node)
+        if ctx.ass:
+            node = self.visit(ctx.ass)
+            printf = PrintF("printf()")
+            printf.adopt(node)
+        else:
+            result = re.search('\((.+?)\)', ctx.getText()).group(1)
+            #print("need this")
+            #print(result)
+            node = ASTNode(result)
+            printf = PrintF("printf()")
+            printf.adopt(node)
         return printf

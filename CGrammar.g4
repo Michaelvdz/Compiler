@@ -150,6 +150,7 @@ comment: block=BLOCKCOMMENT
     ;
 
 printf: 'printf' '(' (IDENTIFIER | constant) ')'
+    | 'printf' '(' ass=assignment_expression ')'
     ;
 
 BLOCKCOMMENT: '/*' .*? '*/';

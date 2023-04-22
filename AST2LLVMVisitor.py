@@ -490,11 +490,26 @@ class AST2LLVMVisitor(Visitor):
                 self.llvm += "%" + str(self.instr) + " = load i8, i8* %" + str(
                     symbol.register) + ", align 1\n"
                 self.instr += 1
+
             if "int*" in type:
-                print("Komterm ier?")
-                self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(
-                    symbol.register) + ", align 4\n"
+                llvmrtyp = symbol.type.replace("int", "i32")
+                self.llvm += "%" + str(self.instr) + " = load " + llvmrtyp + ", " + llvmrtyp + "* %" + str(
+                    symbol.register) + ", align 8\n"
                 self.instr += 1
+                return (str(self.instr - 1), type[:-1], "reg", currentNode.value)
+            if "float*" in type:
+                llvmrtyp = symbol.type.replace("float", "float")
+                self.llvm += "%" + str(self.instr) + " = load " + llvmrtyp + ", " + llvmrtyp + "* %" + str(
+                    symbol.register) + ", align 8\n"
+                self.instr += 1
+                return (str(self.instr - 1), type[:-1], "reg", currentNode.value)
+            if "char*" in type:
+                llvmrtyp = symbol.type.replace("char", "i8")
+                self.llvm += "%" + str(self.instr) + " = load " + llvmrtyp + ", " + llvmrtyp + "* %" + str(
+                    symbol.register) + ", align 8\n"
+                self.instr += 1
+                return (str(self.instr - 1), type[:-1], "reg", currentNode.value)
+
             return (str(self.instr-1), type, "reg", currentNode.value)
 
     def VisitBinaryOperation(self, currentNode):
@@ -510,12 +525,16 @@ class AST2LLVMVisitor(Visitor):
                     BinType = newType
                 elif newType == "float":
                     BinType = newType
+                print("Variable")
             elif isinstance(child, Constant):
                 print("Constant")
             children.append(child)
 
         left = currentNode.children[0].accept(self)
         right = currentNode.children[1].accept(self)
+        print("The operands are:")
+        print(left)
+        print(right)
         lefttype = ""
         righttype = ""
         if not isinstance(currentNode.children[0], Constant):
@@ -532,6 +551,8 @@ class AST2LLVMVisitor(Visitor):
             rightvalue = right[0]
         if lefttype == "float" or righttype == "float":
             BinType = "float"
+        else:
+            BinType = "int"
 
 
         if BinType == "float":
@@ -543,7 +564,10 @@ class AST2LLVMVisitor(Visitor):
                 self.llvm += "%" + str(self.instr) + " = sitofp i32 " + str(rightvalue) + " to float\n"
                 rightvalue = "%" + str(self.instr)
                 self.instr += 1
-
+        print("Binary operator:")
+        print(currentNode.value)
+        print("BinType")
+        print(BinType)
         match currentNode.value:
             case "+":
                 if BinType == "int":
@@ -884,9 +908,17 @@ class AST2LLVMVisitor(Visitor):
                     print("Both types:")
                     print(ltype)
                     print(value[1])
-                    llvmltyp = ltype.replace("int", "i32")
-                    llvmrtyp = value[1].replace("int", "i32")
-                    self.llvm += "store "+ str(llvmrtyp) + "* %" + str(value[0]) + ", " + str(llvmltyp) + "* %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
+                    if ltype != value[1]:
+                        llvmltyp = ltype.replace("int", "i32")
+                        llvmrtyp = value[1].replace("int", "i32")
+                        self.llvm += "store "+ str(llvmrtyp) + "* %" + str(value[0]) + ", " + str(llvmltyp) + "* %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
+                    else:
+                        llvmltyp = ltype.replace("int", "i32")
+                        llvmrtyp = value[1].replace("int", "i32")
+                        self.llvm += "store " + str(llvmrtyp) + "* %" + str(value[0]) + ", " + str(
+                            llvmltyp) + "* %" + str(
+                            self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
+
                 elif "int*" in ltype:
                     # We need to dereference more
                     self.llvm += "store float* %" + str(value[0]) + ", float** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
@@ -898,18 +930,24 @@ class AST2LLVMVisitor(Visitor):
 
         # The lvalue is no declaration but a variable
         elif isinstance(currentNode.lvalue, Variable):
+            print("We are in a variable declaration")
+            self.lvalue = False
             value = currentNode.rvalue.accept(self)
+            print(value)
             self.lvalue = True
             reg = currentNode.lvalue.accept(self)
+            print("reg is:")
+            print(reg)
             #ltype = self.symbolTable.lookup(currentNode.lvalue.children[0].value).type
             ltype = self.currentTable.lookup(currentNode.lvalue.value).type
+            print(ltype)
             #self.instr += 1
             if ltype == "int*":
-                self.llvm += "store i32* %" + str(value[0]) + ", i32** %" + str(reg) + ", align 8\n"
+                self.llvm += "store i32* %" + str(value[0]) + ", i32** %" + str(reg[0]) + ", align 8\n"
             if ltype == "float*":
-                self.llvm += "store float* %" + str(value[0]) + ", float** %" + str(reg) + ", align 8\n"
+                self.llvm += "store float* %" + str(value[0]) + ", float** %" + str(reg[0]) + ", align 8\n"
             if ltype == "char*":
-                self.llvm += "store i8* %" + str(value[0]) + ", i8** %" + str(reg) + ", align 1\n"
+                self.llvm += "store i8* %" + str(value[0]) + ", i8** %" + str(reg[0]) + ", align 1\n"
             if value[2] != "reg":
                 if ltype == "int":
                     try:
@@ -923,17 +961,21 @@ class AST2LLVMVisitor(Visitor):
                         value = float(value[0])
                     except ValueError:
                         print("failiure")
-                    self.llvm += "store float " + str(value) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
+                    packed = struct.pack("f", value)
+                    unpacked = struct.unpack("f", packed)[0]
+                    self.llvm += "store float " + str(unpacked) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
                 elif ltype == "char":
-                    value = value.replace("'","")
+                    value = value[0].replace("'","")
+                    if len(value) > 1:
+                        value= value.encode('utf-8').decode('unicode-escape')
                     self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 1\n"
             else:
                 if ltype == "int":
                     self.llvm += "store i32 %" + str(value[0]) + ", i32* %" + reg[0] + ", align 4\n"
                 elif ltype == "float":
-                    packed = struct.pack("f", value[0])
-                    unpacked = struct.unpack("f", packed)[0]
-                    self.llvm += "store float %" + str(unpacked) + ", float* %" + reg[0] + ", align 4\n"
+                    #packed = struct.pack("f", value[0])
+                    #unpacked = struct.unpack("f", packed)[0]
+                    self.llvm += "store float %" + str(value[0]) + ", float* %" + reg[0] + ", align 4\n"
                 elif ltype == "char":
                     value = value.replace("'","")
                     self.llvm += "store i8 " + str(ord(value[0])) + ", i8* %" + reg[0] + ", align 1\n"
@@ -985,17 +1027,23 @@ class AST2LLVMVisitor(Visitor):
 
     def VisitPrintf(self, currentNode):
         print("Printf")
+        self.lvalue = False
         node = currentNode.children[0].accept(self)
+        self.lvalue = True
         #symbol = self.symbolTable.lookup(node.value)
         symbol = 0
+        print("Trying to print this:")
+        print(node)
         if not isinstance(node, ASTNode):
             symbol = self.currentTable.lookupByRegister(node[0])
-
+        print("Symbol:")
+        print(symbol)
         if symbol:
             if not self.printing:
                 self.llvm = "declare i32 @printf(i8* noundef, ...)\n" + self.llvm
             match symbol.type:
                 case "int":
+                    print("Printing int")
                     if not self.intprinting:
                         self.llvm = "@.int = private unnamed_addr constant [3 x i8] c" + "\"" + "%d" + "\\00" + "\", align 1\n"\
                                  + self.llvm
@@ -1036,71 +1084,116 @@ class AST2LLVMVisitor(Visitor):
                                  "@.char, i64 0, i64 0), i32 noundef %" + str(int(self.instr) - 1) + ")\n"
                     self.instr += 1
         else:
-            if '\'' not in node.value:
-                try:
-                    value = int(node.value)
-                except ValueError:
-                    value = float(node.value)
-                if isinstance(value, int):
+            print("KOMTER IER IN DIE PRINT?")
+            if not self.printing:
+                self.llvm = "declare i32 @printf(i8* noundef, ...)\n" + self.llvm
+            if isinstance(node, ASTNode):
+                if '\'' not in node.value:
+                    try:
+                        value = int(node.value)
+                    except ValueError:
+                        value = float(node.value)
+                    if isinstance(value, int):
+                        if not self.printing:
+                            self.llvm = "declare i32 @printf(i8* noundef, ...)\n" + self.llvm
+                        if not self.intprinting:
+                            self.llvm = "@.int = private unnamed_addr constant [3 x i8] c" + "\"" + "%d" + "\\00" + "\", align 1\n" \
+                                        + self.llvm
+                            self.intprinting = True
+                            self.printing = True
+
+
+                        self.llvm += "%" + str(self.instr) + " = alloca i32, align 4\n"
+                        self.instr += 1
+                        self.llvm += "store i32 " + str(node.value) + ", i32* %" + str(self.instr - 1) + ", align 4\n"
+                        self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(self.instr - 1) + ", align 4\n"
+                        self.instr += 1
+                        self.llvm += "%" + str(
+                            self.instr) + " = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* " \
+                                          "@.int, i64 0, i64 0), i32 noundef %" + str(int(self.instr) - 1) + ")\n"
+                        self.instr += 1
+                    elif isinstance(value, float):
+                        if not self.printing:
+                            self.llvm = "declare i32 @printf(i8* noundef, ...)\n" + self.llvm
+                        if not self.floatprinting:
+                            self.llvm = "@.float = private unnamed_addr constant [3 x i8] c" + "\"" + "%f" + "\\00" + "\", align 1\n" \
+                                        + self.llvm
+                            self.charprinting = True
+                            self.printing = True
+
+                        self.llvm += "%" + str(self.instr) + " = alloca float, align 4\n"
+                        self.instr += 1
+                        self.llvm += "store float " + str(node.value) + ", float* %" + str(self.instr - 1) + ", align 4\n"
+                        self.llvm += "%" + str(self.instr) + " = load float, float* %" + str(self.instr - 1) + ", align 4\n"
+                        self.instr += 1
+                        self.llvm += "%" + str(self.instr) + " = fpext float %" + str(int(self.instr) - 1) + " to double\n"
+                        self.instr += 1
+                        self.llvm += "%" + str(
+                            self.instr) + " = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* " \
+                                          "@.float, i64 0, i64 0), double noundef %" + str(int(self.instr) - 1) + ")\n"
+                        self.instr += 1
+                else:
+                    value = node.value.replace("'", "")
                     if not self.printing:
                         self.llvm = "declare i32 @printf(i8* noundef, ...)\n" + self.llvm
+                    if not self.charprinting:
+                        self.llvm = "@.char = private unnamed_addr constant [3 x i8] c" + "\"" + "%c" + "\\00" + "\", align 1\n" \
+                                    + self.llvm
+                        self.charprinting = True
+                        self.printing = True
+
+                    self.llvm += "%" + str(self.instr) + " = alloca i8, align 4\n"
+                    self.instr += 1
+                    if len(value) > 1:
+                        value= value.encode('utf-8').decode('unicode-escape')
+                    self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + str(self.instr - 1) + ", align 4\n"
+                    self.llvm += "%" + str(self.instr) + " = load i8, i8* %" + str(self.instr - 1) + ", align 4\n"
+                    self.instr += 1
+                    self.llvm += "%" + str(self.instr) + " = sext i8 %" + str(int(self.instr) - 1) + " to i32\n"
+                    self.instr += 1
+                    self.llvm += "%" + str(
+                        self.instr) + " = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* " \
+                                      "@.char, i64 0, i64 0), i32 noundef %" + str(int(self.instr) - 1) + ")\n"
+                    self.instr += 1
+            else:
+                print("Printing original deref pointer")
+                print(node)
+                if node[1] == "int":
                     if not self.intprinting:
                         self.llvm = "@.int = private unnamed_addr constant [3 x i8] c" + "\"" + "%d" + "\\00" + "\", align 1\n" \
                                     + self.llvm
                         self.intprinting = True
                         self.printing = True
 
-
-                    self.llvm += "%" + str(self.instr) + " = alloca i32, align 4\n"
-                    self.instr += 1
-                    self.llvm += "store i32 " + str(node.value) + ", i32* %" + str(self.instr - 1) + ", align 4\n"
-                    self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(self.instr - 1) + ", align 4\n"
-                    self.instr += 1
                     self.llvm += "%" + str(
                         self.instr) + " = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* " \
                                       "@.int, i64 0, i64 0), i32 noundef %" + str(int(self.instr) - 1) + ")\n"
                     self.instr += 1
-                elif isinstance(value, float):
-                    if not self.printing:
-                        self.llvm = "declare i32 @printf(i8* noundef, ...)\n" + self.llvm
+                if node[1] == "float":
                     if not self.floatprinting:
                         self.llvm = "@.float = private unnamed_addr constant [3 x i8] c" + "\"" + "%f" + "\\00" + "\", align 1\n" \
                                     + self.llvm
-                        self.charprinting = True
+                        self.floatprinting = True
                         self.printing = True
 
-                    self.llvm += "%" + str(self.instr) + " = alloca float, align 4\n"
-                    self.instr += 1
-                    self.llvm += "store float " + str(node.value) + ", float* %" + str(self.instr - 1) + ", align 4\n"
-                    self.llvm += "%" + str(self.instr) + " = load float, float* %" + str(self.instr - 1) + ", align 4\n"
-                    self.instr += 1
                     self.llvm += "%" + str(self.instr) + " = fpext float %" + str(int(self.instr) - 1) + " to double\n"
                     self.instr += 1
                     self.llvm += "%" + str(
                         self.instr) + " = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* " \
                                       "@.float, i64 0, i64 0), double noundef %" + str(int(self.instr) - 1) + ")\n"
                     self.instr += 1
-            else:
-                value = node.value.replace("'", "")
-                if not self.printing:
-                    self.llvm = "declare i32 @printf(i8* noundef, ...)\n" + self.llvm
-                if not self.charprinting:
-                    self.llvm = "@.char = private unnamed_addr constant [3 x i8] c" + "\"" + "%c" + "\\00" + "\", align 1\n" \
-                                + self.llvm
-                    self.charprinting = True
-                    self.printing = True
+                if node[1] == "char":
+                    if not self.charprinting:
+                        self.llvm = "@.char = private unnamed_addr constant [3 x i8] c" + "\"" + "%c" + "\\00" + "\", align 1\n"\
+                                     + self.llvm
+                        self.charprinting = True
+                        self.printing = True
 
-                self.llvm += "%" + str(self.instr) + " = alloca i8, align 4\n"
-                self.instr += 1
-                self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + str(self.instr - 1) + ", align 4\n"
-                self.llvm += "%" + str(self.instr) + " = load i8, i8* %" + str(self.instr - 1) + ", align 4\n"
-                self.instr += 1
-                self.llvm += "%" + str(self.instr) + " = sext i8 %" + str(int(self.instr) - 1) + " to i32\n"
-                self.instr += 1
-                self.llvm += "%" + str(
-                    self.instr) + " = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* " \
-                                  "@.char, i64 0, i64 0), i32 noundef %" + str(int(self.instr) - 1) + ")\n"
-                self.instr += 1
+                    self.llvm += "%" + str(self.instr) + " = sext i8 %" + str(int(self.instr) - 1) + " to i32\n"
+                    self.instr += 1
+                    self.llvm += "%" + str(self.instr) + " = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* " \
+                                 "@.char, i64 0, i64 0), i32 noundef %" + str(int(self.instr) - 1) + ")\n"
+                    self.instr += 1
         return currentNode
 
 
