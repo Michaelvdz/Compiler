@@ -28,11 +28,17 @@ class SymbolTables:
     def __int__(self):
         self.tables = []
 
+    def empty(self):
+        for child in self.tables:
+            self.tables.remove(child)
+
     def pop(self):
         return self.tables.pop()
 
     def push(self, table):
         self.tables.append(table)
+        print("Added table")
+        print(len(self.tables))
 
     def peek(self):
         table = self.tables.pop()
@@ -50,7 +56,8 @@ class SymbolTable:
 
     def __init__(self):
         self.vars = dict()
-        self.children = []
+        self.children = list()
+        self.children.clear()
         self.parent = 0
         self.name = ""
 

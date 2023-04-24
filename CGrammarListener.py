@@ -287,5 +287,14 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CGrammarParser#scanf.
+    def enterScanf(self, ctx:CGrammarParser.ScanfContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#scanf.
+    def exitScanf(self, ctx:CGrammarParser.ScanfContext):
+        pass
+
+
 
 del CGrammarParser

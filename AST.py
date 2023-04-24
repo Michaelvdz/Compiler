@@ -584,12 +584,16 @@ class PrintF(ASTNode):
     value = ""
     name = ""
     children = []
+    format = ""
+    args = []
 
     def __init__(self, value):
         #print("___init-Printf__");
         self.children = []
         self.name = "Printf"
         self.value = value
+        self.format = ""
+        self.args = []
         #print("___Node-Created-With-Name:"+ self.name + "___")
 
     def print(self):
@@ -597,6 +601,32 @@ class PrintF(ASTNode):
 
     def accept(self, visitor: Visitor):
         return visitor.VisitPrintf(self)
+
+    def adopt(self, node):
+        self.children.append(node)
+
+class ScanF(ASTNode):
+
+    value = ""
+    name = ""
+    children = []
+    format = ""
+    args = []
+
+    def __init__(self, value):
+        #print("___init-Scanf__");
+        self.children = []
+        self.name = "Scanf"
+        self.value = value
+        self.format = ""
+        self.args = []
+        #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def print(self):
+        print("Scanf: " + str(self.value))
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitScanf(self)
 
     def adopt(self, node):
         self.children.append(node)

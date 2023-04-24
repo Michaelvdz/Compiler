@@ -81,7 +81,7 @@ def main(argv):
 
         print("------- Creating LLVM IR -------")
         ST = copy.copy(STStack.tables[0])
-        llvm=""
+        llvm = ""
         LLVMCreator = AST2LLVMVisitor(llvm, STStack.tables[0])
         optimizedTree.root.accept(LLVMCreator)
         #print(LLVMCreator.llvm)
@@ -90,9 +90,6 @@ def main(argv):
         llvm = open(outputmap + filename+".ll", "w")
         llvm.write(LLVMCreator.llvm)
         llvm.close()
-        ST.print()
-
-
 
     else:
         print("Compiler interrupted after finding syntax errors")

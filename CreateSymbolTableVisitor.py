@@ -16,10 +16,16 @@ class CreateSymbolTableVisitor(Visitor):
         self.lineNr = 0
         self.positionNr = 0
         self.scopeNr = 0
-        #print("----------------Creating Symbol Table----------------")
+        print("----------------Creating Symbol Table----------------")
         globaltable = SymbolTable()
+        globaltable.children = []
         globaltable.name = "Global"
+        print("Globaltable:")
+        print(globaltable)
         self.table.push(globaltable)
+        print("Print top op stack?")
+        print(self.table)
+        print(self.table.tables[0])
 
     def VisitASTNode(self, currentNode):
         #print("Node")
@@ -116,7 +122,7 @@ class CreateSymbolTableVisitor(Visitor):
         return currentNode
 
     def VisitFunction(self, currentNode):
-        #print("Function - Creating new ST for the function")
+        print("Function - Creating new ST for the function")
         if currentNode.hasbody:
             # Creating Symbol Table for function
             newtable = SymbolTable()
@@ -125,14 +131,22 @@ class CreateSymbolTableVisitor(Visitor):
             parenttable = self.table.peek()
             newtable.parent = parenttable
             # Append new ST as child of parent ST
+            print(parenttable.name)
+            print(parenttable.children)
             parenttable.children.append(newtable)
+            print(parenttable.children)
             # Push ST to stack
             self.table.push(newtable)
+            print(self.table.tables[0].name)
+            print(self.table.tables[1].name)
+            print(self.table.tables[0].children)
             if currentNode.body:
                 # if it has params, visit them
                 for param in currentNode.params:
                     print("Param:")
+                    print(param)
                     node = param.accept(self)
+                    print(node.value)
                 # Visit body
                 if currentNode.body:
                     currentNode.body.accept(self)
@@ -292,5 +306,8 @@ class CreateSymbolTableVisitor(Visitor):
         #print("SLComment")
         return currentNode
     def VisitPrintf(self, currentNode):
+        #print("Printf")
+        return currentNode
+    def VisitScanf(self, currentNode):
         #print("Printf")
         return currentNode

@@ -46,23 +46,25 @@ class ASTOptimizer(Visitor):
         return newNode
 
     def VisitBinaryOperation(self, currentNode):
-        #print("Binary")
+        print("Binary")
         children = []
         for child in currentNode.children:
             children.append(child.accept(self))
 
-        print(children[0])
         match currentNode.value:
             case "+":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
                     try:
                         value = int(children[0].value)
+                        print(int(children[0].value))
                     except ValueError:
                         value = float(children[0].value)
                     try:
                         value += int(children[1].value)
+                        print(int(children[1].value))
                     except ValueError:
                         value += float(children[1].value)
+
                     currentNode.children = 0
                     currentNode.value = value
                     newnode = Constant(str(value))
@@ -451,7 +453,7 @@ class ASTOptimizer(Visitor):
                 else:
                     return currentNode
             case "!":
-                if isinstance(currentNode.children[0], Constant):
+                if isinstance(currentNode.children[0], Constant) or isinstance(currentNode.children[0], BinaryOperation):
                     for child in currentNode.children:
                         node = child.accept(self)
                         try:
@@ -513,21 +515,25 @@ class ASTOptimizer(Visitor):
         return newNode
 
     def VisitFunction(self, currentNode):
-        #print("Function")
+        print("Function")
         newNode = copy.copy(currentNode)
         newNode.children = []
         if currentNode.hasbody:
             if currentNode.body:
                 newNode.body = currentNode.body.accept(self)
-                for child in currentNode.body.children:
+                for child in newNode.body.children:
+                    print("test")
                     node = child.accept(self)
+                    print(node)
                     if isinstance(node, Jump):
                         print("Jumper")
                         print(node.value)
                         if node.value == "return":
+                            print("value:")
                             print(currentNode.returnType.value)
                             node.type = currentNode.returnType.value
                     newNode.children.append(node)
+
         return newNode
 
     def VisitConstant(self, currentNode):
@@ -590,9 +596,12 @@ class ASTOptimizer(Visitor):
         newNode.children = []
         for child in currentNode.children:
             node = child.accept(self)
+            print(node)
             newNode.children.append(node)
             if isinstance(node, Jump):
                 if node.value == "return":
+                    print("We zen hier")
+                    print(newNode)
                     return newNode
                 if node.value == "break":
                     return newNode
@@ -688,4 +697,14 @@ class ASTOptimizer(Visitor):
         self.propagation = True
         return newNode
 
+    def VisitScanf(self, currentNode):
+        #print("PrintF")
+        newNode = copy.copy(currentNode)
+        newNode.children = []
+        self.propagation = False
+        for child in currentNode.children:
+            node = child.accept(self)
+            newNode.children.append(node)
+        self.propagation = True
+        return newNode
 

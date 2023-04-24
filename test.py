@@ -2,14 +2,16 @@ import os
 from main import *
 
 currentPath = os.getcwd()
-testPath = os.getcwd() + "/testfiles/"
-outputPath = os.getcwd() + "/outputfiles/"
+testPath = os.getcwd() + "/testfiles4/"
+outputPath = os.getcwd() + "/outputfiles4/"
 print(testPath)
-
+STStack = SymbolTables()
 files = os.listdir(testPath)
+i = 0
 
 print("Compiling files:")
 for file in files:
+    STStack.empty()
     print(file)
     filename = os.path.splitext(file)[0]
     input_stream = FileStream(testPath+file)
@@ -27,7 +29,7 @@ for file in files:
         visitor.visit(tree)
 
         # Print before optimization
-        astVisitor = ASTVisitor(filename+"_beforeOptimization", "outputfiles")
+        astVisitor = ASTVisitor(filename+"_beforeOptimization", "outputfiles4")
         asttree.root.accept(astVisitor)
         astVisitor.ast.render()
 
@@ -37,9 +39,11 @@ for file in files:
         optimizedTree.root = asttree.root.accept(astOptimizer)
 
         # Create symbol table
-        table = SymbolTable()
-        STCreator = CreateSymbolTableVisitor(table)
+        print("Creating STS")
+        print(STStack)
+        STCreator = CreateSymbolTableVisitor(STStack)
         optimizedTree.root.accept(STCreator)
+        STStack.tables[0].print()
 
         # Print after optimisation
         astVisitor = ASTVisitor(filename, "outputfiles")
@@ -47,18 +51,15 @@ for file in files:
         astVisitor.ast.render()
 
         # Generate llvm
+        #ST = copy.copy(STStack.tables[0])
         llvm = ""
-        # Act like we are in the main function for future debugging
-        llvm += "define dso_local i32 @main(){\n"
-        LLVMCreator = AST2LLVMVisitor(llvm, table)
+        LLVMCreator = AST2LLVMVisitor(llvm, STStack.tables[0])
         optimizedTree.root.accept(LLVMCreator)
         # Act like we are close the main function for future debugging
-        LLVMCreator.llvm += "ret i32 0\n}"
         LLVMCreator.printing = False
-
         llvm = open(outputPath+filename+".ll", "w")
         llvm.write(LLVMCreator.llvm)
         llvm.close()
-
+        i+= 1
     else:
         print("Compiler interrupted after finding syntax errors")

@@ -164,5 +164,10 @@ class CGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CGrammarParser#scanf.
+    def visitScanf(self, ctx:CGrammarParser.ScanfContext):
+        return self.visitChildren(ctx)
+
+
 
 del CGrammarParser

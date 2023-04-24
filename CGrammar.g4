@@ -90,6 +90,7 @@ expr:   assignment_expression ';'
     | comment
     | jumps
     | function
+    | scanf ';'
 	;
 
 expr_loop:
@@ -158,8 +159,14 @@ comment: block=BLOCKCOMMENT
     |   sl=SINGLE_LINE_COMMENT
     ;
 
-printf: 'printf' '(' (IDENTIFIER | constant) ')'
-    | 'printf' '(' ass=assignment_expression ')'
+printf:
+    'printf' '(' form=FORMAT ',' args=argumentlist ')'
+    | 'printf' '(' form=FORMAT ')'
+    ;
+
+scanf:
+    'scanf' '(' form=FORMAT ',' args=argumentlist ')'
+    | 'scanf' '(' form=FORMAT ')'
     ;
 
 BLOCKCOMMENT: '/*' .*? '*/';
@@ -167,6 +174,7 @@ SINGLE_LINE_COMMENT: '//'~( '\r' | '\n' )*;
 INT: ([1-9][0-9]*|[0]);
 FLOAT: [0-9]*? '.' [0-9]+;
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
+FORMAT: ["](.)*?["];
 CHAR: (['].[']|['][\\].[']);
 IO: '#include <stdio.h>';
 WS: [ \n\t\r]+ -> skip;

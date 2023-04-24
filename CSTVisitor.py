@@ -433,6 +433,17 @@ class CSTVisitor(CGrammarVisitor):
 
     def visitPrintf(self, ctx: CGrammarParser.PrintfContext):
         print("Printf")
+        printf = PrintF("Printf()")
+        if ctx.form:
+            form = ctx.form.text
+            format = ASTNode(form)
+            printf.format = format
+            print(ctx.form.text)
+        if ctx.args:
+            node = self.visit(ctx.args)
+            print(node)
+            printf.args = node
+        '''
         if ctx.ass:
             node = self.visit(ctx.ass)
             printf = PrintF("printf()")
@@ -444,4 +455,18 @@ class CSTVisitor(CGrammarVisitor):
             node = ASTNode(result)
             printf = PrintF("printf()")
             printf.adopt(node)
+        '''
+        return printf
+
+    def visitScanf(self, ctx: CGrammarParser.ScanfContext):
+        print("ScanF")
+        printf = ScanF("Scanf()")
+        if ctx.form:
+            form = ctx.form.text
+            format = ASTNode(form)
+            printf.format = format
+            print(ctx.form.text)
+        if ctx.args:
+            node = self.visit(ctx.args)
+            printf.args = node
         return printf
