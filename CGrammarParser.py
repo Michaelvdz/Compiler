@@ -488,6 +488,7 @@ class CGrammarParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
+            self.ass = None # Assignment_expressionContext
 
         def assignment_expression(self):
             return self.getTypedRuleContext(CGrammarParser.Assignment_expressionContext,0)
@@ -536,7 +537,7 @@ class CGrammarParser ( Parser ):
                 self.state = 80
                 self.match(CGrammarParser.T__8)
                 self.state = 81
-                self.assignment_expression()
+                localctx.ass = self.assignment_expression()
                 self.state = 82
                 self.match(CGrammarParser.T__9)
                 pass

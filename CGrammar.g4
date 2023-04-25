@@ -17,7 +17,7 @@ unary_operator:  '+'
 
 post_unary_operator:  '++'
     |   '--'
-    |   '[' assignment_expression ']'
+    |   '[' ass=assignment_expression ']'
     ;
 
 function_call:

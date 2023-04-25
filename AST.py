@@ -363,6 +363,7 @@ class Declaration(ASTNode):
     var = ASTNode
     attr = ASTNode
     pointer = ASTNode
+    array = 0
 
 
     def __init__(self, name):
@@ -454,6 +455,7 @@ class Variable(ASTNode):
     value = ""
     type = ""
     attr = ""
+    rvalue = False
 
     def __init__(self, value):
         #print("___init-Variable__")
@@ -470,6 +472,33 @@ class Variable(ASTNode):
 
     def accept(self, visitor: Visitor):
         return visitor.VisitVariable(self)
+
+class ArrayVariable(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+    type = ""
+    attr = ""
+    lvalue = False
+    index = ""
+    size = ""
+
+    def __init__(self, value):
+        #print("___init-Variable__")
+        self.children = []
+        self.name = "ArrayVariable"
+        self.value = value
+        #print("___Node-Created-With-Name:" + self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def print(self):
+        print("ArrayVariable: " + str(self.value))
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitArrayVariable(self)
 
 class Call(ASTNode):
 
@@ -501,10 +530,13 @@ class UnaryOperator(ASTNode):
 
     def __init__(self, value):
         #print("___init-UnaryOperator__");
-        self.children = 0
+        self.children = []
         self.name = "Operator"
         self.value = value
         #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
 
     def print(self):
         print("Operator: " + self.value)

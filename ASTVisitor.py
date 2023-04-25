@@ -150,13 +150,45 @@ class ASTVisitor(Visitor):
 
     def VisitVariable(self, currentNode):
         #print("Beginning Constant")
-        self.ast.node(str(id(currentNode)), currentNode.value)
+        if currentNode.attr == "[]":
+            self.ast.node(str(id(currentNode)), (currentNode.value))
+            if currentNode.type:
+                self.ast.node(str(id(currentNode.type)), currentNode.type)
+                self.ast.edge(str(id(currentNode)), str(id(currentNode.type)))
+            if currentNode.attr:
+                self.ast.node(str(id(currentNode.attr)), (currentNode.attr))
+                self.ast.edge(str(id(currentNode)), str(id(currentNode.attr)))
+            if currentNode.size:
+                self.ast.node(str(id(currentNode.size)), (currentNode.size))
+                self.ast.edge(str(id(currentNode)), str(id(currentNode.size)))
+
+        else:
+            self.ast.node(str(id(currentNode)), currentNode.value)
+            if currentNode.type:
+                self.ast.node(str(id(currentNode.type)), currentNode.type)
+                self.ast.edge(str(id(currentNode)), str(id(currentNode.type)))
+            if currentNode.attr:
+                self.ast.node(str(id(currentNode.attr)), str(id(currentNode.type)))
+                self.ast.edge(str(id(currentNode)), str(id(currentNode.attr)))
+
+        #print("Ending Constant")
+        return currentNode
+
+    def VisitArrayVariable(self, currentNode):
+        #print("Beginning ArrayVar")
+        self.ast.node(str(id(currentNode)), (currentNode.value)+"[]")
         if currentNode.type:
             self.ast.node(str(id(currentNode.type)), currentNode.type)
             self.ast.edge(str(id(currentNode)), str(id(currentNode.type)))
         if currentNode.attr:
-            self.ast.node(str(id(currentNode.attr)), str(id(currentNode.type)))
+            self.ast.node(str(id(currentNode.attr)), (currentNode.attr))
             self.ast.edge(str(id(currentNode)), str(id(currentNode.attr)))
+        if currentNode.size:
+            self.ast.node(str(id(currentNode.size)), (currentNode.size))
+            self.ast.edge(str(id(currentNode)), str(id(currentNode.size)))
+        if currentNode.index:
+            self.ast.node(str(id(currentNode.index)), str(currentNode.index.value))
+            self.ast.edge(str(id(currentNode)), str(id(currentNode.index)), "index")
         #print("Ending Constant")
         return currentNode
 

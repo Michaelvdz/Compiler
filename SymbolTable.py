@@ -22,6 +22,21 @@ class Function(Node):
         return f'{self.type} and attr: {self.attr} and register: {self.register} and params:'
 
 
+class Array(Node):
+    def __init__(self, constant, type, size, attr="", node=""):
+        print("Size: " + size)
+        self.constant = constant
+        self.type = type
+        self.attr = attr
+        self.register = None
+        self.astnode = node
+        self.size = size
+
+    def __str__(self):
+        return f'{self.type} and attr: {self.attr} and register: {self.register} and size {self.size}'
+
+
+
 class SymbolTables:
 
     tables = []
@@ -92,6 +107,10 @@ class SymbolTable:
 
     def insertFunction(self, name, constant, type, attribute="", node="", params=[]):
         self.vars[name] = Function(constant, type, "", attribute, node, params)
+
+    def insertArray(self, name, constant, type, attribute, size):
+        print("Inserting array with size:" + str(size))
+        self.vars[name] = Array(constant, type, size, "", attribute)
 
     def insertRegister(self, name, register):
         #print("Zoeken naar var: " + name + "in scope: " + self.name)

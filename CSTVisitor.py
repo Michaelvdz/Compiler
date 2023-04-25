@@ -43,7 +43,15 @@ class CSTVisitor(CGrammarVisitor):
     # Visit a parse tree produced by CGrammarParser#unary_operator.
     def visitPost_unary_operator(self, ctx: CGrammarParser.Unary_operatorContext):
         #print("PostUnaryOperator")
-        op = UnaryOperator(ctx.getText())
+        if ctx.ass:
+            #op = UnaryOperator("[]")
+            array = ArrayVariable("[]")
+            node = self.visit(ctx.ass)
+            array.adopt(node)
+            return array
+            #op.adopt(node)
+        else:
+            op = UnaryOperator(ctx.getText())
         return op
 
     def visitFunction_call(self, ctx: CGrammarParser.Function_callContext):
@@ -77,11 +85,24 @@ class CSTVisitor(CGrammarVisitor):
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, UnaryOperator):
+                    print("DEEEEEEEEEEEEEESEEEEEEEEEEEEEEEEEEEEEEEEEEEEEES")
                     newnode.value = node.value
+                    print(newnode)
+                elif isinstance(node, ArrayVariable):
+                    print("Tis nen array")
+                    if newnode.children:
+                        node.value = newnode.children[0].value
+                        node.index = node.children[0]
+                        node.rvalue = False
+                        return node
+                    else:
+                        newnode.adopt(node)
                 elif node is None:
                     newvar = Variable(ctx.iden.text)
                     newnode.adopt(newvar)
                 else:
+                    print("DEEEEEEEEEEEEEES")
+                    print(newnode.value)
                     newnode.adopt(node)
             return newnode
         else:
@@ -185,6 +206,7 @@ class CSTVisitor(CGrammarVisitor):
                     decl.pointer = node
                 elif child == ctx.arr:
                     array = self.visit(ctx.arr)
+                    decl.array = array
                     decl.adopt(array)
                 else:
                     print("En dees?")
@@ -198,6 +220,13 @@ class CSTVisitor(CGrammarVisitor):
                 var = Variable(ctx.var.text)
                 op.adopt(var)
                 return op
+            elif ctx.arr:
+                print("Creating array")
+                index = self.visit(ctx.arr)
+                node = ArrayVariable(ctx.var.text)
+                node.lvalue = True
+                node.index = index
+                return node
             else:
                 for child in ctx.children:
                     node = self.visit(child)
@@ -205,6 +234,13 @@ class CSTVisitor(CGrammarVisitor):
                     return var
         # We return decl if we have a declaration
         return decl
+    def visitArray(self, ctx:CGrammarParser.ArrayContext):
+        print("Array")
+        value = "-1"
+        for child in ctx.children:
+            if not child.getText() == "[" and not child.getText() == "]":
+                value = self.visit(child)
+        return value
 
     def visitDeclaration(self, ctx:CGrammarParser.DeclarationContext):
         print("Declaration")
@@ -316,14 +352,7 @@ class CSTVisitor(CGrammarVisitor):
                 node.adopt(childnode)
         return node
 
-    def visitArray(self, ctx:CGrammarParser.ArrayContext):
-        print("Array")
-        array = Array("array")
-        for child in ctx.children:
-            if not child.getText() == "[" and not child.getText() == "]":
-                size = self.visit(child)
-                array.size = size
-        return array
+
 
 
     def visitParameterlist(self, ctx:CGrammarParser.ParameterlistContext):
@@ -349,6 +378,7 @@ class CSTVisitor(CGrammarVisitor):
         if ctx.ass:
             ass = self.visit(ctx.ass)
             args.adopt(ass)
+            print(ass.value)
         if ctx.args:
             param = self.visit(ctx.args)
             if isinstance(param, ASTNode):
@@ -440,9 +470,11 @@ class CSTVisitor(CGrammarVisitor):
             printf.format = format
             print(ctx.form.text)
         if ctx.args:
+            print("ARRRRG")
             node = self.visit(ctx.args)
             print(node)
             printf.args = node
+            printf.adopt(node)
         '''
         if ctx.ass:
             node = self.visit(ctx.ass)

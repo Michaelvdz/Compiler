@@ -392,7 +392,8 @@ class ASTOptimizer(Visitor):
 
 
     def VisitUnaryOperation(self, currentNode):
-        #print("Unary")
+        print("Unary")
+        print(currentNode.value)
         match currentNode.value:
             case "-":
                 value = 0
@@ -474,6 +475,27 @@ class ASTOptimizer(Visitor):
                     return node
                 else:
                     return currentNode
+            case "[]":
+                print("ARRAAAAAAAAAAAAAAAAAAAAAAAAY")
+                print(currentNode.value)
+                print(currentNode.children[0].ch)
+                print(currentNode.children[0].value)
+                if isinstance(currentNode.children[0], Constant) or isinstance(currentNode.children[0], BinaryOperation):
+                    for child in currentNode.children:
+                        node = child.accept(self)
+                        if isinstance(node, ASTNode):
+                            try:
+                                value = int(node.value)
+                            except ValueError:
+                                print("failure")
+                    array = Array('[]')
+                    array.size = value
+                    print(value)
+                    currentNode.children = []
+                    currentNode.adopt(array)
+                    return currentNode
+                else:
+                    return currentNode
             case "_":
                 print("none")
         return currentNode
@@ -496,13 +518,25 @@ class ASTOptimizer(Visitor):
             newNode.children.append(node)
         return newNode
 
+    def VisitArrayVariable(self, currentNode):
+        #print("Pointer")
+        newNode = copy.copy(currentNode)
+        newNode.children = []
+        for child in currentNode.children:
+            node = child.accept(self)
+            newNode.children.append(node)
+        return newNode
+
     def VisitArray(self, currentNode):
         #print("Array")
         newNode = copy.copy(currentNode)
         size = currentNode.size.accept(self)
+        print(size.value)
         newNode.value = "[" + " ]"
         newNode.name = newNode.value
         newNode.children = []
+        newNode.size = size
+        print(size)
         return newNode
 
     def VisitLogicalOperation(self, currentNode):
@@ -522,6 +556,11 @@ class ASTOptimizer(Visitor):
             if currentNode.body:
                 newNode.body = currentNode.body.accept(self)
                 for child in newNode.body.children:
+                    if isinstance(child, Jump):
+                        print(currentNode.returnType.value)
+                        child.type = currentNode.returnType.value
+                    newNode.children.append(child)
+                    '''
                     print("test")
                     node = child.accept(self)
                     print(node)
@@ -533,6 +572,7 @@ class ASTOptimizer(Visitor):
                             print(currentNode.returnType.value)
                             node.type = currentNode.returnType.value
                     newNode.children.append(node)
+                    '''
 
         return newNode
 
@@ -565,6 +605,10 @@ class ASTOptimizer(Visitor):
 
     def VisitVariable(self, currentNode):
         #print("Constant")
+        if currentNode.children:
+            for child in currentNode.children:
+                if isinstance(child, Array):
+                    currentNode.size = str(child.size.value)
         return currentNode
 
     def VisitJump(self, currentNode):
@@ -634,6 +678,7 @@ class ASTOptimizer(Visitor):
                 node = child.acceptWithNoOptimization(self)
                 newNode.children.append(node)
             else:
+                newNode.type += "[]"
                 node = child.accept(self)
                 newNode.children.append(node)
         return newNode
@@ -653,6 +698,9 @@ class ASTOptimizer(Visitor):
         newNode.children = []
         #print(currentNode.lvalue)
         newNode.lvalue = currentNode.lvalue.accept(self)
+        if isinstance(newNode.lvalue, Array):
+            print("ARAAAAAAAAAAAAAAAAAAAAAAAAY")
+            print(newNode.lvalue.size)
         #print(newNode.lvalue)
         newNode.rvalue = currentNode.rvalue.accept(self)
         newNode.adopt(newNode.lvalue)
@@ -686,11 +734,12 @@ class ASTOptimizer(Visitor):
         return currentNode
 
     def VisitPrintf(self, currentNode):
-        print("DOETEM DEES FEITELIJK?")
+        print("DOETEM DEES FEITELIJK?????")
         #print("PrintF")
         newNode = copy.copy(currentNode)
         newNode.children = []
         self.propagation = False
+        print(len(currentNode.children))
         for child in currentNode.children:
             node = child.accept(self)
             newNode.children.append(node)

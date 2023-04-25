@@ -20,12 +20,7 @@ class CreateSymbolTableVisitor(Visitor):
         globaltable = SymbolTable()
         globaltable.children = []
         globaltable.name = "Global"
-        print("Globaltable:")
-        print(globaltable)
         self.table.push(globaltable)
-        print("Print top op stack?")
-        print(self.table)
-        print(self.table.tables[0])
 
     def VisitASTNode(self, currentNode):
         #print("Node")
@@ -131,15 +126,9 @@ class CreateSymbolTableVisitor(Visitor):
             parenttable = self.table.peek()
             newtable.parent = parenttable
             # Append new ST as child of parent ST
-            print(parenttable.name)
-            print(parenttable.children)
             parenttable.children.append(newtable)
-            print(parenttable.children)
             # Push ST to stack
             self.table.push(newtable)
-            print(self.table.tables[0].name)
-            print(self.table.tables[1].name)
-            print(self.table.tables[0].children)
             if currentNode.body:
                 # if it has params, visit them
                 for param in currentNode.params:
@@ -203,9 +192,6 @@ class CreateSymbolTableVisitor(Visitor):
         currType = ""
 
 
-        if currentNode.type != "int" and currentNode.type != "float" and currentNode.type != "char" and currentNode.type != "char*"\
-                and currentNode.type != "int*" and currentNode.type != "float*":
-            currentNode.type = ""
 
 
         if currentNode.type == "VariableType":
@@ -240,22 +226,25 @@ class CreateSymbolTableVisitor(Visitor):
             # self.table.peek().insert(currentNode.var, currConst, currType, currentNode.attr)
             '''none'''
 
-        print(currentNode.pointer)
-        print(currentNode.var)
         if currentNode.pointer:
             node = currentNode.pointer.accept(self)
             for star in node.children:
                 currType = currType + "*"
             currType += "*"
-        print("Type of var")
-        print(currType)
 
 
+        if currentNode.array:
+            array = currentNode.array.accept(self)
+            if not self.table.peek().lookupInThisTable(currentNode.var):
+                print("Inserting array var")
+                size = array.value
+                self.table.peek().insertArray(currentNode.var, currConst, currType+"[]", currentNode.attr, size)
 
+        if "[]" not in currentNode.type:
+            if not self.table.peek().lookupInThisTable(currentNode.var):
+                print("Inserting var")
+                self.table.peek().insert(currentNode.var, currConst, currType, currentNode.attr)
 
-        if not self.table.peek().lookupInThisTable(currentNode.var):
-            print("Inserting var")
-            self.table.peek().insert(currentNode.var, currConst, currType, currentNode.attr)
 
         #currentNode.print()
         return currentNode
@@ -289,6 +278,14 @@ class CreateSymbolTableVisitor(Visitor):
         else:
             currentNode.lvalue.accept(self)
 
+        return currentNode
+
+    def VisitArray(self, currentNode):
+        #print("Variable")
+        return currentNode
+
+    def VisitArrayVariable(self, currentNode):
+        #print("Variable")
         return currentNode
 
     def VisitVariable(self, currentNode):

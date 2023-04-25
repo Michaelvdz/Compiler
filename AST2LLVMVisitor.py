@@ -35,6 +35,9 @@ class AST2LLVMVisitor(Visitor):
     def allocateRegister(self, table, name, var):
         type = var.type
         attr = var.attr
+        size = 0
+        if isinstance(var, Array):
+            size = var.size
         if type == "int":
             self.llvm += "%" + str(self.instr) + " = alloca i32, align 4\n"
             table.insertRegister(name, str(self.instr))
@@ -62,6 +65,25 @@ class AST2LLVMVisitor(Visitor):
             self.llvm += "%" + str(self.instr) + " = alloca " + str(llvmtyp) + ", align 8\n"
             table.insertRegister(name, str(self.instr))
             self.instr += 1
+        elif "[]" in type:
+            if "int" in type:
+                arraytype = type.replace("int","i32")
+                arraytype = arraytype.replace("[]", "")
+                self.llvm += "%" + str(self.instr) + " = alloca [" + str(size) + " x " + str(arraytype) + "], align 16\n"
+                table.insertRegister(name, str(self.instr))
+                self.instr += 1
+            if "float" in type:
+                arraytype = type.replace("float","float")
+                arraytype = arraytype.replace("[]", "")
+                self.llvm += "%" + str(self.instr) + " = alloca [" + str(size) + " x " + str(arraytype) + "], align 16\n"
+                table.insertRegister(name, str(self.instr))
+                self.instr += 1
+            if "char" in type:
+                arraytype = type.replace("char","i8")
+                arraytype = arraytype.replace("[]", "")
+                self.llvm += "%" + str(self.instr) + " = alloca [" + str(size) + " x " + str(arraytype) + "], align 16\n"
+                table.insertRegister(name, str(self.instr))
+                self.instr += 1
         else:
             print("Type not implemented")
 
@@ -460,7 +482,7 @@ class AST2LLVMVisitor(Visitor):
 
         # Label condition
         conditionlabel = self.instr
-        self.instr +=1
+        self.instr += 1
 
         self.llvm += "br label %" + str(conditionlabel) + "\n"
 
@@ -553,8 +575,88 @@ class AST2LLVMVisitor(Visitor):
                 self.instr += 1
                 return (str(self.instr - 1), type[:-1], "reg", currentNode.value)
 
+            if "int[]" in type:
+                llvmtype = type.replace("int", "i32")
+                llvmtype = llvmtype.replace("[]", "")
+                size = symbol.size
+                register = symbol.register
+                self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
+                    size) + " x " + llvmtype + "], [" + str(
+                    size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 0" + "\n"
+                self.instr += 1
+            if "float[]" in type:
+                llvmtype = type.replace("float", "float")
+                llvmtype = llvmtype.replace("[]", "")
+                size = symbol.size
+                register = symbol.register
+                self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
+                    size) + " x " + llvmtype + "], [" + str(
+                    size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 0" + "\n"
+                self.instr += 1
+            if "char[]" in type:
+                llvmtype = type.replace("char", "i8")
+                llvmtype = llvmtype.replace("[]", "")
+                size = symbol.size
+                register = symbol.register
+                self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
+                    size) + " x " + llvmtype + "], [" + str(
+                    size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 0" + "\n"
+                self.instr += 1
+
             return (str(self.instr-1), type, "reg", currentNode.value)
 
+    def VisitArrayVariable(self, currentNode):
+        print("ArrayVariable")
+        if self.currentTable.lookup(currentNode.value):
+            array = self.currentTable.lookup(currentNode.value)
+            arraytype = array.type
+            var = currentNode.value
+            register = array.register
+            size = array.size
+            if currentNode.index:
+                index = currentNode.index.accept(self)
+
+            llvmtype = ""
+            if "int" in arraytype:
+                llvmtype = arraytype.replace("int", "i32")
+                llvmtype = llvmtype.replace("[]", "")
+                self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
+                    size) + " x " + llvmtype + "], [" + str(
+                    size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 " + str(
+                    index[0]) + "\n"
+                self.instr += 1
+            elif "float" in arraytype:
+                llvmtype = arraytype.replace("float", "float")
+                llvmtype = llvmtype.replace("[]", "")
+                self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
+                    size) + " x " + llvmtype + "], [" + str(
+                    size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 " + str(
+                    index[0]) + "\n"
+                self.instr += 1
+            elif "char" in arraytype:
+                llvmtype = arraytype.replace("char", "i8")
+                llvmtype = llvmtype.replace("[]", "")
+                self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
+                    size) + " x " + llvmtype + "], [" + str(
+                    size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 " + str(
+                    index[0]) + "\n"
+                self.instr += 1
+            if currentNode.lvalue:
+                return (str(self.instr -1), str(arraytype), "reg", currentNode.value)
+            else:
+                if arraytype == "int[]":
+                    self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(
+                        self.instr - 1) + ", align 4\n"
+                    self.instr += 1
+                if arraytype == "float[]":
+                    self.llvm += "%" + str(self.instr) + " = load float, float* %" + str(
+                        self.instr - 1) + ", align 4\n"
+                    self.instr += 1
+                if arraytype == "char[]":
+                    self.llvm += "%" + str(self.instr) + " = load i8, i8* %" + str(
+                        self.instr - 1) + ", align 1\n"
+                    self.instr += 1
+            return (str(self.instr-1), str(arraytype), "reg", currentNode.value)
     def VisitBinaryOperation(self, currentNode):
         print("Binary-----------")
         BinType = None
@@ -562,6 +664,13 @@ class AST2LLVMVisitor(Visitor):
         self.lvalue = False
 
         for child in currentNode.children:
+            if isinstance(child, Variable):
+                newType = self.currentTable.lookup(child.value).type
+                if BinType is None:
+                    BinType = newType
+                elif newType == "float":
+                    BinType = newType
+                print("Variable")
             if isinstance(child, Variable):
                 newType = self.currentTable.lookup(child.value).type
                 if BinType is None:
@@ -783,8 +892,10 @@ class AST2LLVMVisitor(Visitor):
                     return var
 
             case "++":
+                print("DOING THISIIII")
                 for child in currentNode.children:
-                    if isinstance(child, Variable):
+                    print(child)
+                    if isinstance(child, Variable) or isinstance(child, ArrayVariable):
                         var = self.currentTable.lookup(child.value)
                         match var.type:
                             case "int":
@@ -794,6 +905,13 @@ class AST2LLVMVisitor(Visitor):
                                 self.instr += 1
                                 self.llvm += "store i32 %" + str(self.instr-1) + ", i32* %" + str(var.register) + ", align 4\n"
                                 return (str(self.instr-2) , str(var.type), "reg", str(child.value))
+                        if "int[]" in var.type:
+                            value = child.accept(self)
+                            self.llvm += "%" + str(self.instr) + " = add nsw i32 %" + str(value[0]) + ", 1\n"
+                            self.instr += 1
+                            self.llvm += "store i32 %" + str(self.instr - 1) + ", i32* %" + str(
+                                int(value[0])-1) + ", align 4\n"
+                            return (str(int(value[0])), str(var.type), "reg", str(child.value))
             case "--":
                 for child in currentNode.children:
                     if isinstance(child, Variable):
@@ -806,8 +924,24 @@ class AST2LLVMVisitor(Visitor):
                                 self.instr += 1
                                 self.llvm += "store i32 %" + str(self.instr-1) + ", i32* %" + str(var.register) + ", align 4\n"
                                 return (str(self.instr-2) , str(var.type), "reg", str(child.value))
+            case "[]":
+                print(len(currentNode.children))
+                print(currentNode.children)
+                print(currentNode.children[0].value)
+                print(currentNode.value)
+                if self.lvalue:
+                    if currentNode.children:
+                        for child in currentNode.children:
+                            print(child)
+                            print(child.children[0])
             case other:
                 print("not implemented yet")
+        return currentNode
+
+    def VisitArray(self, currentNode):
+        #print("Array")
+        for child in currentNode.children:
+            node = child.accept(self)
         return currentNode
 
     def VisitRelationOperation(self, currentNode):
@@ -959,14 +1093,20 @@ class AST2LLVMVisitor(Visitor):
                 else:
                     print("test")
 
+
         # The lvalue is no declaration but a variable
-        elif isinstance(currentNode.lvalue, Variable):
+        elif isinstance(currentNode.lvalue, Variable) or isinstance(currentNode.lvalue, ArrayVariable):
             self.lvalue = False
             value = currentNode.rvalue.accept(self)
             self.lvalue = True
             reg = currentNode.lvalue.accept(self)
+            print("REG:")
+            print(reg)
+            print("Value")
+            print(value)
             #ltype = self.symbolTable.lookup(currentNode.lvalue.children[0].value).type
             ltype = self.currentTable.lookup(currentNode.lvalue.value).type
+            print(ltype)
             #self.instr += 1
             if ltype == "int*":
                 self.llvm += "store i32* %" + str(value[0]) + ", i32** %" + str(reg[0]) + ", align 8\n"
@@ -991,10 +1131,83 @@ class AST2LLVMVisitor(Visitor):
                     unpacked = struct.unpack("f", packed)[0]
                     self.llvm += "store float " + str(unpacked) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
                 elif ltype == "char":
+
                     value = value[0].replace("'","")
                     if len(value) > 1:
-                        value= value.encode('utf-8').decode('unicode-escape')
+                        value = value.encode('utf-8').decode('unicode-escape')
                     self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 1\n"
+                if ltype == "int[]":
+                    llvmtype = ltype.replace("int", "i32")
+                    llvmtype = llvmtype.replace("[]", "")
+                    try:
+                        value = int(value[0])
+                    except ValueError:
+                        value = float(value[0])
+                    self.llvm += "store i32 " + str(value) + ", i32* %" + str(self.instr - 1) + ", align 4\n"
+                elif ltype == "float[]":
+                    llvmtype = ltype.replace("float", "float")
+                    llvmtype = llvmtype.replace("[]", "")
+                    try:
+                        value = float(value[0])
+                    except ValueError:
+                        print("failiure")
+                    packed = struct.pack("f", value)
+                    value = struct.unpack("f", packed)[0]
+                    self.llvm += "store float " + str(value) + ", float* %" + str(self.instr - 1) + ", align 4\n"
+                elif ltype == "char[]":
+                    print("Zitten we ier?")
+                    llvmtype = ltype.replace("char", "i8")
+                    llvmtype = llvmtype.replace("[]", "")
+                    value = value[0].replace("'","")
+                    if len(value) > 1:
+                        value = value.encode('utf-8').decode('unicode-escape')
+                    self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + str(self.instr - 1) + ", align 4\n"
+                if "[]" in ltype:
+                    '''
+                    print("KOMETEM IER?")
+                    var = reg[3]
+                    register = reg[0]
+                    symbol = self.currentTable.lookup(var)
+                    size = symbol.size
+                    index = currentNode.lvalue.size
+                    llvmtype = ""
+                    if "int" in ltype:
+                        llvmtype = ltype.replace("int", "i32")
+                        llvmtype = llvmtype.replace("[]", "")
+                        try:
+                            value = int(value[0])
+                        except ValueError:
+                            value = float(value[0])
+                        self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
+                            size) + " x " + llvmtype + "], [" + str(
+                            size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 " + str(
+                            index) + "\n"
+                        self.instr += 1
+                        self.llvm += "store i32 " + str(value) + ", i32* %" + str(self.instr-1) + ", align 4\n"
+                    elif "float" in ltype:
+                        llvmtype = ltype.replace("float", "float")
+                        llvmtype = llvmtype.replace("[]", "")
+                        try:
+                            value = float(value[0])
+                        except ValueError:
+                            print("failiure")
+                        packed = struct.pack("f", value)
+                        value = struct.unpack("f", packed)[0]
+                        self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
+                            size) + " x " + llvmtype + "], [" + str(
+                            size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 " + str(
+                            index) + "\n"
+                        self.instr += 1
+                        self.llvm += "store float " + str(value) + ", float* %" + str(self.instr - 1) + ", align 4\n"
+                    elif "char" in ltype:
+                        llvmtype = ltype.replace("char", "i8")
+                        llvmtype = llvmtype.replace("[]", "")
+                        self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
+                            size) + " x " + llvmtype + "], [" + str(size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 " + str(
+                            index) + "\n"
+                        self.instr += 1
+                        self.llvm += "store i8 " + str(value) + ", i8* %" + str(self.instr - 1) + ", align 4\n"'''
+                    print("test")
             else:
                 if ltype == "int":
                     self.llvm += "store i32 %" + str(value[0]) + ", i32* %" + reg[0] + ", align 4\n"
@@ -1005,6 +1218,29 @@ class AST2LLVMVisitor(Visitor):
                 elif ltype == "char":
                     value = value.replace("'","")
                     self.llvm += "store i8 " + str(ord(value[0])) + ", i8* %" + reg[0] + ", align 1\n"
+                if ltype == "int[]":
+                    llvmtype = ltype.replace("int", "i32")
+                    llvmtype = llvmtype.replace("[]", "")
+                    try:
+                        value = int(value[0])
+                    except ValueError:
+                        value = float(value[0])
+                    self.llvm += "store i32 %" + str(value) + ", i32* %" + str(self.instr - 1) + ", align 4\n"
+                elif ltype == "float[]":
+                    llvmtype = ltype.replace("float", "float")
+                    llvmtype = llvmtype.replace("[]", "")
+                    try:
+                        value = float(value[0])
+                    except ValueError:
+                        print("failiure")
+                    packed = struct.pack("f", value)
+                    value = struct.unpack("f", packed)[0]
+                    self.llvm += "store float %" + str(value) + ", float* %" + str(self.instr - 1) + ", align 4\n"
+                elif ltype == "char[]":
+                    llvmtype = ltype.replace("char", "i8")
+                    llvmtype = llvmtype.replace("[]", "")
+                    self.llvm += "store i8 %" + str(value) + ", i8* %" + str(self.instr - 1) + ", align 4\n"
+
         else:
             # In this case the lvalue is a pointer dereference
             value = currentNode.rvalue.accept(self)
@@ -1012,6 +1248,8 @@ class AST2LLVMVisitor(Visitor):
             reg = currentNode.lvalue.accept(self)
             var = reg[3]
             type = reg[1]
+            print(value)
+            print(reg)
             if type == "int*":
                 try:
                     value = int(value[0])
@@ -1175,6 +1413,8 @@ class AST2LLVMVisitor(Visitor):
         if currentNode.args:
             for child in currentNode.args.children:
                 print(child)
+                if isinstance(child, ArrayVariable):
+                    child.rvalue = True
                 self.lvalue = False
                 node = child.accept(self)
                 self.lvalue = True
@@ -1201,7 +1441,10 @@ class AST2LLVMVisitor(Visitor):
                             node[2]) + ", align 1\n"
                         self.instr += 1
                     '''
-                    newnode = (self.instr - 1, node[1], node[2], node[3], "value")
+                    if isinstance(child, Variable) and "[]" in node[1]:
+                        newnode = (self.instr - 1, node[1], node[2], node[3], "array")
+                    else:
+                        newnode = (self.instr - 1, node[1], node[2], node[3], "value")
                     params.append(newnode)
                 else:
                     print(node)
@@ -1234,12 +1477,20 @@ class AST2LLVMVisitor(Visitor):
             self.llvm += ", "
         for node in params:
             print(node)
-            if node[2] == "reg" and node[4] == "value":
-                if node[1] == "int":
+            if node[4] == "array":
+                print("JAAAAAAAA")
+                if node[1] == "int" or node[1] == "int[]":
+                    self.llvm += "i32* noundef %" + str(node[0])
+                elif node[1] == "float" or node[1] == "float[]":
+                    self.llvm += "float* noundef %" + str(node[0])
+                elif node[1] == "char" or node[1] == "char[]":
+                    self.llvm += "i8* noundef %" + str(node[0])
+            elif node[2] == "reg" and node[4] == "value":
+                if node[1] == "int" or node[1] == "int[]":
                     self.llvm += "i32 noundef %" + str(node[0])
-                elif node[1] == "float":
+                elif node[1] == "float" or node[1] == "float[]":
                     self.llvm += "float noundef %" + str(node[0])
-                else:
+                elif node[1] == "char" or node[1] == "char[]":
                     self.llvm += "i8 noundef %" + str(node[0])
             elif node[2] == "reg" and node[4] == "ref":
                 if "int" in node[1]:
@@ -1255,6 +1506,8 @@ class AST2LLVMVisitor(Visitor):
                     self.llvm += "float noundef " + str(node[0])
                 else:
                     self.llvm += "i8 noundef " + str(node[0])
+
+
 
             if i != numberParams:
                 self.llvm += ", "
