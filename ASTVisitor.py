@@ -69,9 +69,11 @@ class ASTVisitor(Visitor):
     def VisitScope(self, currentNode):
         #print("Beginning Node")
         self.ast.node(str(id(currentNode)), currentNode.name)
-        for child in currentNode.children:
-            node = child.accept(self)
-            self.ast.edge(str(id(currentNode)), str(id(node)))
+        if currentNode.children and len(currentNode.children) != 0:
+            for child in currentNode.children:
+                if child is not None:
+                    node = child.accept(self)
+                    self.ast.edge(str(id(currentNode)), str(id(node)))
         #print("Ending Node")
         return currentNode
 

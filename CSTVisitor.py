@@ -349,7 +349,8 @@ class CSTVisitor(CGrammarVisitor):
         for child in ctx.children:
             if not child.getText() == "{" and not child.getText() == "}":
                 childnode = self.visit(child)
-                node.adopt(childnode)
+                if childnode is not None:
+                    node.adopt(childnode)
         return node
 
 

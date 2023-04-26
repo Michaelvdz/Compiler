@@ -1,6 +1,9 @@
+import SymbolTable
 from AST import *
 import graphviz
 from SymbolTable import *
+from ctypes import *
+import re
 import struct
 
 class Visitor:
@@ -22,15 +25,20 @@ class AST2LLVMVisitor(Visitor):
     currentLoop = []
     context = []
     printstr = []
+    globalPosition = 0
 
     def __init__(self, llvm="", symbolTable=SymbolTable()):
         #print("----------------Converting AST 2 LLVM IR----------------")
+
+        # The generated LLVM IR code
         self.llvm = llvm
-        self.symbolTable = symbolTable
+
+        #self.symbolTable = symbolTable
+
+        # Set the current symbol table which will be used
         self.currentTable = symbolTable
-        #self.allocateRegisters(self.currentTable)
+
         self.currentLoop = []
-        #self.currentTable.print()
 
     def allocateRegister(self, table, name, var):
         type = var.type
@@ -401,6 +409,7 @@ class AST2LLVMVisitor(Visitor):
         parent = self.currentTable
         self.currentTable = self.currentTable.children[0]
         self.allocateRegistersCurrentScope(self.currentTable)
+        print(self.currentTable)
         ifbody.accept(self)
         # After visiting scope, delete the symbol table
         self.currentTable.parent.children.remove(self.currentTable)
@@ -425,6 +434,7 @@ class AST2LLVMVisitor(Visitor):
             # Open a new scope by selecting the right symbol table
             parent = self.currentTable
             self.currentTable = self.currentTable.children[0]
+            self.allocateRegistersCurrentScope(self.currentTable)
             elsebody.accept(self)
             # After visiting scope, delete the symbol table
             self.currentTable.parent.children.remove(self.currentTable)
@@ -453,6 +463,7 @@ class AST2LLVMVisitor(Visitor):
         # Open a new scope by selecting the right symbol table
         parent = self.currentTable
         self.currentTable = self.currentTable.children[0]
+        self.allocateRegistersCurrentScope(self.currentTable)
 
         # Visit scope body
         for child in currentNode.children:
@@ -542,6 +553,7 @@ class AST2LLVMVisitor(Visitor):
                 return currentNode
         else:
             symbol = self.currentTable.lookup(currentNode.value)
+            print(symbol)
             type = symbol.type
             if type == "int":
                 self.llvm += "%" + str(self.instr) + " = load i32, i32* %" + str(
@@ -974,10 +986,6 @@ class AST2LLVMVisitor(Visitor):
 
     def VisitDeclaration(self, currentNode):
         #print("Declaration2LLVM")
-        var = currentNode.var
-        #print(var)
-        type = currentNode.type
-        attr = currentNode.attr
         '''
         match type:
             case "int":
@@ -1011,180 +1019,309 @@ class AST2LLVMVisitor(Visitor):
                 #print("Type not implemented or literal")
             '''
 
+        # If we are assigning in global scope
+        if self.currentTable.name == "Global":
+
+            # For a global variable, allocate them and value them 0 if not assigned
+
+            ltype = currentNode.type
+            var = currentNode.var
+            value = ("0", "", "value")
+            symbol = self.currentTable.lookup(var)
+            print(symbol.type)
+            ltype = symbol.type
+
+            # Test for type
+            if "[]" in symbol.type:
+                if "int" in ltype:
+                    vartype = ltype.replace("int", "i32")
+                    vartype = vartype.replace("[]","")
+                    self.llvm += "@" + str(var) + " = dso_local global [" + str(symbol.size) + " x " + str(vartype) + "] zeroinitializer, align 16\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+                elif "float" in ltype:
+                    vartype = ltype.replace("float", "float")
+                    vartype = vartype.replace("[]", "")
+                    self.llvm += "@" + str(var) + " = dso_local global [" + str(symbol.size) + " x " + str(vartype) + "] zeroinitializer, align 16\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+                elif "char" in ltype:
+                    vartype = ltype.replace("char", "i8")
+                    vartype = vartype.replace("[]", "")
+                    self.llvm += "@" + str(var) + " = dso_local global [" + str(symbol.size) + " x " + str(vartype) + "] zeroinitializer, align 16\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+            elif "*" in symbol.type:
+                if "int" in ltype:
+                    vartype = ltype.replace("int", "i32")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str("null") + ", align 8\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+                elif "float" in ltype:
+                    vartype = ltype.replace("float", "float")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str("null") + ", align 8\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+                elif "char" in ltype:
+                    vartype = ltype.replace("char", "i8")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str("null") + ", align 8\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+            else:
+                if "int" in ltype:
+                    try:
+                        value = int(value[0])
+                    except ValueError:
+                        print("Cannot be converted")
+                    vartype = ltype.replace("int", "i32")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value) + ", align 4\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+                elif "float" in ltype:
+                    try:
+                        value = float(value[0])
+                    except ValueError:
+                        print("Cannot be converted")
+                    packed = struct.pack("f", value)
+                    unpacked = struct.unpack("f", packed)[0]
+                    vartype = ltype.replace("float", "float")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value) + ", align 4\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+                elif "char" in ltype:
+                    vartype = ltype.replace("char", "i8")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str("0") + ", align 1\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
         return currentNode
 
     def VisitAssignment(self, currentNode):
         #print("Assignment2LLVM")
+        if self.currentTable.name == "Global":
 
-        # Test if the left value is a declaration
-        if isinstance(currentNode.lvalue, Declaration):
-            currentNode.lvalue.accept(self)
+            # For a global variable, allocate them and value them 0 if not assigned
+
+            ltype = currentNode.lvalue.type
+            var = currentNode.lvalue.var
+            value = ("0", "", "value")
+            symbol = self.currentTable.lookup(var)
+            ltype = symbol.type
             self.lvalue = False
             value = currentNode.rvalue.accept(self)
             self.lvalue = True
-            ltype = self.currentTable.lookup(currentNode.lvalue.var).type
-            if value[2] != "reg":
-                if ltype == "int":
-                    try:
-                        value = int(value[0])
-                    except ValueError:
-                        value = float(value[0])
-                    if isinstance(value, float) or isinstance(value, int):
-                        self.llvm += "store i32 " + str(value) + ", i32* %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 4\n"
-                elif ltype == "float":
-                    try:
-                        value = float(value[0])
-                    except ValueError:
-                        print("failiure")
-                    packed = struct.pack("f", value)
-                    unpacked = struct.unpack("f", packed)[0]
-                    self.llvm += "store float " + str(unpacked) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
-                elif ltype == "char":
-                    value = value[0].replace("'", "")
-                    if len(value) > 1:
-                        value= value.encode('utf-8').decode('unicode-escape')
-                    self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
-                elif ltype == "int*":
-                    self.llvm += "store i32* %" + str(value) + ", i32** %" + self.currentTable.lookup(
-                        currentNode.lvalue.var).register + ", align 8\n"
-                elif ltype == "float*":
-                    self.llvm += "store float* %" + str(value) + ", float** %" + self.currentTable.lookup(
-                        currentNode.lvalue.var).register + ", align 8\n"
-                elif ltype == "char*":
-                    self.llvm += "store i8* %" + str(value) + ", i8** %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 8\n"
+            # Test for type
+            '''
+            if "[]" in symbol.type:
+                if "int" in ltype:
+                    vartype = ltype.replace("int", "i32")
+                    vartype = vartype.replace("[]","")
+                    self.llvm += "@" + str(var) + " = dso_local global [" + str(symbol.size) + " x " + str(vartype) + "] zeroinitializer, align 16\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+                elif "float" in ltype:
+                    vartype = ltype.replace("float", "float")
+                    vartype = vartype.replace("[]", "")
+                    self.llvm += "@" + str(var) + " = dso_local global [" + str(symbol.size) + " x " + str(vartype) + "] zeroinitializer, align 16\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+                elif "char" in ltype:
+                    vartype = ltype.replace("char", "i8")
+                    vartype = vartype.replace("[]", "")
+                    self.llvm += "@" + str(var) + " = dso_local global [" + str(symbol.size) + " x " + str(vartype) + "] zeroinitializer, align 16\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+            '''
+            if "*" in symbol.type:
+                if "int" in ltype:
+                    vartype = ltype.replace("int", "i32")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value[0]) + ", align 8\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+                elif "float" in ltype:
+                    vartype = ltype.replace("float", "float")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value[0]) + ", align 8\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+                elif "char" in ltype:
+                    vartype = ltype.replace("char", "i8")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value[0]) + ", align 8\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
             else:
-                if ltype == "int":
-                    if value[1] == "float":
-                        self.llvm += "%" + str(value[0]) + " = fptosi float %" + str(value[0]) + " to i32\n"
-                        self.instr += 1
-                    self.llvm += "store i32 %" + str(value[0]) + ", i32* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
-                elif ltype == "float":
-                    if value[1] == "int":
-                        self.llvm += "%" + str(value[0]) + " = sitofp i32 %" + str(value[0]) + " to float\n"
-                        self.instr += 1
-                    self.llvm += "store float %" + str(value[0]) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
-                elif ltype == "char":
-                    self.llvm += "store i8 %" + str(value[0]) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
-                elif "int*" == ltype:
-                    self.llvm += "store i32* %" + str(value[0]) + ", i32** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
-                elif  "float*" == ltype:
-                    self.llvm += "store float* %" + str(value[0]) + ", float** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
-                elif "char*" == ltype:
-                    self.llvm += "store i8* %" + str(value[0]) + ", i8** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 1\n"
-                elif "int*" in ltype:
-                    # We need to dereference more
-                    if ltype != value[1]:
-                        llvmltyp = ltype.replace("int", "i32")
-                        llvmrtyp = value[1].replace("int", "i32")
-                        self.llvm += "store "+ str(llvmrtyp) + "* %" + str(value[0]) + ", " + str(llvmltyp) + "* %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
-                    else:
-                        llvmltyp = ltype.replace("int", "i32")
-                        llvmrtyp = value[1].replace("int", "i32")
-                        self.llvm += "store " + str(llvmrtyp) + "* %" + str(value[0]) + ", " + str(
-                            llvmltyp) + "* %" + str(
-                            self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
-
-                elif "int*" in ltype:
-                    # We need to dereference more
-                    self.llvm += "store float* %" + str(value[0]) + ", float** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
-                elif "int*" in ltype:
-                    # We need to dereference more
-                    self.llvm += "store i8* %" + str(value[0]) + ", i8** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 1\n"
-                else:
-                    print("test")
-
-
-        # The lvalue is no declaration but a variable
-        elif isinstance(currentNode.lvalue, Variable) or isinstance(currentNode.lvalue, ArrayVariable):
-            self.lvalue = False
-            value = currentNode.rvalue.accept(self)
-            self.lvalue = True
-            reg = currentNode.lvalue.accept(self)
-            print("REG:")
-            print(reg)
-            print("Value")
-            print(value)
-            #ltype = self.symbolTable.lookup(currentNode.lvalue.children[0].value).type
-            ltype = self.currentTable.lookup(currentNode.lvalue.value).type
-            print(ltype)
-            #self.instr += 1
-            if ltype == "int*":
-                self.llvm += "store i32* %" + str(value[0]) + ", i32** %" + str(reg[0]) + ", align 8\n"
-            if ltype == "float*":
-                self.llvm += "store float* %" + str(value[0]) + ", float** %" + str(reg[0]) + ", align 8\n"
-            if ltype == "char*":
-                self.llvm += "store i8* %" + str(value[0]) + ", i8** %" + str(reg[0]) + ", align 1\n"
-            if value[2] != "reg":
-                if ltype == "int":
+                if "int" in ltype:
                     try:
                         value = int(value[0])
                     except ValueError:
-                        value = float(value[0])
-                    if isinstance(value, float) or isinstance(value, int):
-                        self.llvm += "store i32 " + str(value) + ", i32* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
-                elif ltype == "float":
+                        print("Cannot be converted")
+                    vartype = ltype.replace("int", "i32")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value) + ", align 4\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+                elif "float" in ltype:
                     try:
                         value = float(value[0])
                     except ValueError:
-                        print("failiure")
+                        print("Cannot be converted")
                     packed = struct.pack("f", value)
                     unpacked = struct.unpack("f", packed)[0]
-                    self.llvm += "store float " + str(unpacked) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
-                elif ltype == "char":
-
-                    value = value[0].replace("'","")
-                    if len(value) > 1:
-                        value = value.encode('utf-8').decode('unicode-escape')
-                    self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 1\n"
-                if ltype == "int[]":
-                    llvmtype = ltype.replace("int", "i32")
-                    llvmtype = llvmtype.replace("[]", "")
+                    vartype = ltype.replace("float", "float")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value) + ", align 4\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+                elif "char" in ltype:
+                    value = value[0].replace("'", "")
+                    if len(value[0]) > 1:
+                        value = value[0].encode('utf-8').decode('unicode-escape')
+                    vartype = ltype.replace("char", "i8")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str("0") + ", align 1\n"
+                    self.currentTable.insertRegister(var, "@"+str(var))
+            '''
+            # If we are assigning in global scope
+            if self.currentTable.name == "Global":
+                # For a global variable, allocate them and value them 0 if not assigned
+                ltype = currentNode.lvalue.type
+                var = currentNode.lvalue.var
+                value = ("0", "", "value")
+                self.lvalue = False
+                value = currentNode.rvalue.accept(self)
+                self.lvalue = True
+                if "int" in ltype:
                     try:
                         value = int(value[0])
                     except ValueError:
-                        value = float(value[0])
-                    self.llvm += "store i32 " + str(value) + ", i32* %" + str(self.instr - 1) + ", align 4\n"
-                elif ltype == "float[]":
-                    llvmtype = ltype.replace("float", "float")
-                    llvmtype = llvmtype.replace("[]", "")
+                        print("Cannot be converted")
+                    vartype = ltype.replace("int", "i32")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value) + ", align 4\n"
+                elif "float" in ltype:
                     try:
                         value = float(value[0])
                     except ValueError:
-                        print("failiure")
+                        print("Cannot be converted")
                     packed = struct.pack("f", value)
-                    value = struct.unpack("f", packed)[0]
-                    self.llvm += "store float " + str(value) + ", float* %" + str(self.instr - 1) + ", align 4\n"
-                elif ltype == "char[]":
-                    print("Zitten we ier?")
-                    llvmtype = ltype.replace("char", "i8")
-                    llvmtype = llvmtype.replace("[]", "")
-                    value = value[0].replace("'","")
-                    if len(value) > 1:
-                        value = value.encode('utf-8').decode('unicode-escape')
-                    self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + str(self.instr - 1) + ", align 4\n"
-                if "[]" in ltype:
-                    '''
-                    print("KOMETEM IER?")
-                    var = reg[3]
-                    register = reg[0]
-                    symbol = self.currentTable.lookup(var)
-                    size = symbol.size
-                    index = currentNode.lvalue.size
-                    llvmtype = ""
-                    if "int" in ltype:
+                    unpacked = struct.unpack("f", packed)[0]
+                    vartype = ltype.replace("float", "float")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value) + ", align 4\n"
+                elif "char" in ltype:
+                    value = value[0].replace("'", "")
+                    if len(value[0]) > 1:
+                        value = value[0].encode('utf-8').decode('unicode-escape')
+                    vartype = ltype.replace("char", "i8")
+                    self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(ord(value)) + ", align 1\n"
+            '''
+
+        else:
+            # Test if the left value is a declaration
+            if isinstance(currentNode.lvalue, Declaration):
+                currentNode.lvalue.accept(self)
+                self.lvalue = False
+                value = currentNode.rvalue.accept(self)
+                self.lvalue = True
+                ltype = self.currentTable.lookup(currentNode.lvalue.var).type
+                if value[2] != "reg":
+                    if ltype == "int":
+                        try:
+                            value = int(value[0])
+                        except ValueError:
+                            value = float(value[0])
+                        if isinstance(value, float) or isinstance(value, int):
+                            self.llvm += "store i32 " + str(value) + ", i32* %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 4\n"
+                    elif ltype == "float":
+                        try:
+                            value = float(value[0])
+                        except ValueError:
+                            print("failiure")
+                        packed = struct.pack("f", value)
+                        unpacked = struct.unpack("f", packed)[0]
+                        self.llvm += "store float " + str(unpacked) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                    elif ltype == "char":
+                        value = value[0].replace("'", "")
+                        if len(value) > 1:
+                            value= value.encode('utf-8').decode('unicode-escape')
+                        self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
+                    elif ltype == "int*":
+                        self.llvm += "store i32* %" + str(value) + ", i32** %" + self.currentTable.lookup(
+                            currentNode.lvalue.var).register + ", align 8\n"
+                    elif ltype == "float*":
+                        self.llvm += "store float* %" + str(value) + ", float** %" + self.currentTable.lookup(
+                            currentNode.lvalue.var).register + ", align 8\n"
+                    elif ltype == "char*":
+                        self.llvm += "store i8* %" + str(value) + ", i8** %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 8\n"
+                else:
+                    if ltype == "int":
+                        if value[1] == "float":
+                            self.llvm += "%" + str(value[0]) + " = fptosi float %" + str(value[0]) + " to i32\n"
+                            self.instr += 1
+                        self.llvm += "store i32 %" + str(value[0]) + ", i32* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                    elif ltype == "float":
+                        if value[1] == "int":
+                            self.llvm += "%" + str(value[0]) + " = sitofp i32 %" + str(value[0]) + " to float\n"
+                            self.instr += 1
+                        self.llvm += "store float %" + str(value[0]) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
+                    elif ltype == "char":
+                        self.llvm += "store i8 %" + str(value[0]) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
+                    elif "int*" == ltype:
+                        self.llvm += "store i32* %" + str(value[0]) + ", i32** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
+                    elif  "float*" == ltype:
+                        self.llvm += "store float* %" + str(value[0]) + ", float** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
+                    elif "char*" == ltype:
+                        self.llvm += "store i8* %" + str(value[0]) + ", i8** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 1\n"
+                    elif "int*" in ltype:
+                        # We need to dereference more
+                        if ltype != value[1]:
+                            llvmltyp = ltype.replace("int", "i32")
+                            llvmrtyp = value[1].replace("int", "i32")
+                            self.llvm += "store "+ str(llvmrtyp) + "* %" + str(value[0]) + ", " + str(llvmltyp) + "* %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
+                        else:
+                            llvmltyp = ltype.replace("int", "i32")
+                            llvmrtyp = value[1].replace("int", "i32")
+                            self.llvm += "store " + str(llvmrtyp) + "* %" + str(value[0]) + ", " + str(
+                                llvmltyp) + "* %" + str(
+                                self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
+
+                    elif "int*" in ltype:
+                        # We need to dereference more
+                        self.llvm += "store float* %" + str(value[0]) + ", float** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 8\n"
+                    elif "int*" in ltype:
+                        # We need to dereference more
+                        self.llvm += "store i8* %" + str(value[0]) + ", i8** %" + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 1\n"
+                    else:
+                        print("test")
+
+
+            # The lvalue is no declaration but a variable
+            elif isinstance(currentNode.lvalue, Variable) or isinstance(currentNode.lvalue, ArrayVariable):
+                self.lvalue = False
+                value = currentNode.rvalue.accept(self)
+                self.lvalue = True
+                reg = currentNode.lvalue.accept(self)
+                print("REG:")
+                print(reg)
+                print("Value")
+                print(value)
+                #ltype = self.symbolTable.lookup(currentNode.lvalue.children[0].value).type
+                ltype = self.currentTable.lookup(currentNode.lvalue.value).type
+                print(ltype)
+                #self.instr += 1
+                if ltype == "int*":
+                    self.llvm += "store i32* %" + str(value[0]) + ", i32** %" + str(reg[0]) + ", align 8\n"
+                if ltype == "float*":
+                    self.llvm += "store float* %" + str(value[0]) + ", float** %" + str(reg[0]) + ", align 8\n"
+                if ltype == "char*":
+                    self.llvm += "store i8* %" + str(value[0]) + ", i8** %" + str(reg[0]) + ", align 1\n"
+                if value[2] != "reg":
+                    if ltype == "int":
+                        try:
+                            value = int(value[0])
+                        except ValueError:
+                            value = float(value[0])
+                        if isinstance(value, float) or isinstance(value, int):
+                            self.llvm += "store i32 " + str(value) + ", i32* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
+                    elif ltype == "float":
+                        try:
+                            value = float(value[0])
+                        except ValueError:
+                            print("failiure")
+                        packed = struct.pack("f", value)
+                        unpacked = struct.unpack("f", packed)[0]
+                        self.llvm += "store float " + str(unpacked) + ", float* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 4\n"
+                    elif ltype == "char":
+
+                        value = value[0].replace("'","")
+                        if len(value) > 1:
+                            value = value.encode('utf-8').decode('unicode-escape')
+                        self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + self.currentTable.lookup(currentNode.lvalue.value).register + ", align 1\n"
+                    if ltype == "int[]":
                         llvmtype = ltype.replace("int", "i32")
                         llvmtype = llvmtype.replace("[]", "")
                         try:
                             value = int(value[0])
                         except ValueError:
                             value = float(value[0])
-                        self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
-                            size) + " x " + llvmtype + "], [" + str(
-                            size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 " + str(
-                            index) + "\n"
-                        self.instr += 1
-                        self.llvm += "store i32 " + str(value) + ", i32* %" + str(self.instr-1) + ", align 4\n"
-                    elif "float" in ltype:
+                        self.llvm += "store i32 " + str(value) + ", i32* %" + str(self.instr - 1) + ", align 4\n"
+                    elif ltype == "float[]":
                         llvmtype = ltype.replace("float", "float")
                         llvmtype = llvmtype.replace("[]", "")
                         try:
@@ -1193,83 +1330,123 @@ class AST2LLVMVisitor(Visitor):
                             print("failiure")
                         packed = struct.pack("f", value)
                         value = struct.unpack("f", packed)[0]
-                        self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
-                            size) + " x " + llvmtype + "], [" + str(
-                            size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 " + str(
-                            index) + "\n"
-                        self.instr += 1
                         self.llvm += "store float " + str(value) + ", float* %" + str(self.instr - 1) + ", align 4\n"
-                    elif "char" in ltype:
+                    elif ltype == "char[]":
+                        print("Zitten we ier?")
                         llvmtype = ltype.replace("char", "i8")
                         llvmtype = llvmtype.replace("[]", "")
-                        self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
-                            size) + " x " + llvmtype + "], [" + str(size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 " + str(
-                            index) + "\n"
-                        self.instr += 1
-                        self.llvm += "store i8 " + str(value) + ", i8* %" + str(self.instr - 1) + ", align 4\n"'''
-                    print("test")
+                        value = value[0].replace("'","")
+                        if len(value) > 1:
+                            value = value.encode('utf-8').decode('unicode-escape')
+                        self.llvm += "store i8 " + str(ord(value)) + ", i8* %" + str(self.instr - 1) + ", align 4\n"
+                    if "[]" in ltype:
+                        '''
+                        print("KOMETEM IER?")
+                        var = reg[3]
+                        register = reg[0]
+                        symbol = self.currentTable.lookup(var)
+                        size = symbol.size
+                        index = currentNode.lvalue.size
+                        llvmtype = ""
+                        if "int" in ltype:
+                            llvmtype = ltype.replace("int", "i32")
+                            llvmtype = llvmtype.replace("[]", "")
+                            try:
+                                value = int(value[0])
+                            except ValueError:
+                                value = float(value[0])
+                            self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
+                                size) + " x " + llvmtype + "], [" + str(
+                                size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 " + str(
+                                index) + "\n"
+                            self.instr += 1
+                            self.llvm += "store i32 " + str(value) + ", i32* %" + str(self.instr-1) + ", align 4\n"
+                        elif "float" in ltype:
+                            llvmtype = ltype.replace("float", "float")
+                            llvmtype = llvmtype.replace("[]", "")
+                            try:
+                                value = float(value[0])
+                            except ValueError:
+                                print("failiure")
+                            packed = struct.pack("f", value)
+                            value = struct.unpack("f", packed)[0]
+                            self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
+                                size) + " x " + llvmtype + "], [" + str(
+                                size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 " + str(
+                                index) + "\n"
+                            self.instr += 1
+                            self.llvm += "store float " + str(value) + ", float* %" + str(self.instr - 1) + ", align 4\n"
+                        elif "char" in ltype:
+                            llvmtype = ltype.replace("char", "i8")
+                            llvmtype = llvmtype.replace("[]", "")
+                            self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
+                                size) + " x " + llvmtype + "], [" + str(size) + " x " + llvmtype + "]* %" + register + ", i64 0, i64 " + str(
+                                index) + "\n"
+                            self.instr += 1
+                            self.llvm += "store i8 " + str(value) + ", i8* %" + str(self.instr - 1) + ", align 4\n"'''
+                        print("test")
+                else:
+                    if ltype == "int":
+                        self.llvm += "store i32 %" + str(value[0]) + ", i32* %" + reg[0] + ", align 4\n"
+                    elif ltype == "float":
+                        #packed = struct.pack("f", value[0])
+                        #unpacked = struct.unpack("f", packed)[0]
+                        self.llvm += "store float %" + str(value[0]) + ", float* %" + reg[0] + ", align 4\n"
+                    elif ltype == "char":
+                        value = value.replace("'","")
+                        self.llvm += "store i8 " + str(ord(value[0])) + ", i8* %" + reg[0] + ", align 1\n"
+                    if ltype == "int[]":
+                        llvmtype = ltype.replace("int", "i32")
+                        llvmtype = llvmtype.replace("[]", "")
+                        try:
+                            value = int(value[0])
+                        except ValueError:
+                            value = float(value[0])
+                        self.llvm += "store i32 %" + str(value) + ", i32* %" + str(self.instr - 1) + ", align 4\n"
+                    elif ltype == "float[]":
+                        llvmtype = ltype.replace("float", "float")
+                        llvmtype = llvmtype.replace("[]", "")
+                        try:
+                            value = float(value[0])
+                        except ValueError:
+                            print("failiure")
+                        packed = struct.pack("f", value)
+                        value = struct.unpack("f", packed)[0]
+                        self.llvm += "store float %" + str(value) + ", float* %" + str(self.instr - 1) + ", align 4\n"
+                    elif ltype == "char[]":
+                        llvmtype = ltype.replace("char", "i8")
+                        llvmtype = llvmtype.replace("[]", "")
+                        self.llvm += "store i8 %" + str(value) + ", i8* %" + str(self.instr - 1) + ", align 4\n"
+
             else:
-                if ltype == "int":
-                    self.llvm += "store i32 %" + str(value[0]) + ", i32* %" + reg[0] + ", align 4\n"
-                elif ltype == "float":
-                    #packed = struct.pack("f", value[0])
-                    #unpacked = struct.unpack("f", packed)[0]
-                    self.llvm += "store float %" + str(value[0]) + ", float* %" + reg[0] + ", align 4\n"
-                elif ltype == "char":
-                    value = value.replace("'","")
-                    self.llvm += "store i8 " + str(ord(value[0])) + ", i8* %" + reg[0] + ", align 1\n"
-                if ltype == "int[]":
-                    llvmtype = ltype.replace("int", "i32")
-                    llvmtype = llvmtype.replace("[]", "")
+                # In this case the lvalue is a pointer dereference
+                value = currentNode.rvalue.accept(self)
+                self.lvalue = True
+                reg = currentNode.lvalue.accept(self)
+                var = reg[3]
+                type = reg[1]
+                print(value)
+                print(reg)
+                if type == "int*":
                     try:
                         value = int(value[0])
                     except ValueError:
                         value = float(value[0])
-                    self.llvm += "store i32 %" + str(value) + ", i32* %" + str(self.instr - 1) + ", align 4\n"
-                elif ltype == "float[]":
-                    llvmtype = ltype.replace("float", "float")
-                    llvmtype = llvmtype.replace("[]", "")
+                    if isinstance(value, float) or isinstance(value, int):
+                        self.llvm += "store i32 " + str(value) + ", i32* %" + str(self.instr-1) + ", align 4\n"
+                        #self.symbolTable.replaceRegisters(reg, str(self.instr-1))
+                if type == "float*":
                     try:
                         value = float(value[0])
                     except ValueError:
                         print("failiure")
-                    packed = struct.pack("f", value)
-                    value = struct.unpack("f", packed)[0]
-                    self.llvm += "store float %" + str(value) + ", float* %" + str(self.instr - 1) + ", align 4\n"
-                elif ltype == "char[]":
-                    llvmtype = ltype.replace("char", "i8")
-                    llvmtype = llvmtype.replace("[]", "")
-                    self.llvm += "store i8 %" + str(value) + ", i8* %" + str(self.instr - 1) + ", align 4\n"
-
-        else:
-            # In this case the lvalue is a pointer dereference
-            value = currentNode.rvalue.accept(self)
-            self.lvalue = True
-            reg = currentNode.lvalue.accept(self)
-            var = reg[3]
-            type = reg[1]
-            print(value)
-            print(reg)
-            if type == "int*":
-                try:
-                    value = int(value[0])
-                except ValueError:
-                    value = float(value[0])
-                if isinstance(value, float) or isinstance(value, int):
-                    self.llvm += "store i32 " + str(value) + ", i32* %" + str(self.instr-1) + ", align 4\n"
-                    #self.symbolTable.replaceRegisters(reg, str(self.instr-1))
-            if type == "float*":
-                try:
-                    value = float(value[0])
-                except ValueError:
-                    print("failiure")
-                if isinstance(value, float) or isinstance(value, int):
-                    packed = struct.pack("f", value[0])
-                    unpacked = struct.unpack("f", packed)[0]
-                    self.llvm += "store float " + str(unpacked) + ", float* %" + str(self.instr-1) + ", align 4\n"
-            if type == "char*":
-                value = value[0].replace("'", "")
-                self.llvm += "store i8 " + str(ord(value[0])) + ", i8* %" + str(self.instr-1) + ", align 1\n"
+                    if isinstance(value, float) or isinstance(value, int):
+                        packed = struct.pack("f", value[0])
+                        unpacked = struct.unpack("f", packed)[0]
+                        self.llvm += "store float " + str(unpacked) + ", float* %" + str(self.instr-1) + ", align 4\n"
+                if type == "char*":
+                    value = value[0].replace("'", "")
+                    self.llvm += "store i8 " + str(ord(value[0])) + ", i8* %" + str(self.instr-1) + ", align 1\n"
         return currentNode
 
     def VisitMLComment(self, currentNode):
@@ -1291,6 +1468,8 @@ class AST2LLVMVisitor(Visitor):
         print("Scanf")
         format = currentNode.format.value
         print(format)
+        print(len(format))
+
         params = []
         if not self.scanning:
             self.llvm = "declare i32 @__isoc99_scanf(i8* noundef, ...)\n" + self.llvm
@@ -1403,8 +1582,9 @@ class AST2LLVMVisitor(Visitor):
 
     def VisitPrintf(self, currentNode):
         print("Printf")
+
+        print(self.currentTable.parent)
         format = currentNode.format.value
-        print(format)
         params = []
         if not self.printing:
             self.llvm = "declare i32 @printf(i8* noundef, ...)\n" + self.llvm
@@ -1452,6 +1632,10 @@ class AST2LLVMVisitor(Visitor):
 
         if format in self.printstr:
             print("string exists")
+            for string in self.printstr:
+                if string == format:
+                    size = len(format)-1
+                    strindex = self.printstr.index(string)
         else:
             size = len(format)-1
             print("The format has size:")
@@ -1463,7 +1647,7 @@ class AST2LLVMVisitor(Visitor):
             unpacked = struct.unpack("c", packed)[0]
             print(unpacked)
             '''
-            self.llvm = "@.str." + str(strindex) + " = private unnamed_addr constant [" + str(size) + " x i8] c" + format[:-1] + "\\00" + "\", align 1\n" + self.llvm
+            self.llvm = "@.str." + str(strindex) + " = private unnamed_addr constant [" + str(size) + " x i8] c\"" + str(format.replace("\"","")) + "\\00" + "\", align 1\n" + self.llvm
             self.printstr.append(format)
 
         # Print function call
@@ -1515,7 +1699,7 @@ class AST2LLVMVisitor(Visitor):
         self.llvm += ")"
         self.llvm += "\n"
         self.instr += 1
-
+        self.printing = True
 
 
 
