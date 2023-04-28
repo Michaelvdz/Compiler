@@ -293,6 +293,8 @@ class Function(ASTNode):
     body = []
     params = []
     children = []
+    totalParams = 0
+    
     def __init__(self, name="Free"):
         #print("___init-ASTNode___");
         self.children = []
