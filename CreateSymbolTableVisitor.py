@@ -28,6 +28,9 @@ class CreateSymbolTableVisitor(Visitor):
             if currentNode.children[0].name == "Comment":
                 for i in range(currentNode.children[0].value.count('\n')):
                     self.lineNr += 1
+            if currentNode.children[0].name == "return":
+                print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
+                    self.lineNr) + ": return has not been used in a function! \n")
         
         if currentNode.name == "Inst":
             self.lineNr += 1
@@ -118,7 +121,35 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitFunction(self, currentNode):
         print("Function - Creating new ST for the function")
+        returnType = currentNode.returnType.value
+        if not currentNode.hasbody:
+            if self.table.search(currentNode.value)[0]:
+                if returnType != self.table.search(currentNode.value)[2]:
+                    print(
+                        "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
+                            self.lineNr) + ": function returnType does not match the original functions returnType! \n")
+                else:
+                    if len(currentNode.params) != self.table.search(currentNode.value)[1]:
+                        print(
+                            "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
+                                self.lineNr) + ": function parameters does not match the original functions parameters! \n")
+
         if currentNode.hasbody:
+            if self.table.search(currentNode.value)[0]:
+                print(
+                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
+                        self.lineNr) + ": function name " + currentNode.value + " has already been used! \n")
+
+            if currentNode.body is not None:
+                if currentNode.body.children[-1].value != "return" and returnType != "void":
+                    print(
+                        "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
+                            self.lineNr) + ": function " + currentNode.value + " has no return at the end! \n")
+
+                if currentNode.body.children[-1].value == "return" and returnType == "void":
+                    print(
+                        "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
+                            self.lineNr) + ": you can't use return in a void function \n")
             # Creating Symbol Table for function
             newtable = SymbolTable()
             # Name scope
@@ -142,15 +173,27 @@ class CreateSymbolTableVisitor(Visitor):
             # Pop after run through
             self.table.pop()
             # Add function to ST
-            self.table.peek().insertFunction(currentNode.value, "", currentNode.returnType.value, "func")
+            self.table.peek().insertFunction(currentNode.totalParams, currentNode.value, "", currentNode.returnType.value, "func")
         else:
             for param in currentNode.params:
                 print(param.type)
-            self.table.peek().insertFunction(currentNode.value, "", currentNode.returnType.value, "func")
+            self.table.peek().insertFunction(currentNode.totalParams, currentNode.value, "", currentNode.returnType.value, "func")
         return currentNode
 
     def VisitExprLoop(self, currentNode):
         #print("Binary")
+        if currentNode.children[0].name == "Call":
+            numberOfPar = len(currentNode.children[0].children)
+            if not self.table.search(currentNode.children[0].value)[0]:
+                print(
+                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
+                        self.lineNr) + ": function " + currentNode.value + " has not been made! \n")
+            else:
+                numberOfPar2 = self.table.search(currentNode.children[0].value)[1]
+                if numberOfPar != numberOfPar2:
+                    print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
+                        self.lineNr) + ": function " + currentNode.value + " has more/less parameters then given! \n")
+
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
@@ -275,6 +318,8 @@ class CreateSymbolTableVisitor(Visitor):
             rvalue = currentNode.rvalue
             rvalue.accept(self)
             '''
+            currentNode.lvalue.accept(self)
+            currentNode.rvalue.accept(self)
         else:
             currentNode.lvalue.accept(self)
 
@@ -290,6 +335,28 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitVariable(self, currentNode):
         #print("Variable")
+        currConst = ""
+        currType = ""
+        if currentNode.type == "VariableType":
+            #print("dees?")
+            currConst = currentNode.type.children[0].name
+            currType = currentNode.type.children[1].name
+        else:
+            #print("nee dit!")
+            currType = currentNode.type
+            #print(currType)
+
+        if self.table.peek().lookup(currentNode.value) != 0 and len(currType) == 0:
+            peeker = self.table.peek()
+            if peeker.lookup(currentNode.value).attr == "const":
+                print(
+                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
+                        self.lineNr) + ": variable " + currentNode.value + " can not be changed because it's a const! \n")
+
+        if self.table.peek().lookup(currentNode.value) == 0 and len(currType) == 0:
+            print(
+                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(self.lineNr) + ": variable " + currentNode.value + " has not been declared yet! \n")
+
         return currentNode
 
     def VisitCall(self, currentNode):
