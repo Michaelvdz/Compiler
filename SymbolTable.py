@@ -113,7 +113,7 @@ class SymbolTable:
     def insert(self, name, constant, type, attribute=""):
         self.vars[name] = Node(constant, type, "", attribute)
 
-    def insertFunction(self, name, totalParams, constant, type, attribute="", node="", params=[]):
+    def insertFunction(self, totalParams, name, constant, type, attribute="", node="", params=[]):
         self.vars[name] = Function(totalParams, constant, type, "", attribute, node, params)
 
     def insertArray(self, name, constant, type, attribute, size):
