@@ -11,13 +11,14 @@ class Node:
         return f'{self.type} and attr: {self.attr} and register: {self.register}'
 
 class Function(Node):
-    def __init__(self, constant, type, value, attr="", node="", params=[]):
+    def __init__(self, totalParams, constant, type, value, attr="", node="", params=[]):
         self.constant = constant
         self.type = type
         self.attr = attr
         self.register = None
         self.astnode = node
         self.params = []
+        self.totalParams = totalParams
 
     def __str__(self):
         return f'{self.type} and attr: {self.attr} and register: {self.register} and params:'
@@ -63,6 +64,13 @@ class SymbolTables:
         #print(table.name)
         self.tables.append(table)
         return table
+    
+    def search(self, name):
+        for i in self.tables:
+            listOfKeys = i.vars.keys()
+            if name in listOfKeys:
+                return True, i.vars[name].totalParams, i.vars[name].type
+        return False, 0, 0
 
 class SymbolTable:
 
@@ -107,8 +115,8 @@ class SymbolTable:
     def insert(self, name, constant, type, attribute=""):
         self.vars[name] = Node(constant, type, "", attribute)
 
-    def insertFunction(self, name, constant, type, attribute="", node="", params=[]):
-        self.vars[name] = Function(constant, type, "", attribute, node, params)
+    def insertFunction(self, totalParams, name, constant, type, attribute="", node="", params=[]):
+        self.vars[name] = Function(totalParams, constant, type, "", attribute, node, params)
 
     def insertArray(self, name, constant, type, attribute, size):
         print("Inserting array with size:" + str(size))
