@@ -395,6 +395,8 @@ class ASTOptimizer(Visitor):
     def VisitUnaryOperation(self, currentNode):
         print("Unary")
         print(currentNode.value)
+        children = []
+
         match currentNode.value:
             case "-":
                 value = 0
@@ -410,7 +412,17 @@ class ASTOptimizer(Visitor):
                     node = Constant(str(value))
                     return node
                 else:
-                    return currentNode
+                    node = currentNode.children[0].accept(self)
+                    if isinstance(node, Constant):
+                        try:
+                            value = -int(node.value)
+                        except ValueError:
+                            value = -float(node.value)
+                        currentNode.children = 0
+                        currentNode.value = value
+                        node = Constant(str(value))
+                        return node
+                    return currentNode.accept(self)
             case "--":
                 if isinstance(currentNode.children[0], Constant):
                     for child in currentNode.children:
@@ -439,7 +451,17 @@ class ASTOptimizer(Visitor):
                     node = Constant(str(value))
                     return node
                 else:
-                    return  currentNode.children[0]
+                    node = currentNode.children[0].accept(self)
+                    if isinstance(node, Constant):
+                        try:
+                            value = int(node.value)
+                        except ValueError:
+                            value = float(node.value)
+                        currentNode.children = 0
+                        currentNode.value = value
+                        node = Constant(str(value))
+                        return node
+                    return currentNode.accept(self)
             case "++":
                 if isinstance(currentNode.children[0], Constant):
                     for child in currentNode.children:
@@ -745,14 +767,15 @@ class ASTOptimizer(Visitor):
         self.propagation = False
         node = None
         print(len(currentNode.children))
-        for child in currentNode.children:
+        for child in currentNode.args:
             node = child.accept(self)
+            print("optimized node")
             print(node)
             newNode.children.append(node)
             newNode.args.append(node)
         self.propagation = True
         #node = currentNode.args.accept(self)
-        newNode.args = node
+        #newNode.args.append(node)
         return newNode
 
     def VisitScanf(self, currentNode):

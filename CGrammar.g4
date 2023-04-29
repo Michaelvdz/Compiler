@@ -167,13 +167,20 @@ comment: block=BLOCKCOMMENT
     |   sl=SINGLE_LINE_COMMENT
     ;
 
+printfArgslist:
+    ass=assignment_expression
+    | string=FORMAT
+    | ass=assignment_expression  ',' args=printfArgslist
+    | string=FORMAT ',' args=printfArgslist
+    ;
+
 printf:
-    'printf' '(' form=FORMAT ',' args=argumentlist ')'
+    'printf' '(' form=FORMAT ',' args=printfArgslist ')'
     | 'printf' '(' form=FORMAT ')'
     ;
 
 scanf:
-    'scanf' '(' form=FORMAT ',' args=argumentlist ')'
+    'scanf' '(' form=FORMAT ',' args=printfArgslist ')'
     | 'scanf' '(' form=FORMAT ')'
     ;
 

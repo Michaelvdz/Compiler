@@ -374,6 +374,7 @@ class CSTVisitor(CGrammarVisitor):
         return params
 
     def visitArgumentlist(self, ctx:CGrammarParser.ArgumentlistContext):
+        print("TEEEEEEEEEEEEEEEEEEEEEEEST")
         print("Arguments")
         args = ASTNode("Arguments")
         if ctx.ass:
@@ -386,6 +387,28 @@ class CSTVisitor(CGrammarVisitor):
                 for child in param.children:
                     args.adopt(child)
         return args
+
+    def visitPrintfArgslist(self, ctx:CGrammarParser.PrintfArgslistContext):
+        print("TEEEEEEEEEEEEEEEEEEEEEEEST")
+        args = ASTNode("Arguments")
+        if ctx.ass:
+            ass = self.visit(ctx.ass)
+            print(ass)
+            args.adopt(ass)
+            print(ass.value)
+        if ctx.args:
+            param = self.visit(ctx.args)
+            if isinstance(param, ASTNode):
+                for child in param.children:
+                    args.adopt(child)
+        if ctx.string:
+            node = ASTNode(ctx.string.text)
+            print(node.value)
+            args.adopt(node)
+        print("We are returning:")
+        print(args)
+        return args
+
     def visitFunction(self, ctx:CGrammarParser.FunctionContext):
         print("Function declaration/definition")
         returntype = self.visit(ctx.returntype)
@@ -474,22 +497,12 @@ class CSTVisitor(CGrammarVisitor):
         if ctx.args:
             print("ARRRRG")
             node = self.visit(ctx.args)
+            print("We returned")
             print(node)
-            printf.args = node
+            printf.args = node.children
             printf.adopt(node)
-        '''
-        if ctx.ass:
-            node = self.visit(ctx.ass)
-            printf = PrintF("printf()")
-            printf.adopt(node)
-        else:
-            result = re.search('\((.+?)\)', ctx.getText()).group(1)
-            #print("need this")
-            #print(result)
-            node = ASTNode(result)
-            printf = PrintF("printf()")
-            printf.adopt(node)
-        '''
+        print("Number of args:")
+        print(len(printf.args))
         return printf
 
     def visitScanf(self, ctx: CGrammarParser.ScanfContext):

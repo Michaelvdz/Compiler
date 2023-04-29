@@ -287,6 +287,15 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CGrammarParser#printfArgslist.
+    def enterPrintfArgslist(self, ctx:CGrammarParser.PrintfArgslistContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#printfArgslist.
+    def exitPrintfArgslist(self, ctx:CGrammarParser.PrintfArgslistContext):
+        pass
+
+
     # Enter a parse tree produced by CGrammarParser#printf.
     def enterPrintf(self, ctx:CGrammarParser.PrintfContext):
         pass

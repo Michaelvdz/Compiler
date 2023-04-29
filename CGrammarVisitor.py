@@ -164,6 +164,11 @@ class CGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CGrammarParser#printfArgslist.
+    def visitPrintfArgslist(self, ctx:CGrammarParser.PrintfArgslistContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CGrammarParser#printf.
     def visitPrintf(self, ctx:CGrammarParser.PrintfContext):
         return self.visitChildren(ctx)

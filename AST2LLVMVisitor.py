@@ -76,7 +76,7 @@ class AST2LLVMVisitor(Visitor):
             table.insertRegister(name, "%"+str(self.instr))
             self.instr += 1
         elif "[]" in type:
-            size = self.currentTable.lookup(name).size
+            size = self.currentTable.lookupUnallocated(name).size
             if "int" in type:
                 arraytype = type.replace("int","i32")
                 arraytype = arraytype.replace("[]", "")
@@ -722,7 +722,7 @@ class AST2LLVMVisitor(Visitor):
                 register = symbol.register
                 self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
                     size) + " x " + llvmtype + "], [" + str(
-                    size) + " x " + llvmtype + "]* " + register + ", i64 0, i64 0" + "\n"
+                    size) + " x " + llvmtype + "]* " + register + ", i32 0, i32 0" + "\n"
                 self.instr += 1
             if "float[]" in type:
                 llvmtype = type.replace("float", "float")
@@ -731,7 +731,7 @@ class AST2LLVMVisitor(Visitor):
                 register = symbol.register
                 self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
                     size) + " x " + llvmtype + "], [" + str(
-                    size) + " x " + llvmtype + "]* " + register + ", i64 0, i64 0" + "\n"
+                    size) + " x " + llvmtype + "]* " + register + ", i32 0, i32 0" + "\n"
                 self.instr += 1
             if "char[]" in type:
                 llvmtype = type.replace("char", "i8")
@@ -740,7 +740,7 @@ class AST2LLVMVisitor(Visitor):
                 register = symbol.register
                 self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
                     size) + " x " + llvmtype + "], [" + str(
-                    size) + " x " + llvmtype + "]* " + register + ", i64 0, i64 0" + "\n"
+                    size) + " x " + llvmtype + "]* " + register + ", i32 0, i32 0" + "\n"
                 self.instr += 1
             return ("%"+str(self.instr-1), type, "reg", currentNode.value)
 
@@ -761,7 +761,7 @@ class AST2LLVMVisitor(Visitor):
                 llvmtype = llvmtype.replace("[]", "")
                 self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
                     size) + " x " + llvmtype + "], [" + str(
-                    size) + " x " + llvmtype + "]* " + register + ", i64 0, i64 " + str(
+                    size) + " x " + llvmtype + "]* " + register + ", i32 0, i32 " + str(
                     index[0]) + "\n"
                 self.instr += 1
             elif "float" in arraytype:
@@ -769,7 +769,7 @@ class AST2LLVMVisitor(Visitor):
                 llvmtype = llvmtype.replace("[]", "")
                 self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
                     size) + " x " + llvmtype + "], [" + str(
-                    size) + " x " + llvmtype + "]* " + register + ", i64 0, i64 " + str(
+                    size) + " x " + llvmtype + "]* " + register + ", i32 0, i32 " + str(
                     index[0]) + "\n"
                 self.instr += 1
             elif "char" in arraytype:
@@ -777,7 +777,7 @@ class AST2LLVMVisitor(Visitor):
                 llvmtype = llvmtype.replace("[]", "")
                 self.llvm += "%" + str(self.instr) + " = getelementptr inbounds [" + str(
                     size) + " x " + llvmtype + "], [" + str(
-                    size) + " x " + llvmtype + "]* " + register + ", i64 0, i64 " + str(
+                    size) + " x " + llvmtype + "]* " + register + ", i32 0, i32 " + str(
                     index[0]) + "\n"
                 self.instr += 1
             if currentNode.lvalue:
@@ -1705,7 +1705,7 @@ class AST2LLVMVisitor(Visitor):
 
         # Print function call
         self.llvm += "%" + str(self.instr) + " = call i32 (i8*, ...)" + " @__isoc99_scanf(i8* noundef getelementptr inbounds "
-        self.llvm += "([" + str(size) + " x i8], ["+ str(size) + " x i8]* @.str." + str(strindex) + ", i64 0, i64 0)"
+        self.llvm += "([" + str(size) + " x i8], ["+ str(size) + " x i8]* @.str." + str(strindex) + ", i32 0, i32 0)"
         print("Parameters:")
         i = 1
         numberParams = len(params)
@@ -1770,8 +1770,10 @@ class AST2LLVMVisitor(Visitor):
             self.llvm = "declare i32 @printf(i8* noundef, ...)\n" + self.llvm
 
         # Prepare arguments
+        print("prepare args")
+        print(currentNode.children)
         if currentNode.args:
-            for child in currentNode.args.children:
+            for child in currentNode.args:
                 print(child)
                 if isinstance(child, ArrayVariable):
                     child.rvalue = True
@@ -1783,8 +1785,7 @@ class AST2LLVMVisitor(Visitor):
                 if isinstance(child, UnaryOperation) and child.value == "*":
                     node = (node[0], node[1], node[2], node[3], "ref")
                     params.append(node)
-                elif isinstance(child, UnaryOperation):
-                    node = child.accept()
+
                 # When the arg is a value
                 elif node[2] == "reg":
                     symbol = self.currentTable.lookup(node[3].replace("()",""))
@@ -1828,7 +1829,7 @@ class AST2LLVMVisitor(Visitor):
 
         # Print function call
         self.llvm += "%" + str(self.instr) + " = call i32 (i8*, ...)" + " @printf(i8* noundef getelementptr inbounds "
-        self.llvm += "([" + str(size + 1) + " x i8], ["+ str(size + 1) + " x i8]* @.str." + str(strindex) + ", i64 0, i64 0)"
+        self.llvm += "([" + str(size + 1) + " x i8], ["+ str(size + 1) + " x i8]* @.str." + str(strindex) + ", i32 0, i32 0)"
         print("Parameters:")
         i = 1
         numberParams = len(params)

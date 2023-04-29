@@ -262,8 +262,8 @@ class ASTVisitor(Visitor):
                 node = child.accept(self)
                 self.ast.edge(str(id(currentNode)), str(id(node)), "Args")
         '''
-        if currentNode.children:
-            for child in currentNode.children:
+        if currentNode.args:
+            for child in currentNode.args:
                 print("PRINTING NODE")
                 node = child.accept(self)
                 self.ast.edge(str(id(currentNode)), str(id(node)), "Args")
