@@ -5,6 +5,7 @@ class Node:
         self.attr = attr
         self.register = None
         self.astnode = node
+        self.inUse = False
 
     def __str__(self):
         return f'{self.type} and attr: {self.attr} and register: {self.register}'
@@ -31,6 +32,7 @@ class Array(Node):
         self.register = None
         self.astnode = node
         self.size = size
+        self.inUse = False
 
     def __str__(self):
         return f'{self.type} and attr: {self.attr} and register: {self.register} and size {self.size}'
@@ -121,11 +123,35 @@ class SymbolTable:
                 self.parent.insertRegister(name, register)
 
 
+    def lookupActive(self, name):
+        var = self.vars.get(name)
+        if var:
+            if var.register is not None:
+                return var
+        else:
+            if self.parent:
+                return self.parent.lookupActibe(name)
+        #print("Nothing found")
+        return 0
+
+    def lookupUnallocated(self, name):
+        var = self.vars.get(name)
+        if var:
+            return var
+        else:
+            if self.parent:
+                return self.parent.lookup(name)
+        #print("Nothing found")
+        return 0
 
     def lookup(self, name):
         var = self.vars.get(name)
         if var:
-            return var
+            if var.register is not None or isinstance(var, Function):
+                return var
+            else:
+                if self.parent:
+                    return self.parent.lookup(name)
         else:
             if self.parent:
                 return self.parent.lookup(name)

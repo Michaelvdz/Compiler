@@ -98,8 +98,11 @@ class ASTVisitor(Visitor):
         return currentNode
 
     def VisitBinaryOperation(self, currentNode):
-        #print("Beginning Binary")
-        self.ast.node(str(id(currentNode)), currentNode.value)
+        print("Beginning Binary")
+        print(currentNode.value)
+        print(str(id(currentNode)))
+        self.ast.node(str(id(currentNode)), str(currentNode.value))
+        print("test")
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
@@ -252,8 +255,16 @@ class ASTVisitor(Visitor):
         form = currentNode.format.accept(self)
         self.ast.edge(str(id(currentNode)), str(id(form)), "Format")
         print(currentNode.args)
+        '''
         if currentNode.args:
             for child in currentNode.args.children:
+                print("PRINTING NODE")
+                node = child.accept(self)
+                self.ast.edge(str(id(currentNode)), str(id(node)), "Args")
+        '''
+        if currentNode.children:
+            for child in currentNode.children:
+                print("PRINTING NODE")
                 node = child.accept(self)
                 self.ast.edge(str(id(currentNode)), str(id(node)), "Args")
         #print("Ending Printf")

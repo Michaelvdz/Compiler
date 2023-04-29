@@ -119,6 +119,11 @@ class CGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CGrammarParser#case.
+    def visitCase(self, ctx:CGrammarParser.CaseContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CGrammarParser#loops.
     def visitLoops(self, ctx:CGrammarParser.LoopsContext):
         return self.visitChildren(ctx)

@@ -206,6 +206,15 @@ class CGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CGrammarParser#case.
+    def enterCase(self, ctx:CGrammarParser.CaseContext):
+        pass
+
+    # Exit a parse tree produced by CGrammarParser#case.
+    def exitCase(self, ctx:CGrammarParser.CaseContext):
+        pass
+
+
     # Enter a parse tree produced by CGrammarParser#loops.
     def enterLoops(self, ctx:CGrammarParser.LoopsContext):
         pass

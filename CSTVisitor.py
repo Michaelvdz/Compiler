@@ -468,6 +468,7 @@ class CSTVisitor(CGrammarVisitor):
         if ctx.form:
             form = ctx.form.text
             format = ASTNode(form)
+            format.value = format.value.replace("\"", "")
             printf.format = format
             print(ctx.form.text)
         if ctx.args:

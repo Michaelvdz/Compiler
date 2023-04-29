@@ -13,6 +13,8 @@ unary_operator:  '+'
     |   '*'
     |   '&'
     |   '!'
+    |   '++'
+    |   '--'
     ;
 
 post_unary_operator:  '++'
@@ -119,11 +121,17 @@ function:
 conditional_statement:
     'if' '(' condition=assignment_expression ')' '{' ifbody=expr_loop '}'
     | 'if' '(' condition=assignment_expression ')' '{' ifbody=expr_loop '}' 'else' '{' elsebody=expr_loop '}'
+    | 'switch' '(' assignment_expression ')' '{' case* '}'
+    ;
+
+case:
+    'case' logical_expression ':' expr_loop
+    | 'default' ':' expr_loop
     ;
 
 loops:
     loop='while' '(' condition=assignment_expression ')' '{' body=expr_loop '}'
-    | loop='for' '(' before=declaration ';' condition=assignment_expression ';' after=assignment_expression? ')' '{' body=expr_loop '}'
+    | loop='for' '(' before=assignment_expression ';' condition=assignment_expression ';' after=assignment_expression? ')' '{' body=expr_loop '}'
     ;
 
 jumps:

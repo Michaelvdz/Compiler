@@ -13,6 +13,7 @@ class ASTOptimizer(Visitor):
 
     vars = dict()
     propagation = True
+    returnType = ""
 
     def __init__(self, tree):
         #self.ast = graphviz.Digraph('AST', filename='ast.gv')
@@ -551,13 +552,14 @@ class ASTOptimizer(Visitor):
     def VisitFunction(self, currentNode):
         print("Function")
         newNode = copy.copy(currentNode)
-        newNode.children = []
+        newNode.children.clear();
+        self.returnType = currentNode.returnType.value
         if currentNode.hasbody:
             if currentNode.body:
                 newNode.body = currentNode.body.accept(self)
                 for child in newNode.body.children:
+                    print("Child")
                     if isinstance(child, Jump):
-                        print(currentNode.returnType.value)
                         child.type = currentNode.returnType.value
                     newNode.children.append(child)
                     '''
@@ -573,7 +575,6 @@ class ASTOptimizer(Visitor):
                             node.type = currentNode.returnType.value
                     newNode.children.append(node)
                     '''
-
         return newNode
 
     def VisitConstant(self, currentNode):
@@ -613,6 +614,8 @@ class ASTOptimizer(Visitor):
 
     def VisitJump(self, currentNode):
         print("---------------------------------------Jump")
+        if currentNode.value == "return":
+            currentNode.type =self.returnType
         return currentNode
 
     def VisitWhile(self, currentNode):
@@ -738,12 +741,18 @@ class ASTOptimizer(Visitor):
         #print("PrintF")
         newNode = copy.copy(currentNode)
         newNode.children = []
+        newNode.args = []
         self.propagation = False
+        node = None
         print(len(currentNode.children))
         for child in currentNode.children:
             node = child.accept(self)
+            print(node)
             newNode.children.append(node)
+            newNode.args.append(node)
         self.propagation = True
+        #node = currentNode.args.accept(self)
+        newNode.args = node
         return newNode
 
     def VisitScanf(self, currentNode):
