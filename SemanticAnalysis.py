@@ -9,17 +9,17 @@ class Visitor:
     def __str__(self):
         return self.__class__.__name__
 
-class CreateSymbolTableVisitor(Visitor):
+class SemanticAnalysisVisitor(Visitor):
 
-    def __init__(self, table):
-        self.table = table
+    def __init__(self):
         self.lineNr = 0
         self.positionNr = 0
         self.scopeNr = 0
-        #print("----------------Creating Symbol Table----------------")
         globaltable = SymbolTable()
         globaltable.name = "Global"
-        self.table.push(globaltable)
+        self.currentScope = globaltable
+        self.functions = {}
+
 
     def VisitASTNode(self, currentNode):
         for child in currentNode.children:
@@ -27,28 +27,117 @@ class CreateSymbolTableVisitor(Visitor):
         return currentNode
 
     def VisitConditional(self, currentNode):
-        #print("Scope")
-        for child in currentNode.children:
-            node = child.accept(self)
+        # Creating the scope for condition
+        newtable = SymbolTable()
+        newtable.name = currentNode.value
+        # Get current scope als parent scope
+        parenttable = self.currentScope
+        newtable.parent = parenttable
+        # Append new scope as child of parent scope
+        parenttable.children.append(newtable)
+        # Updating currentScope and functions
+        self.currentScope = newtable
+        self.functions[newtable.name] = newtable
+        currentNode.ifbody.accept(self)
+        if currentNode.elsebody:
+            # Creating the scope for condition
+            newtable = SymbolTable()
+            newtable.name = currentNode.value
+            # Get current scope als parent scope
+            parenttable = self.currentScope
+            newtable.parent = parenttable
+            # Append new scope as child of parent scope
+            parenttable.children.append(newtable)
+            # Updating currentScope and functions
+            self.currentScope = newtable
+            self.functions[newtable.name] = newtable
+            currentNode.elsebody.accept(self)
+        if self.currentScope.parent:
+            self.currentScope = self.currentScope.parent
         return currentNode
 
     def VisitScope(self, currentNode):
+        # Creating Symbol Table for scope
+        newtable = SymbolTable()
+        # Name scope
+        newtable.name = "Scope " + str(self.scopeNr)
+        self.scopeNr += 1
+        # Get current ST als parent table
+        parenttable = self.currentScope
+        newtable.parent = parenttable
+        # Append new ST as child of parent ST
+        parenttable.children.append(newtable)
+        self.currentScope = newtable
+        self.functions[newtable.name] = newtable
         for child in currentNode.children:
             node = child.accept(self)
+        if self.currentScope.parent:
+            self.currentScope = self.currentScope.parent
         return currentNode
 
     def VisitWhile(self, currentNode):
-        for child in currentNode.children:
-            node = child.accept(self)
+        # Creating scope for while
+        newtable = SymbolTable()
+        # Name scope
+        newtable.name = "While-loop"
+        parenttable = self.currentScope
+        newtable.parent = parenttable
+        # Append new scope as child of parent scope
+        parenttable.children.append(newtable)
+        # Updating currentScope and functions
+        self.currentScope = newtable
+        self.functions[newtable.name] = newtable
+        # if it has for loop and before part
+        if currentNode.beforeLoop:
+            currentNode.beforeLoop.accept(self)
+        # if it has for loop and before part
+        if currentNode.afterLoop:
+            currentNode.afterLoop.accept(self)
+        # Visit condition
+        currentNode.condition.accept(self)
+        # Visit body
+        currentNode.body.accept(self)
+        if self.currentScope.parent:
+            self.currentScope = self.currentScope.parent
         return currentNode
 
     def VisitFunction(self, currentNode):
-        for child in currentNode.children:
-            node = child.accept(self)
+        if currentNode.hasbody:
+            # Creating scope for function
+            newtable = SymbolTable()
+            # Name scope
+            newtable.name = currentNode.value
+            parenttable = self.currentScope
+            newtable.parent = parenttable
+            # Append new scope as child of parent scope
+            parenttable.children.append(newtable)
+            # Updating currentScope and functions
+            self.currentScope = newtable
+            self.functions[newtable.name] = newtable
+            if currentNode.body:
+                # if it has params, visit them
+                for param in currentNode.params:
+                    print("Param:")
+                    print(param)
+                    node = param.accept(self)
+                    print(node.value)
+                # Visit body
+                if currentNode.body:
+                    currentNode.body.accept(self)
+            if self.currentScope.parent:
+                self.currentScope = self.currentScope.parent
+
+        else:
+            for param in currentNode.params:
+                print(param.type)
+
         return currentNode
 
     def VisitExprLoop(self, currentNode):
         #print("Binary")
+
+        #if self.currentScope.lookupUnallocated(currentNode.children)
+
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
@@ -85,6 +174,15 @@ class CreateSymbolTableVisitor(Visitor):
 
     def VisitDeclaration(self, currentNode):
         #print("Declaration")
+        varName = currentNode.var
+
+        if self.currentScope.lookupUnallocated(varName) != 0:
+            print(
+                "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                    self.lineNr) + ": variable " + currentNode.var + " has already been declared! \n")
+
+        self.currentScope.insert(varName, currentNode.attr, currentNode.type)
+
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
@@ -95,12 +193,24 @@ class CreateSymbolTableVisitor(Visitor):
         return currentNode
 
     def VisitAssignment(self, currentNode):
+
+        varName = currentNode.value
+
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
 
     def VisitVariable(self, currentNode):
         #print("Variable")
+        if self.currentScope.lookupUnallocated(currentNode.value) == 0:
+            print(
+                "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                    self.lineNr) + ": variable " + currentNode.value + " has not been declared yet! \n")
+        elif self.currentScope.lookupUnallocated(currentNode.value) != 0 and self.currentScope.lookupUnallocated(currentNode.value).constant == "const":
+            print(
+                "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                    self.lineNr) + ": variable " + currentNode.value + " can not be changed because it's a const! \n")
+
         return currentNode
 
     def VisitCall(self, currentNode):
