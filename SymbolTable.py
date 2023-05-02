@@ -148,7 +148,7 @@ class SymbolTable:
             return var
         else:
             if self.parent:
-                return self.parent.lookup(name)
+                return self.parent.lookupUnallocated(name)
         #print("Nothing found")
         return 0
 
