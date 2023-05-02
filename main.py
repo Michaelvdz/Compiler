@@ -15,6 +15,7 @@ from errorAnalysis import errorAnalyser
 from ASTOptimizer import ASTOptimizer
 from SymbolTable import *
 from AST2LLVMVisitor import *
+from SemanticAnalysis import *
 
 def main(argv):
 
@@ -63,6 +64,10 @@ def main(argv):
         STStack = SymbolTables()
         STCreator = CreateSymbolTableVisitor(STStack)
         optimizedTree.root.accept(STCreator)
+        
+        SACreator = SemanticAnalysisVisitor()
+        optimizedTree.root.accept(SACreator)
+        
         #print("\n\nThe generated symbol table:")
         #print(table)
 
