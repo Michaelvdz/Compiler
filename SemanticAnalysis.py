@@ -22,6 +22,10 @@ class SemanticAnalysisVisitor(Visitor):
 
 
     def VisitASTNode(self, currentNode):
+        if currentNode.children:
+            if currentNode.children[0].name == "return":
+                print("\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                    self.lineNr) + ": return has not been used in a function! \n")
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
@@ -103,6 +107,17 @@ class SemanticAnalysisVisitor(Visitor):
 
     def VisitFunction(self, currentNode):
         if currentNode.hasbody:
+            returnType = currentNode.returnType.value
+            if currentNode.hasbody is not None:
+                if currentNode.body.children[-1].value != "return" and returnType != "void":
+                    print(
+                        "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                            self.lineNr) + ": function " + currentNode.value + " has no return at the end! \n")
+                if currentNode.body.children[-1].value == "return" and returnType == "void":
+                    print(
+                        "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                            self.lineNr) + ": you can't use return in a void function \n")
+            
             # Creating scope for function
             newtable = SymbolTable()
             # Name scope
