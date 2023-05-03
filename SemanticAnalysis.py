@@ -11,14 +11,15 @@ class Visitor:
 
 class SemanticAnalysisVisitor(Visitor):
 
-    def __init__(self):
-        self.lineNr = 0
+    def __init__(self, tree):
+        self.lineNr = tree.start
         self.positionNr = 0
         self.scopeNr = 0
         globaltable = SymbolTable()
         globaltable.name = "Global"
         self.currentScope = globaltable
         self.functions = {}
+        self.functionsWithoutBody = {}
 
 
     def VisitASTNode(self, currentNode):
@@ -106,29 +107,82 @@ class SemanticAnalysisVisitor(Visitor):
         return currentNode
 
     def VisitFunction(self, currentNode):
+        returnType = currentNode.returnType.value
+        currentNode.totalParams = len(currentNode.params)
+        if not currentNode.hasbody:
+            if self.functionsWithoutBody.get(currentNode.name) is not None:
+                if returnType != self.functionsWithoutBody.get(currentNode.name).returnType.value:
+                    print(
+                        "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                            self.lineNr) + ": function returnType does not match the original functions returnType! \n")
+                if currentNode.totalParams != self.functionsWithoutBody.get(currentNode.name).totalParams:
+                    print(
+                        "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                            self.lineNr) + ": function parameters does not match the original functions parameters! \n")
+            if self.functions.get(currentNode.name) is not None:
+                if returnType != self.functions.get(currentNode.name).returnType.value:
+                    print(
+                        "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                            self.lineNr) + ": function returnType does not match the original functions returnType! \n")
+                if currentNode.totalParams != self.functions.get(currentNode.name).totalParams:
+                    print(
+                        "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                            self.lineNr) + ": function parameters does not match the original functions parameters! \n")
+
+            l = []
+            if currentNode.totalParams > 1:
+                for i in currentNode.params:
+                    if i.var in l:
+                        print(
+                            "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                                self.lineNr.line) + ": variable " + i.var + " has already been declared! \n")
+                    else:
+                        l.append(i.var)
+
         if currentNode.hasbody:
-            returnType = currentNode.returnType.value
-            if currentNode.hasbody is not None:
-                if currentNode.body.children[-1].value != "return" and returnType != "void":
-                    print(
-                        "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
-                            self.lineNr) + ": function " + currentNode.value + " has no return at the end! \n")
-                if currentNode.body.children[-1].value == "return" and returnType == "void":
-                    print(
-                        "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
-                            self.lineNr) + ": you can't use return in a void function \n")
-            
+            if currentNode.hasbody is not None and currentNode.name != "main":
+
+                if self.functionsWithoutBody.get(currentNode.name) is not None:
+                    if returnType != self.functionsWithoutBody.get(currentNode.name).returnType.value:
+                        print(
+                            "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                                self.lineNr) + ": function returnType does not match the original functions returnType! \n")
+                    if currentNode.totalParams != self.functionsWithoutBody.get(currentNode.name).totalParams:
+                        print(
+                            "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                                self.lineNr) + ": function params does not match the original functions params! \n")
+
+                if currentNode.body is not None:
+                    if currentNode.body.children[-1].value != "return" and returnType != "void":
+                        print(
+                            "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                                self.lineNr) + ": function " + currentNode.value + " has no return at the end! \n")
+                    if currentNode.body.children[-1].value == "return" and returnType == "void":
+                        print(
+                            "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                                self.lineNr) + ": you can't use return in a void function \n")
+                else:
+                    if returnType != "void":
+                        print(
+                            "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                                self.lineNr) + ": function " + currentNode.value + " has no return at the end! \n")
+
+            if self.functions.get(currentNode.value):
+                print(
+                    "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                        self.lineNr.line) + ": function name " + currentNode.value + " has already been used! \n")
             # Creating scope for function
             newtable = SymbolTable()
             # Name scope
             newtable.name = currentNode.value
+            newtable.returnType = currentNode.returnType.value
             parenttable = self.currentScope
             newtable.parent = parenttable
             # Append new scope as child of parent scope
             parenttable.children.append(newtable)
             # Updating currentScope and functions
             self.currentScope = newtable
-            self.functions[newtable.name] = newtable
+            self.functions[currentNode.value] = currentNode
             if currentNode.body:
                 # if it has params, visit them
                 for param in currentNode.params:
@@ -145,13 +199,17 @@ class SemanticAnalysisVisitor(Visitor):
         else:
             for param in currentNode.params:
                 print(param.type)
+            self.functionsWithoutBody[currentNode.value] = currentNode
 
         return currentNode
 
     def VisitExprLoop(self, currentNode):
         #print("Binary")
-
-        #if self.currentScope.lookupUnallocated(currentNode.children)
+        for i in currentNode.children:
+            if i.name == "Call":
+                if len(i.children) != self.functions.get(i.value.split("()")[0]):
+                    print("\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                        self.lineNr) + ": function " + currentNode.value + " has more/less parameters then given! \n")
 
         for child in currentNode.children:
             node = child.accept(self)
@@ -194,7 +252,7 @@ class SemanticAnalysisVisitor(Visitor):
         if self.currentScope.lookupUnallocated(varName) != 0:
             print(
                 "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
-                    self.lineNr) + ": variable " + currentNode.var + " has already been declared! \n")
+                    self.lineNr.line) + ": variable " + currentNode.var + " has already been declared! \n")
 
         self.currentScope.insert(varName, currentNode.attr, currentNode.type)
 
@@ -208,9 +266,6 @@ class SemanticAnalysisVisitor(Visitor):
         return currentNode
 
     def VisitAssignment(self, currentNode):
-
-        varName = currentNode.value
-
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
@@ -240,4 +295,9 @@ class SemanticAnalysisVisitor(Visitor):
         return currentNode
     def VisitPrintf(self, currentNode):
         #print("Printf")
+        return currentNode
+    def VisitArrayVariable(self, currentNode):
+        return currentNode
+
+    def VisitArray(self, currentNode):
         return currentNode
