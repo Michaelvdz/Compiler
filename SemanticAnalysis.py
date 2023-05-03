@@ -11,8 +11,8 @@ class Visitor:
 
 class SemanticAnalysisVisitor(Visitor):
 
-    def __init__(self, tree):
-        self.lineNr = tree.start
+    def __init__(self):
+        self.lineNr = 0
         self.positionNr = 0
         self.scopeNr = 0
         globaltable = SymbolTable()
@@ -135,7 +135,7 @@ class SemanticAnalysisVisitor(Visitor):
                     if i.var in l:
                         print(
                             "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
-                                self.lineNr.line) + ": variable " + i.var + " has already been declared! \n")
+                                self.lineNr) + ": variable " + i.var + " has already been declared! \n")
                     else:
                         l.append(i.var)
 
@@ -170,7 +170,7 @@ class SemanticAnalysisVisitor(Visitor):
             if self.functions.get(currentNode.value):
                 print(
                     "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
-                        self.lineNr.line) + ": function name " + currentNode.value + " has already been used! \n")
+                        self.lineNr) + ": function name " + currentNode.value + " has already been used! \n")
             # Creating scope for function
             newtable = SymbolTable()
             # Name scope
@@ -252,7 +252,7 @@ class SemanticAnalysisVisitor(Visitor):
         if self.currentScope.lookupUnallocated(varName) != 0:
             print(
                 "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
-                    self.lineNr.line) + ": variable " + currentNode.var + " has already been declared! \n")
+                    self.lineNr) + ": variable " + currentNode.var + " has already been declared! \n")
 
         self.currentScope.insert(varName, currentNode.attr, currentNode.type)
 
