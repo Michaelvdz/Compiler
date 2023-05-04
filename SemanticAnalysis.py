@@ -20,6 +20,7 @@ class SemanticAnalysisVisitor(Visitor):
         self.currentScope = globaltable
         self.functions = {}
         self.functionsWithoutBody = {}
+        self.arrays = {}
 
 
     def VisitASTNode(self, currentNode):
@@ -109,6 +110,12 @@ class SemanticAnalysisVisitor(Visitor):
     def VisitFunction(self, currentNode):
         returnType = currentNode.returnType.value
         currentNode.totalParams = len(currentNode.params)
+
+        if self.currentScope.name is not "Global":
+            print(
+                "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                    self.lineNr) + ": you can't make a function inside a function! \n")
+
         if not currentNode.hasbody:
             if self.functionsWithoutBody.get(currentNode.name) is not None:
                 if returnType != self.functionsWithoutBody.get(currentNode.name).returnType.value:
@@ -119,6 +126,15 @@ class SemanticAnalysisVisitor(Visitor):
                     print(
                         "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
                             self.lineNr) + ": function parameters does not match the original functions parameters! \n")
+                else:
+                    rangeParams = currentNode.totalParams
+                    for i in range(rangeParams):
+                        if currentNode.params[i].type != self.functionsWithoutBody.get(currentNode.name).params[i].type:
+                            print(
+                                "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                                    self.lineNr) + ": function parameter type does not match the original functions parameter type! \n")
+
+
             if self.functions.get(currentNode.name) is not None:
                 if returnType != self.functions.get(currentNode.name).returnType.value:
                     print(
@@ -151,6 +167,13 @@ class SemanticAnalysisVisitor(Visitor):
                         print(
                             "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
                                 self.lineNr) + ": function params does not match the original functions params! \n")
+                    else:
+                        rangeParams = currentNode.totalParams
+                        for i in range(rangeParams):
+                            if currentNode.params[i].type != self.functionsWithoutBody.get(currentNode.name).params[i].type:
+                                print(
+                                    "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                                        self.lineNr) + ": function parameter type does not match the original functions parameter type! \n")
 
                 if currentNode.body is not None:
                     if currentNode.body.children[-1].value != "return" and returnType != "void":
@@ -199,6 +222,12 @@ class SemanticAnalysisVisitor(Visitor):
         else:
             for param in currentNode.params:
                 print(param.type)
+            newtable = SymbolTable()
+            newtable.name = currentNode.value
+            newtable.returnType = currentNode.returnType.value
+            parenttable = self.currentScope
+            newtable.parent = parenttable
+            parenttable.children.append(newtable)
             self.functionsWithoutBody[currentNode.value] = currentNode
 
         return currentNode
@@ -206,16 +235,25 @@ class SemanticAnalysisVisitor(Visitor):
     def VisitExprLoop(self, currentNode):
         #print("Binary")
         for i in currentNode.children:
+
             if i.name == "Call":
-                if len(i.children) != self.functions.get(i.value.split("()")[0]):
+                if self.functions.get(i.value.split("()")[0]) is not None:
+                    if len(i.children) != self.functions.get(i.value.split("()")[0]).totalParams:
+                        print("\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                            self.lineNr) + ": function " + i.value.split("()")[0] + " has more/less parameters then given! \n")
+                else:
                     print("\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
-                        self.lineNr) + ": function " + currentNode.value + " has more/less parameters then given! \n")
+                        self.lineNr) + ": function " + i.value.split("()")[0] + " has not been made! \n")
 
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
     def VisitBinaryOperation(self, currentNode):
         #print("Binary")
+        if self.arrays.get(currentNode.children[0].value) is not None or self.arrays.get(currentNode.children[1].value) is not None:
+            print("\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                self.lineNr) + ": this binaryOperation contains an array! \n")
+
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
@@ -248,6 +286,14 @@ class SemanticAnalysisVisitor(Visitor):
     def VisitDeclaration(self, currentNode):
         #print("Declaration")
         varName = currentNode.var
+
+        if currentNode.array != 0:
+            self.arrays[currentNode.var] = currentNode.array
+            if not self.isInteger(currentNode.array.value) and float(currentNode.array.value) > 0:
+                print(
+                    "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                        self.lineNr) + ": array " + currentNode.var + " has a size that is not accepted! \n")
+
 
         if self.currentScope.lookupUnallocated(varName) != 0:
             print(
@@ -297,7 +343,28 @@ class SemanticAnalysisVisitor(Visitor):
         #print("Printf")
         return currentNode
     def VisitArrayVariable(self, currentNode):
+        typer = type(currentNode.index.value)
+        if self.arrays.get(currentNode.value) is not None:
+            if not self.isInteger(currentNode.index.value):
+                print(
+                    "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                        self.lineNr) + ": you can only put integers in [] from an array and " + currentNode.index.value + " is not an integer! \n")
+            if float(currentNode.index.value) > float(self.arrays.get(currentNode.value).value) or float(currentNode.index.value) < 0:
+                print(
+                    "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                        self.lineNr) + ": number " + currentNode.index.value + " is not between the boundaries of the array! \n")
+        else:
+            print(
+                "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
+                    self.lineNr) + ": variable " + currentNode.value + " is not an array! \n")
         return currentNode
-
     def VisitArray(self, currentNode):
         return currentNode
+
+    def isInteger(self, str):
+        try:
+            int(str)
+        except ValueError:
+            return False
+        else:
+            return True
