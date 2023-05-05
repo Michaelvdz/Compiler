@@ -17,7 +17,7 @@ class ASTOptimizer(Visitor):
 
     def __init__(self, tree):
         #self.ast = graphviz.Digraph('AST', filename='ast.gv')
-        #print("---------------------Optimizing Tree--------------------")
+        print("---------------------Optimizing Tree--------------------")
         self.tree = tree
         self.lineNr = 0
 
@@ -46,30 +46,53 @@ class ASTOptimizer(Visitor):
                 newNode.children.append(node)
         return newNode
 
+    def VisitInclude(self, currentNode):
+        return currentNode
+
     def VisitBinaryOperation(self, currentNode):
-        print("Binary")
+        #print("Binary Optimisation")
         children = []
         for child in currentNode.children:
             children.append(child.accept(self))
 
+        #print(children)
+        #print(children[0].value)
+        #print(children[1].value)
+
+
         match currentNode.value:
             case "+":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    try:
-                        value = int(children[0].value)
-                        print(int(children[0].value))
-                    except ValueError:
-                        value = float(children[0].value)
-                    try:
-                        value += int(children[1].value)
-                        print(int(children[1].value))
-                    except ValueError:
-                        value += float(children[1].value)
+                    #print("TYPEZ")
+                    #print(children[0].type)
+                    #print(children[1].type)
+                    if (children[0].type == "int" or children[0].type == "float") and (children[1].type == "int" or children[1].type == "float"):
+                        try:
+                            value = int(children[0].value)
+                            #print(int(children[0].value))
+                        except ValueError:
+                            value = float(children[0].value)
 
-                    currentNode.children = 0
-                    currentNode.value = value
-                    newnode = Constant(str(value))
-                    return newnode
+                        try:
+                            value += int(children[1].value)
+                            #print(int(children[1].value))
+                        except ValueError:
+                            value += float(children[1].value)
+
+                        currentNode.children = 0
+                        currentNode.value = value
+                        newnode = Constant(str(value))
+                        if (children[0].type == "float") or (children[1].type == "float"):
+                            newnode.type = "float"
+                        else:
+                            newnode.type = "int"
+
+                        return newnode
+                    else:
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
                     for child in children:
@@ -78,18 +101,32 @@ class ASTOptimizer(Visitor):
 
             case "*":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    try:
-                        value = int(children[0].value)
-                    except ValueError:
-                        value = float(children[0].value)
-                    try:
-                        value *= int(children[1].value)
-                    except ValueError:
-                        value *= float(children[1].value)
-                    currentNode.children = 0
-                    currentNode.value = value
-                    newnode = Constant(str(value))
-                    return newnode
+                    if (children[0].type == "int" or children[0].type == "float") and (
+                            children[1].type == "int" or children[1].type == "float"):
+                        #print("GRAAKTEM IER?")
+                        try:
+                            value = int(children[0].value)
+                        except ValueError:
+                            value = float(children[0].value)
+
+                        try:
+                            value *= int(children[1].value)
+                        except ValueError:
+                            value *= float(children[1].value)
+
+                        currentNode.children = 0
+                        currentNode.value = value
+                        newnode = Constant(str(value))
+                        if (children[0].type == "float") or (children[1].type == "float"):
+                            newnode.type = "float"
+                        else:
+                            newnode.type = "int"
+                        return newnode
+                    else:
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
                     for child in children:
@@ -97,20 +134,61 @@ class ASTOptimizer(Visitor):
                     return newnode
             case "/":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    try:
-                        value = int(children[0].value)
-                    except ValueError:
-                        value = float(children[0].value)
+                    if (children[0].type == "int" or children[0].type == "float") and (
+                            children[1].type == "int" or children[1].type == "float"):
+                        try:
+                            value = int(children[0].value)
+                        except ValueError:
+                            value = float(children[0].value)
 
-                    if isinstance(value, float):
-                        value = value / float(children[1].value)
+                        if isinstance(value, float):
+                                value = value / float(children[1].value)
+                        else:
+                            try:
+                                try:
+                                    value = value // int(children[1].value)
+                                except ValueError:
+                                    value = value / float(children[1].value)
+                            except ZeroDivisionError:
+                                print(
+                                    "\n" + Fore.MAGENTA + "[warning] " + Fore.RESET + "line " + str(
+                                        self.lineNr) + ": Division by zero is undefined \n")
+                                currentNode.children = 0
+                                currentNode.value = value
+                                newnode = Constant("NaN")
+                                return newnode
+                        currentNode.children = 0
+                        currentNode.value = value
+                        newnode = Constant(str(value))
+                        if (children[0].type == "float") or (children[1].type == "float"):
+                            newnode.type = "float"
+                        else:
+                            newnode.type = "int"
+                        return newnode
                     else:
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
+                else:
+                    newnode = BinaryOperation(currentNode.value)
+                    for child in children:
+                        newnode.adopt(child)
+                    return newnode
+            case "%":
+                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    if (children[0].type == "int" or children[0].type == "float") and (
+                            children[1].type == "int" or children[1].type == "float"):
+                        try:
+                            value = int(children[0].value)
+                        except ValueError:
+                            value = float(children[0].value)
 
                         try:
                             try:
-                                value = value // int(children[1].value)
+                                value = value % int(children[1].value)
                             except ValueError:
-                                value = value / float(children[1].value)
+                                value = value % float(children[1].value)
                         except ZeroDivisionError:
                             print(
                                 "\n" + Fore.MAGENTA + "[warning] " + Fore.RESET + "line " + str(
@@ -119,60 +197,53 @@ class ASTOptimizer(Visitor):
                             currentNode.value = value
                             newnode = Constant("NaN")
                             return newnode
-                    currentNode.children = 0
-                    currentNode.value = value
-                    newnode = Constant(str(value))
-                    return newnode
-                else:
-                    newnode = BinaryOperation(currentNode.value)
-                    for child in children:
-                        newnode.adopt(child)
-                    return newnode
-            case "%":
-                if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    try:
-                        value = int(children[0].value)
-                    except ValueError:
-                        value = float(children[0].value)
-
-                    try:
-                        try:
-                            value = value % int(children[1].value)
-                        except ValueError:
-                            value = value % float(children[1].value)
-                    except ZeroDivisionError:
-                        print(
-                            "\n" + Fore.MAGENTA + "[warning] " + Fore.RESET + "line " + str(
-                                self.lineNr) + ": Division by zero is undefined \n")
                         currentNode.children = 0
                         currentNode.value = value
-                        newnode = Constant("NaN")
+                        newnode = Constant(str(value))
+                        if (children[0].type == "float") or (children[1].type == "float"):
+                            newnode.type = "float"
+                        else:
+                            newnode.type = "int"
                         return newnode
-                    currentNode.children = 0
-                    currentNode.value = value
-                    newnode = Constant(str(value))
-                    return newnode
+                    else:
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
                     for child in children:
                         newnode.adopt(child)
                     return newnode
             case "-":
+                #print(children[0].varType)
+                #print(children[1].varType)
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    try:
-                        value = int(children[0].value)
-                    except ValueError:
-                        value = float(children[0].value)
+                    if (children[0].type == "int" or children[0].type == "float") and (
+                            children[1].type == "int" or children[1].type == "float"):
+                        try:
+                            value = int(children[0].value)
+                        except ValueError:
+                            value = float(children[0].value)
 
-                    try:
-                        value -= int(children[1].value)
-                    except ValueError:
-                        value -= float(children[1].value)
+                        try:
+                            value -= int(children[1].value)
+                        except ValueError:
+                            value -= float(children[1].value)
 
-                    currentNode.children = 0
-                    currentNode.value = value
-                    newnode = Constant(str(value))
-                    return newnode
+                        currentNode.children = 0
+                        currentNode.value = value
+                        newnode = Constant(str(value))
+                        if (children[0].type == "float") or (children[1].type == "float"):
+                            newnode.type = "float"
+                        else:
+                            newnode.type = "int"
+                        return newnode
+                    else:
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
                     for child in children:
@@ -180,23 +251,31 @@ class ASTOptimizer(Visitor):
                     return newnode
             case ">":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    value1 = children[0].value
-                    value2 = children[1].value
-                    try:
-                        value1 = int(value1)
-                    except ValueError:
-                        value1 = float(value1)
-                    try:
-                        value2 = int(value2)
-                    except ValueError:
-                        value2 = float(value2)
+                    if (children[0].type == "int" or children[0].type == "float") and (
+                            children[1].type == "int" or children[1].type == "float"):
+                        value1 = children[0].value
+                        value2 = children[1].value
+                        try:
+                            value1 = int(value1)
+                        except ValueError:
+                            value1 = float(value1)
+                        try:
+                            value2 = int(value2)
+                        except ValueError:
+                            value2 = float(value2)
 
-                    if value1 > value2:
-                        newvalue = "1"
+                        if value1 > value2:
+                            newvalue = "1"
+                        else:
+                            newvalue = "0"
+                        newnode = Constant(newvalue)
+                        newnode.type = "int"
+                        return newnode
                     else:
-                        newvalue = "0"
-                    newnode = Constant(newvalue)
-                    return newnode
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
                     for child in children:
@@ -204,23 +283,31 @@ class ASTOptimizer(Visitor):
                     return newnode
             case "<":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    value1 = children[0].value
-                    value2 = children[1].value
-                    try:
-                        value1 = int(value1)
-                    except ValueError:
-                        value1 = float(value1)
-                    try:
-                        value2 = int(value2)
-                    except ValueError:
-                        value2 = float(value2)
+                    if (children[0].type == "int" or children[0].type == "float") and (
+                            children[1].type == "int" or children[1].type == "float"):
+                        value1 = children[0].value
+                        value2 = children[1].value
+                        try:
+                            value1 = int(value1)
+                        except ValueError:
+                            value1 = float(value1)
+                        try:
+                            value2 = int(value2)
+                        except ValueError:
+                            value2 = float(value2)
 
-                    if value1 < value2:
-                        newvalue = "1"
+                        if value1 < value2:
+                            newvalue = "1"
+                        else:
+                            newvalue = "0"
+                        newnode = Constant(newvalue)
+                        newnode.type = "int"
+                        return newnode
                     else:
-                        newvalue = "0"
-                    newnode = Constant(newvalue)
-                    return newnode
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
                     for child in children:
@@ -228,23 +315,31 @@ class ASTOptimizer(Visitor):
                     return newnode
             case "==":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    value1 = children[0].value
-                    value2 = children[1].value
-                    try:
-                        value1 = int(value1)
-                    except ValueError:
-                        value1 = float(value1)
-                    try:
-                        value2 = int(value2)
-                    except ValueError:
-                        value2 = float(value2)
+                    if (children[0].type == "int" or children[0].type == "float") and (
+                            children[1].type == "int" or children[1].type == "float"):
+                        value1 = children[0].value
+                        value2 = children[1].value
+                        try:
+                            value1 = int(value1)
+                        except ValueError:
+                            value1 = float(value1)
+                        try:
+                            value2 = int(value2)
+                        except ValueError:
+                            value2 = float(value2)
 
-                    if value1 == value2:
-                        newvalue = "1"
+                        if value1 == value2:
+                            newvalue = "1"
+                        else:
+                            newvalue = "0"
+                        newnode = Constant(newvalue)
+                        newnode.type = "int"
+                        return newnode
                     else:
-                        newvalue = "0"
-                    newnode = Constant(newvalue)
-                    return newnode
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
                     for child in children:
@@ -252,23 +347,31 @@ class ASTOptimizer(Visitor):
                     return newnode
             case "!=":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    value1 = children[0].value
-                    value2 = children[1].value
-                    try:
-                        value1 = int(value1)
-                    except ValueError:
-                        value1 = float(value1)
-                    try:
-                        value2 = int(value2)
-                    except ValueError:
-                        value2 = float(value2)
+                    if (children[0].type == "int" or children[0].type == "float") and (
+                            children[1].type == "int" or children[1].type == "float"):
+                        value1 = children[0].value
+                        value2 = children[1].value
+                        try:
+                            value1 = int(value1)
+                        except ValueError:
+                            value1 = float(value1)
+                        try:
+                            value2 = int(value2)
+                        except ValueError:
+                            value2 = float(value2)
 
-                    if value1 != value2:
-                        newvalue = "1"
+                        if value1 != value2:
+                            newvalue = "1"
+                        else:
+                            newvalue = "0"
+                        newnode = Constant(newvalue)
+                        newnode.type = "int"
+                        return newnode
                     else:
-                        newvalue = "0"
-                    newnode = Constant(newvalue)
-                    return newnode
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
                     for child in children:
@@ -276,23 +379,31 @@ class ASTOptimizer(Visitor):
                     return newnode
             case ">=":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    value1 = children[0].value
-                    value2 = children[1].value
-                    try:
-                        value1 = int(value1)
-                    except ValueError:
-                        value1 = float(value1)
-                    try:
-                        value2 = int(value2)
-                    except ValueError:
-                        value2 = float(value2)
+                    if (children[0].type == "int" or children[0].type == "float") and (
+                            children[1].type == "int" or children[1].type == "float"):
+                        value1 = children[0].value
+                        value2 = children[1].value
+                        try:
+                            value1 = int(value1)
+                        except ValueError:
+                            value1 = float(value1)
+                        try:
+                            value2 = int(value2)
+                        except ValueError:
+                            value2 = float(value2)
 
-                    if value1 >= value2:
-                        newvalue = "1"
+                        if value1 >= value2:
+                            newvalue = "1"
+                        else:
+                            newvalue = "0"
+                        newnode = Constant(newvalue)
+                        newnode.type = "int"
+                        return newnode
                     else:
-                        newvalue = "0"
-                    newnode = Constant(newvalue)
-                    return newnode
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
                     for child in children:
@@ -300,23 +411,31 @@ class ASTOptimizer(Visitor):
                     return newnode
             case "<=":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    value1 = children[0].value
-                    value2 = children[1].value
-                    try:
-                        value1 = int(value1)
-                    except ValueError:
-                        value1 = float(value1)
-                    try:
-                        value2 = int(value2)
-                    except ValueError:
-                        value2 = float(value2)
+                    if (children[0].type == "int" or children[0].type == "float") and (
+                            children[1].type == "int" or children[1].type == "float"):
+                        value1 = children[0].value
+                        value2 = children[1].value
+                        try:
+                            value1 = int(value1)
+                        except ValueError:
+                            value1 = float(value1)
+                        try:
+                            value2 = int(value2)
+                        except ValueError:
+                            value2 = float(value2)
 
-                    if value1 <= value2:
-                        newvalue = "1"
+                        if value1 <= value2:
+                            newvalue = "1"
+                        else:
+                            newvalue = "0"
+                        newnode = Constant(newvalue)
+                        newnode.type = "int"
+                        return newnode
                     else:
-                        newvalue = "0"
-                    newnode = Constant(newvalue)
-                    return newnode
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
                     for child in children:
@@ -324,31 +443,39 @@ class ASTOptimizer(Visitor):
                     return newnode
             case "&&":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    value1 = children[0].value
-                    value2 = children[1].value
-                    try:
-                        value1 = int(value1)
-                    except ValueError:
-                        value1 = float(value1)
-                    try:
-                        value2 = int(value2)
-                    except ValueError:
-                        value2 = float(value2)
+                    if (children[0].type == "int" or children[0].type == "float") and (
+                            children[1].type == "int" or children[1].type == "float"):
+                        value1 = children[0].value
+                        value2 = children[1].value
+                        try:
+                            value1 = int(value1)
+                        except ValueError:
+                            value1 = float(value1)
+                        try:
+                            value2 = int(value2)
+                        except ValueError:
+                            value2 = float(value2)
 
-                    if abs(value1) > 0:
-                        value1 = 1
+                        if abs(value1) > 0:
+                            value1 = 1
+                        else:
+                            value1 = 0
+                        if abs(value2) > 0:
+                            value2 = 1
+                        else:
+                            value2 = 0
+                        if value1 and value2:
+                            newvalue = "1"
+                        else:
+                            newvalue = "0"
+                        newnode = Constant(newvalue)
+                        newnode.type = "int"
+                        return newnode
                     else:
-                        value1 = 0
-                    if abs(value2) > 0:
-                        value2 = 1
-                    else:
-                        value2 = 0
-                    if value1 and value2:
-                        newvalue = "1"
-                    else:
-                        newvalue = "0"
-                    newnode = Constant(newvalue)
-                    return newnode
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
                     for child in children:
@@ -356,31 +483,39 @@ class ASTOptimizer(Visitor):
                     return newnode
             case "||":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
-                    value1 = children[0].value
-                    value2 = children[1].value
-                    try:
-                        value1 = int(value1)
-                    except ValueError:
-                        value1 = float(value1)
-                    try:
-                        value2 = int(value2)
-                    except ValueError:
-                        value2 = float(value2)
+                    if (children[0].type == "int" or children[0].type == "float") and (
+                            children[1].type == "int" or children[1].type == "float"):
+                        value1 = children[0].value
+                        value2 = children[1].value
+                        try:
+                            value1 = int(value1)
+                        except ValueError:
+                            value1 = float(value1)
+                        try:
+                            value2 = int(value2)
+                        except ValueError:
+                            value2 = float(value2)
 
-                    if abs(value1) > 0:
-                        value1 = 1
+                        if abs(value1) > 0:
+                            value1 = 1
+                        else:
+                            value1 = 0
+                        if abs(value2) > 0:
+                            value2 = 1
+                        else:
+                            value2 = 0
+                        if value1 or value2:
+                            newvalue = "1"
+                        else:
+                            newvalue = "0"
+                        newnode = Constant(newvalue)
+                        newnode.type = "int"
+                        return newnode
                     else:
-                        value1 = 0
-                    if abs(value2) > 0:
-                        value2 = 1
-                    else:
-                        value2 = 0
-                    if value1 or value2:
-                        newvalue = "1"
-                    else:
-                        newvalue = "0"
-                    newnode = Constant(newvalue)
-                    return newnode
+                        newnode = BinaryOperation(currentNode.value)
+                        for child in children:
+                            newnode.adopt(child)
+                        return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
                     for child in children:
@@ -393,25 +528,26 @@ class ASTOptimizer(Visitor):
 
 
     def VisitUnaryOperation(self, currentNode):
-        print("Unary")
-        print(currentNode.value)
+        #print("Unary")
+        #print(currentNode.value)
         children = []
 
         match currentNode.value:
             case "-":
+                #print("Tis -, kijken naar kinderen")
                 value = 0
-                if isinstance(currentNode.children[0], Constant):
-                    for child in currentNode.children:
-                        node = child.accept(self)
-                        try:
-                            value = -int(node.value)
-                        except ValueError:
-                            value = -float(node.value)
+                node = currentNode.children[0].accept(self)
+                if isinstance(node, Constant):
+                    try:
+                        value = -int(node.value)
+                    except ValueError:
+                        value = -float(node.value)
                     currentNode.children = 0
                     currentNode.value = value
                     node = Constant(str(value))
                     return node
                 else:
+                    #print("Tis -, als genne constante is, gwn node terugegeven")
                     node = currentNode.children[0].accept(self)
                     if isinstance(node, Constant):
                         try:
@@ -422,8 +558,13 @@ class ASTOptimizer(Visitor):
                         currentNode.value = value
                         node = Constant(str(value))
                         return node
-                    return currentNode.accept(self)
+                    else:
+                        currentNode.children = 0
+                        currentNode.children = []
+                        currentNode.children.append(node)
+                    return currentNode
             case "--":
+                '''
                 if isinstance(currentNode.children[0], Constant):
                     for child in currentNode.children:
                         node = child.accept(self)
@@ -436,33 +577,26 @@ class ASTOptimizer(Visitor):
                     node = Constant(str(value))
                     return node
                 else:
-                    return currentNode
+                '''
+                return currentNode
             case "+":
+                #print("Tis +, kijken naar kinderen")
                 value = 0
-                if isinstance(currentNode.children[0], Constant):
-                    for child in currentNode.children:
-                        node = child.accept(self)
-                        try:
-                            value = int(node.value)
-                        except ValueError:
-                            value = float(node.value)
+                node = currentNode.children[0].accept(self)
+                if isinstance(node, Constant):
+                    try:
+                        value = int(node.value)
+                    except ValueError:
+                        value = float(node.value)
                     currentNode.children = 0
                     currentNode.value = value
                     node = Constant(str(value))
                     return node
                 else:
-                    node = currentNode.children[0].accept(self)
-                    if isinstance(node, Constant):
-                        try:
-                            value = int(node.value)
-                        except ValueError:
-                            value = float(node.value)
-                        currentNode.children = 0
-                        currentNode.value = value
-                        node = Constant(str(value))
-                        return node
-                    return currentNode.accept(self)
+                    #print("Tis +, gewoon kund teruggeven")
+                    return node
             case "++":
+                '''
                 if isinstance(currentNode.children[0], Constant):
                     for child in currentNode.children:
                         node = child.accept(self)
@@ -475,9 +609,12 @@ class ASTOptimizer(Visitor):
                     node = Constant(str(value))
                     return node
                 else:
-                    return currentNode
+                '''
+                return currentNode
             case "!":
-                if isinstance(currentNode.children[0], Constant) or isinstance(currentNode.children[0], BinaryOperation):
+                #print(currentNode.children[0].value)
+                node = currentNode.children[0].accept(self)
+                if isinstance(node, Constant):
                     for child in currentNode.children:
                         node = child.accept(self)
                         try:
@@ -497,12 +634,11 @@ class ASTOptimizer(Visitor):
                     node = Constant(newvalue)
                     return node
                 else:
+                    currentNode.children = 0
+                    currentNode.children = []
+                    currentNode.children.append(node)
                     return currentNode
             case "[]":
-                print("ARRAAAAAAAAAAAAAAAAAAAAAAAAY")
-                print(currentNode.value)
-                print(currentNode.children[0].ch)
-                print(currentNode.children[0].value)
                 if isinstance(currentNode.children[0], Constant) or isinstance(currentNode.children[0], BinaryOperation):
                     for child in currentNode.children:
                         node = child.accept(self)
@@ -513,7 +649,7 @@ class ASTOptimizer(Visitor):
                                 print("failure")
                     array = Array('[]')
                     array.size = value
-                    print(value)
+                    #print(value)
                     currentNode.children = []
                     currentNode.adopt(array)
                     return currentNode
@@ -554,12 +690,12 @@ class ASTOptimizer(Visitor):
         #print("Array")
         newNode = copy.copy(currentNode)
         size = currentNode.size.accept(self)
-        print(size.value)
+        #print(size.value)
         newNode.value = "[" + " ]"
         newNode.name = newNode.value
         newNode.children = []
         newNode.size = size
-        print(size)
+        #print(size)
         return newNode
 
     def VisitLogicalOperation(self, currentNode):
@@ -572,15 +708,16 @@ class ASTOptimizer(Visitor):
         return newNode
 
     def VisitFunction(self, currentNode):
-        print("Function")
+        #print("Function in Opti")
         newNode = copy.copy(currentNode)
+        #print(newNode.params)
         newNode.children.clear();
         self.returnType = currentNode.returnType.value
         if currentNode.hasbody:
             if currentNode.body:
                 newNode.body = currentNode.body.accept(self)
                 for child in newNode.body.children:
-                    print("Child")
+                    #print("Child")
                     if isinstance(child, Jump):
                         child.type = currentNode.returnType.value
                     newNode.children.append(child)
@@ -602,7 +739,7 @@ class ASTOptimizer(Visitor):
     def VisitConstant(self, currentNode):
         #print("Constant")
         value = currentNode.value
-        print(currentNode.varType)
+        #print(currentNode.varType)
         try:
             value = int(value)
         except ValueError:
@@ -610,9 +747,11 @@ class ASTOptimizer(Visitor):
                 value = float(value)
             except ValueError:
                 value = value
+        #print(value)
         if isinstance(value, int):
+            #print("Int?")
             if value > 2147483647 or value < -2147483648:
-                print("Dees kan ni")
+                #print("Dees kan ni")
                 if value > 2147483647:
                     while(value > 2147483647):
                         value -= 2147483647
@@ -620,9 +759,13 @@ class ASTOptimizer(Visitor):
                     while(value > 2147483647):
                         value += 2147483647
                 currentNode.value = value
+            currentNode.type = "int"
+            return currentNode
         elif isinstance(value, float):
-            return  currentNode
+            currentNode.type = "float"
+            return currentNode
         else:
+            currentNode.type = "char"
             return currentNode
         return currentNode
 
@@ -635,13 +778,13 @@ class ASTOptimizer(Visitor):
         return currentNode
 
     def VisitJump(self, currentNode):
-        print("---------------------------------------Jump")
+        #print("---------------------------------------Jump")
         if currentNode.value == "return":
             currentNode.type =self.returnType
         return currentNode
 
     def VisitWhile(self, currentNode):
-        print("Loop")
+        #print("Loop")
         newNode = copy.copy(currentNode)
         #newNode.children.append(currentNode.body)
         '''
@@ -651,26 +794,36 @@ class ASTOptimizer(Visitor):
         '''
         return newNode
     def VisitConditional(self, currentNode):
-        print("Conditional")
+        #print("Conditional")
+        #newNode = Conditional(currentNode.value)
         newNode = copy.copy(currentNode)
         newNode.children = []
-        for child in currentNode.children:
-            node = child.accept(self)
-            newNode.children.append(node)
+        #print(len(currentNode.children))
+        #print(len(newNode.children))
+        condition = currentNode.condition.accept(self)
+        newNode.condition = condition
+
+        ifbody = currentNode.ifbody.accept(self)
+        newNode.ifbody = ifbody
+        if currentNode.elsebody:
+            elsebody = currentNode.elsebody.accept(self)
+            newNode.elsebody = elsebody
+
         return newNode
 
     def VisitExprLoop(self, currentNode):
-        print("LoopExpr")
-        newNode = copy.copy(currentNode)
+        #print("LoopExpr")
+        newNode = ExprLoop(currentNode.value)
         newNode.children = []
         for child in currentNode.children:
             node = child.accept(self)
-            print(node)
+            #print("Recieved node")
+            #print(node.children)
             newNode.children.append(node)
             if isinstance(node, Jump):
                 if node.value == "return":
-                    print("We zen hier")
-                    print(newNode)
+                    #print("We zen hier")
+                    #print(newNode)
                     return newNode
                 if node.value == "break":
                     return newNode
@@ -679,7 +832,7 @@ class ASTOptimizer(Visitor):
         return newNode
 
     def VisitScope(self, currentNode):
-        print("Scope")
+        #print("Scope")
         newNode = copy.copy(currentNode)
         newNode.children = []
         for child in currentNode.children:
@@ -695,7 +848,7 @@ class ASTOptimizer(Visitor):
         return newNode
 
     def VisitDeclaration(self, currentNode):
-        print("Declaration")
+        #print("Declaration")
         newNode = copy.copy(currentNode)
         newNode.children = []
         for child in currentNode.children:
@@ -709,7 +862,7 @@ class ASTOptimizer(Visitor):
         return newNode
 
     def VisitCall(self, currentNode):
-        print("VisitCall")
+        #print("VisitCall")
         newNode = copy.copy(currentNode)
         newNode.children = []
         for child in currentNode.children:
@@ -724,8 +877,10 @@ class ASTOptimizer(Visitor):
         #print(currentNode.lvalue)
         newNode.lvalue = currentNode.lvalue.accept(self)
         if isinstance(newNode.lvalue, Array):
+            '''
             print("ARAAAAAAAAAAAAAAAAAAAAAAAAY")
             print(newNode.lvalue.size)
+            '''
         #print(newNode.lvalue)
         newNode.rvalue = currentNode.rvalue.accept(self)
         newNode.adopt(newNode.lvalue)
@@ -743,7 +898,7 @@ class ASTOptimizer(Visitor):
                     x = "test"
                     #print(key + ': ' + value)
             elif isinstance(newNode.lvalue, Variable):
-                print("We are assigning a new value")
+                #print("We are assigning a new value")
                 if self.vars.get(newNode.lvalue.value):
                     self.vars.pop(newNode.lvalue.value)
 
@@ -758,24 +913,32 @@ class ASTOptimizer(Visitor):
         #print("SLComment")
         return currentNode
 
+    def VisitString(self, currentNode):
+        #print("SLComment")
+        return currentNode
+
     def VisitPrintf(self, currentNode):
-        print("DOETEM DEES FEITELIJK?????")
+        #print("DOETEM DEES FEITELIJK?????")
         #print("PrintF")
-        newNode = copy.copy(currentNode)
+        newNode = PrintF(currentNode.value)
         newNode.children = []
         newNode.args = []
         self.propagation = False
         node = None
-        print(len(currentNode.children))
+        format = currentNode.format
+        newNode.format = format
+        #print(len(currentNode.children))
         for child in currentNode.args:
             node = child.accept(self)
-            print("optimized node")
-            print(node)
+            #print("optimized node")
+            #print(node)
             newNode.children.append(node)
             newNode.args.append(node)
         self.propagation = True
         #node = currentNode.args.accept(self)
         #newNode.args.append(node)
+        #print(newNode.format)
+        #print(newNode.children)
         return newNode
 
     def VisitScanf(self, currentNode):

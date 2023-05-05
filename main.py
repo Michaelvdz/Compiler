@@ -35,16 +35,17 @@ def main(argv):
     lexer = CGrammarLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = CGrammarParser(stream)
-    parser.addErrorListener(errorAnalyser())
+    #parser.addErrorListener(errorAnalyser())
 
     tree = parser.prog()
     if parser.getNumberOfSyntaxErrors() == 0:
 
+        print("Creating AST")
         asttree = ASTTree()
         visitor = CSTVisitor(asttree)
         visitor.visit(tree)
 
-        #print("Printing tree before optimization")
+        print("Printing tree before optimization")
         astVisitor = ASTVisitor(filename+"_beforeOptimization",outputmap)
         asttree.root.accept(astVisitor)
         #print("ending")
@@ -65,6 +66,10 @@ def main(argv):
         optimizedTree.root.accept(STCreator)
         #print("\n\nThe generated symbol table:")
         #print(table)
+
+
+        ErrorAnalyser = errorAnalyser(STStack.tables[0])
+        optimizedTree.root.accept(ErrorAnalyser)
 
         print("-------------------------------")
         print(STStack.tables[0].name)

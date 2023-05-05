@@ -191,5 +191,5 @@ FLOAT: [0-9]*? '.' [0-9]+;
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
 FORMAT: ["](.)*?["];
 CHAR: (['].[']|['][\\].[']);
-IO: '#include <stdio.h>';
+IO: '#include <'(.)*?'.h>';
 WS: [ \n\t\r]+ -> skip;

@@ -96,6 +96,7 @@ class BinaryOperation(ASTNode):
     name = ""
     children = []
     value = ""
+    type = ""
 
     def __init__(self, name):
         #print("___init-BinaryOperation___");
@@ -436,6 +437,7 @@ class Constant(ASTNode):
     value = ""
     varName = ""
     varType = ""
+    type = ""
 
     def __init__(self, value):
         #print("___init-Constant__");
@@ -449,6 +451,25 @@ class Constant(ASTNode):
 
     def accept(self, visitor: Visitor):
         return visitor.VisitConstant(self)
+
+class String(ASTNode):
+
+    name = ""
+    children = []
+    value = ""
+
+    def __init__(self, value):
+        #print("___init-Constant__");
+        self.children = 0
+        self.name = "String"
+        self.value = value
+        #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def print(self):
+        print("String: " + str(self.value))
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitString(self)
 
 class Variable(ASTNode):
 
@@ -612,6 +633,24 @@ class SLComment(ASTNode):
 
     def accept(self, visitor: Visitor):
         return visitor.VisitSLComment(self)
+
+class Include(ASTNode):
+
+    value = ""
+    name = ""
+
+    def __init__(self, value):
+        #print("___init-SLComment__");
+        self.children = 0
+        self.name = "Include"
+        self.value = value
+        #print("___Node-Created-With-Name:"+ self.name + "___")
+
+    def print(self):
+        print("Include: " + str(self.value))
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitInclude(self)
 
 class PrintF(ASTNode):
 

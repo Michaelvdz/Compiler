@@ -20,6 +20,11 @@ class ASTVisitor(Visitor):
         #print("Ending Node")
         return currentNode
 
+    def VisitInclude(self, currentNode):
+        #print("Beginning Node")
+        self.ast.node(str(id(currentNode)), currentNode.name)
+        return currentNode
+
     def VisitConditional(self, currentNode):
         #print("Beginning Node")
         self.ast.node(str(id(currentNode)), currentNode.name)
@@ -98,11 +103,11 @@ class ASTVisitor(Visitor):
         return currentNode
 
     def VisitBinaryOperation(self, currentNode):
-        print("Beginning Binary")
-        print(currentNode.value)
-        print(str(id(currentNode)))
+        #print("Beginning Binary")
+        #print(currentNode.value)
+        #print(str(id(currentNode)))
         self.ast.node(str(id(currentNode)), str(currentNode.value))
-        print("test")
+        #print("test")
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
@@ -111,7 +116,9 @@ class ASTVisitor(Visitor):
 
     def VisitUnaryOperation(self, currentNode):
         #print("Beginning Unary")
-        self.ast.node(str(id(currentNode)), currentNode.value)
+        #print(currentNode.value)
+        #print(currentNode)
+        self.ast.node(str(id(currentNode)), str(currentNode.value))
         for child in currentNode.children:
             node = child.accept(self)
             self.ast.edge(str(id(currentNode)), str(id(node)))
@@ -244,6 +251,12 @@ class ASTVisitor(Visitor):
         #print("Ending Assignment")
         return currentNode
 
+    def VisitString(self, currentNode):
+        #print("Beginning SLComment")
+        self.ast.node(str(id(currentNode)), currentNode.value)
+        #print("Ending Assignment")
+        return currentNode
+
     def VisitPrintf(self, currentNode):
         #print("Beginning Printf")
         self.ast.node(str(id(currentNode)), currentNode.value)
@@ -254,7 +267,7 @@ class ASTVisitor(Visitor):
         '''
         form = currentNode.format.accept(self)
         self.ast.edge(str(id(currentNode)), str(id(form)), "Format")
-        print(currentNode.args)
+        #print(currentNode.args)
         '''
         if currentNode.args:
             for child in currentNode.args.children:
@@ -264,7 +277,8 @@ class ASTVisitor(Visitor):
         '''
         if currentNode.args:
             for child in currentNode.args:
-                print("PRINTING NODE")
+                #print("PRINTING NODE")
+                #print(child)
                 node = child.accept(self)
                 self.ast.edge(str(id(currentNode)), str(id(node)), "Args")
         #print("Ending Printf")

@@ -188,9 +188,7 @@ class CGrammarParser ( Parser ):
                      "'else'", "'switch'", "'case'", "':'", "'default'", 
                      "'while'", "'for'", "'break'", "'continue'", "'return'", 
                      "'int'", "'float'", "'char'", "'void'", "'const'", 
-                     "'printf'", "'scanf'", "<INVALID>", "<INVALID>", "<INVALID>", 
-                     "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                     "'#include <stdio.h>'" ]
+                     "'printf'", "'scanf'" ]
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 

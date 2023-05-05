@@ -25,24 +25,28 @@ class CreateSymbolTableVisitor(Visitor):
     def VisitASTNode(self, currentNode):
         #print("Node")
         if currentNode.children:
+            '''
             if currentNode.children[0].name == "Comment":
                 for i in range(currentNode.children[0].value.count('\n')):
                     self.lineNr += 1
             if currentNode.children[0].name == "return":
                 print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
                     self.lineNr) + ": return has not been used in a function! \n")
-        
+            '''
+        '''
         if currentNode.name == "Inst":
             self.lineNr += 1
-
+        
         if len(currentNode.children) == 0 and currentNode.value != "Inst":
             if self.table.peek().lookup(currentNode.value) == 0:
                 print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line "+ str(self.lineNr) + ": variable " + currentNode.value + " has not been declared yet! \n")
-
+        '''
         for child in currentNode.children:
             node = child.accept(self)
         return currentNode
 
+    def VisitInclude(self, currentNode):
+        return currentNode
     def VisitConditional(self, currentNode):
         #print("Scope")
         # Creating Symbol Table for condition
@@ -120,9 +124,10 @@ class CreateSymbolTableVisitor(Visitor):
         return currentNode
 
     def VisitFunction(self, currentNode):
-        print("Function - Creating new ST for the function")
+        #print("Function - Creating new ST for the function")
         returnType = currentNode.returnType.value
         if not currentNode.hasbody:
+            '''
             if self.table.search(currentNode.value)[0]:
                 if returnType != self.table.search(currentNode.value)[2]:
                     print(
@@ -133,8 +138,10 @@ class CreateSymbolTableVisitor(Visitor):
                         print(
                             "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
                                 self.lineNr) + ": function parameters does not match the original functions parameters! \n")
+            '''
 
         if currentNode.hasbody:
+            '''
             if self.table.search(currentNode.value)[0]:
                 print(
                     "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
@@ -150,6 +157,7 @@ class CreateSymbolTableVisitor(Visitor):
                     print(
                         "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
                             self.lineNr) + ": you can't use return in a void function \n")
+            '''
             # Creating Symbol Table for function
             newtable = SymbolTable()
             # Name scope
@@ -160,29 +168,50 @@ class CreateSymbolTableVisitor(Visitor):
             parenttable.children.append(newtable)
             # Push ST to stack
             self.table.push(newtable)
+            # if it has params, visit them
+            #print("PPPPPPPPPPPPPPPP")
+            #print(currentNode.params)
+            parms = []
+            for param in currentNode.params:
+                #print("Param:")
+                #print(param)
+                node = param.accept(self)
+                if node.pointer:
+                    parms.append(node.type+"*")
+                else:
+                    parms.append(node.type)
+
+            print(parms)
+
+
             if currentNode.body:
-                # if it has params, visit them
-                for param in currentNode.params:
-                    print("Param:")
-                    print(param)
-                    node = param.accept(self)
-                    print(node.value)
                 # Visit body
                 if currentNode.body:
                     currentNode.body.accept(self)
             # Pop after run through
             self.table.pop()
             # Add function to ST
-            self.table.peek().insertFunction(currentNode.totalParams, currentNode.value, "", currentNode.returnType.value, "func")
+            symbol = self.table.peek().lookupUnallocated(currentNode.value)
+            if not symbol:
+                table = self.table.peek().insertFunction(currentNode.totalParams, currentNode.value, "", currentNode.returnType.value, "func")
+                table.params = parms
         else:
+            params = []
             for param in currentNode.params:
                 print(param.type)
-            self.table.peek().insertFunction(currentNode.totalParams, currentNode.value, "", currentNode.returnType.value, "func")
+                params.append(param.type)
+            symbol = self.table.peek().lookupUnallocated(currentNode.value)
+            print("Symbol exists?")
+            print(symbol)
+            if not symbol:
+                table = self.table.peek().insertFunction(currentNode.totalParams, currentNode.value, "", currentNode.returnType.value, "func")
+                table.params = params
         return currentNode
 
     def VisitExprLoop(self, currentNode):
         #print("Binary")
         if currentNode.children[0].name == "Call":
+            '''
             numberOfPar = len(currentNode.children[0].children)
             if not self.table.search(currentNode.children[0].value)[0]:
                 print(
@@ -193,6 +222,7 @@ class CreateSymbolTableVisitor(Visitor):
                 if numberOfPar != numberOfPar2:
                     print("\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
                         self.lineNr) + ": function " + currentNode.value + " has more/less parameters then given! \n")
+            '''
 
         for child in currentNode.children:
             node = child.accept(self)
@@ -246,28 +276,6 @@ class CreateSymbolTableVisitor(Visitor):
             currType = currentNode.type
             #print(currType)
 
-        # int i = 3;
-        # int i = 7; Redeclaration
-        if self.table.peek().lookup(currentNode.var) != 0 and len(currType) != 0:
-            print(
-                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(self.lineNr) + ": variable " + currentNode.var + " has already been declared! \n")
-
-        # int i = 3;
-        # k = 7; Undefined variable
-        if self.table.peek().lookup(currentNode.var) == 0 and len(currType) == 0:
-            print(
-                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(self.lineNr) + ": variable " + currentNode.var + " has not been declared yet! \n")
-
-        # const int i = 4;
-        # i = 5; const can't be changed
-        if self.table.peek().lookup(currentNode.var) != 0 and len(currType) == 0:
-            if self.table.peek().vars[currentNode.var].attr == "const":
-                print(
-                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(self.lineNr) + ": variable " + currentNode.var + " can not be changed because it's a const! \n")
-
-        if self.table.peek().lookup(currentNode.var) == 0 and len(currType) != 0:
-            # self.table.peek().insert(currentNode.var, currConst, currType, currentNode.attr)
-            '''none'''
 
         if currentNode.pointer:
             node = currentNode.pointer.accept(self)
@@ -279,13 +287,13 @@ class CreateSymbolTableVisitor(Visitor):
         if currentNode.array:
             array = currentNode.array.accept(self)
             if not self.table.peek().lookupInThisTable(currentNode.var):
-                print("Inserting array var")
+                #print("Inserting array var")
                 size = array.value
                 self.table.peek().insertArray(currentNode.var, currConst, currType+"[]", currentNode.attr, size)
 
         if "[]" not in currentNode.type:
             if not self.table.peek().lookupInThisTable(currentNode.var):
-                print("Inserting var")
+                #print("Inserting var")
                 self.table.peek().insert(currentNode.var, currConst, currType, currentNode.attr)
 
 
@@ -346,16 +354,6 @@ class CreateSymbolTableVisitor(Visitor):
             currType = currentNode.type
             #print(currType)
 
-        if self.table.peek().lookup(currentNode.value) != 0 and len(currType) == 0:
-            peeker = self.table.peek()
-            if peeker.lookup(currentNode.value).attr == "const":
-                print(
-                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
-                        self.lineNr) + ": variable " + currentNode.value + " can not be changed because it's a const! \n")
-
-        if self.table.peek().lookup(currentNode.value) == 0 and len(currType) == 0:
-            print(
-                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(self.lineNr) + ": variable " + currentNode.value + " has not been declared yet! \n")
 
         return currentNode
 

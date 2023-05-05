@@ -6,6 +6,8 @@ class Node:
         self.register = None
         self.astnode = node
         self.inUse = False
+        self.declared = False
+        self.defined = False
 
     def __str__(self):
         return f'{self.type} and attr: {self.attr} and register: {self.register}'
@@ -19,6 +21,8 @@ class Function(Node):
         self.astnode = node
         self.params = []
         self.totalParams = totalParams
+        self.declared = False
+        self.defined = False
 
     def __str__(self):
         return f'{self.type} and attr: {self.attr} and register: {self.register} and params:'
@@ -26,7 +30,7 @@ class Function(Node):
 
 class Array(Node):
     def __init__(self, constant, type, size, attr="", node=""):
-        print("Size: " + size)
+        #print("Size: " + size)
         self.constant = constant
         self.type = type
         self.attr = attr
@@ -34,6 +38,8 @@ class Array(Node):
         self.astnode = node
         self.size = size
         self.inUse = False
+        self.declared = False
+        self.defined = False
 
     def __str__(self):
         return f'{self.type} and attr: {self.attr} and register: {self.register} and size {self.size}'
@@ -55,8 +61,8 @@ class SymbolTables:
 
     def push(self, table):
         self.tables.append(table)
-        print("Added table")
-        print(len(self.tables))
+        #print("Added table")
+        #print(len(self.tables))
 
     def peek(self):
         table = self.tables.pop()
@@ -78,6 +84,7 @@ class SymbolTable:
     parent = 0
     children = []
     vars = dict()
+    analysisDone = False
 
     def __init__(self):
         self.vars = dict()
@@ -85,6 +92,7 @@ class SymbolTable:
         self.children.clear()
         self.parent = 0
         self.name = ""
+        self.analysisDone = False
 
     def __str__(self):
         string = []
@@ -117,9 +125,10 @@ class SymbolTable:
 
     def insertFunction(self, totalParams, name, constant, type, attribute="", node="", params=[]):
         self.vars[name] = Function(totalParams, constant, type, "", attribute, node, params)
+        return self.vars[name]
 
     def insertArray(self, name, constant, type, attribute, size):
-        print("Inserting array with size:" + str(size))
+        #print("Inserting array with size:" + str(size))
         self.vars[name] = Array(constant, type, size, "", attribute)
 
     def insertRegister(self, name, register):
@@ -149,6 +158,16 @@ class SymbolTable:
         else:
             if self.parent:
                 return self.parent.lookup(name)
+        #print("Nothing found")
+        return 0
+
+    def lookupAnalysis(self, name):
+        var = self.vars.get(name)
+        if var:
+            return var
+        else:
+            if self.parent:
+                return self.parent.lookupAnalysis(name)
         #print("Nothing found")
         return 0
 
@@ -186,3 +205,26 @@ class SymbolTable:
             if self.vars[key].register == old:
                 self.vars[key].register = new
         return 0
+
+    def nextTable(self):
+        for child in self.children:
+            if not child.analysisDone:
+                return child
+        return self
+
+    def loopInScopes(self):
+        print(self.name)
+        if "While" in self.name:
+            return True
+        else:
+            if self.parent:
+                return self.parent.loopInScopes()
+            else:
+                return False
+
+    def functionInScopes(self):
+        if "Global" in self.name:
+            return False
+        else:
+            return True
+
