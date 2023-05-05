@@ -111,7 +111,7 @@ class SemanticAnalysisVisitor(Visitor):
         returnType = currentNode.returnType.value
         currentNode.totalParams = len(currentNode.params)
 
-        if self.currentScope.name is not "Global":
+        if self.currentScope.name != "Global":
             print(
                 "\n" + Fore.BLUE + "[ERROR]" + Fore.RESET + "line " + str(
                     self.lineNr) + ": you can't make a function inside a function! \n")
