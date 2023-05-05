@@ -15,7 +15,8 @@ The result is an optimized AST.
 
 We now created a symbol table data type, contained by the file SymbolTable.py.
 Another visitor(CreateSymbolTableVisitor) creates this symbol table by performing another DFS of the Optimized AST.
-Semantic analysis of the code is also performed by this visitor.
+
+After the table creation our errorAnalysis is called which goes over the code and outputs semantic errors.
 
 As our final step, our AST is translated into LLVM IR by another visitor(AST2LLVMVisitor).
 
@@ -24,7 +25,7 @@ to see the full effects of "Constant folding" and "Constant propagation".
 
 Progress:
 ---------
-The current version of the Compiler contains all the mandatory features given in the Assignments 1 - 3.
+The current version of the Compiler contains all the mandatory features given in the Assignments 1 - 6.
 It automatically makes use of "Constant folding" and "Constant propagation".
 
 Additionally, it contains these optional features:
@@ -60,5 +61,5 @@ The tests will create for each test file and .ll file containing the potential L
 two .dot file's containing the AST's before and after optimisation.
 To run our tests, the following command can be used:
 
-<code>python test.py</code>
+<code>python video.py</code>
 

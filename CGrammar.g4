@@ -5,7 +5,7 @@ prog: instr+ EOF
 
 instr: expr
     | stdio=IO
-    | ';'
+    | ';'+
 	;
 
 unary_operator:  '+'
@@ -83,16 +83,16 @@ declaration:
     lvalue=declaration_specification
     ;
 
-expr:   assignment_expression ';'
-    | declaration ';'
+expr:   assignment_expression ';'+
+    | declaration ';'+
     | conditional_statement
     | loops
     | scope
-    | printf ';'
+    | printf ';'+
     | comment
     | jumps
     | function
-    | scanf ';'
+    | scanf ';'+
 	;
 
 expr_loop:

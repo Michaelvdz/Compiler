@@ -848,7 +848,6 @@ class AST2LLVMVisitor(Visitor):
         lefttype = ""
         righttype = ""
         if not isinstance(currentNode.children[0], Constant):
-            var0 = self.currentTable.lookup(currentNode.children[0].value)
             lefttype = left[1]
             leftvalue = left[0]
         else:
@@ -1246,6 +1245,18 @@ class AST2LLVMVisitor(Visitor):
                             self.llvm += "store i32 %" + str(self.instr - 1) + ", i32* " + str(
                                 int(value[0])-1) + ", align 4\n"
                             return ("%"+str(int(value[0])), str(var.type), "reg", str(child.value))
+                    else:
+                        #print("DEEES DAN?")
+                        match node[1]:
+                            case "int":
+                                self.llvm += "%" + str(self.instr) + " = sub nsw i32 0 , %" + str(self.instr-1) + "\n"
+                                self.instr += 1
+                                #print("RETURN")
+                                return ("%"+str(self.instr-1) , str(node[1]), "reg", str(child.value))
+                            case "float":
+                                self.llvm += "%" + str(self.instr) + " = fneg float %" + str(self.instr-1) + "\n"
+                                self.instr += 1
+                                return ("%"+str(self.instr-1) , str(node[1]), "reg", str(child.value))
 
             case "!":
                 for child in currentNode.children:
@@ -1255,7 +1266,7 @@ class AST2LLVMVisitor(Visitor):
                             case "int":
                                 self.llvm += "%" + str(self.instr) + " = load i32, i32* " + str(var.register) + ", align 4\n"
                                 self.instr += 1
-                                self.llvm += "%" + str(self.instr) + " = sub nsw i32 0 , %" + str(self.instr-1) + "\n"
+                                self.llvm += "%" + str(self.instr) + " = sub nsw i32 1 , %" + str(self.instr-1) + "\n"
                                 self.instr += 1
                                 return ("%"+str(self.instr-1) , str(var.type), "reg", str(child.value))
                             case "float":
@@ -1682,7 +1693,7 @@ class AST2LLVMVisitor(Visitor):
                         value = struct.unpack("f", packed)[0]
                         self.llvm += "store float " + str(value) + ", float* %" + str(self.instr - 1) + ", align 4\n"
                     elif ltype == "char[]":
-                        print("Zitten we ier?")
+                        #print("Zitten we ier?")
                         llvmtype = ltype.replace("char", "i8")
                         llvmtype = llvmtype.replace("[]", "")
                         value = value[0].replace("'","")

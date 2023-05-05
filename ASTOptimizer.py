@@ -14,12 +14,14 @@ class ASTOptimizer(Visitor):
     vars = dict()
     propagation = True
     returnType = ""
+    lvalue = False
 
     def __init__(self, tree):
         #self.ast = graphviz.Digraph('AST', filename='ast.gv')
-        print("---------------------Optimizing Tree--------------------")
+        #print("---------------------Optimizing Tree--------------------")
         self.tree = tree
         self.lineNr = 0
+        self.vars = dict()
 
     def VisitASTNode(self, currentNode, constantProp=True):
         #print("Node")
@@ -101,6 +103,8 @@ class ASTOptimizer(Visitor):
 
             case "*":
                 if isinstance(children[0], Constant) and isinstance(children[1], Constant):
+                    #print(children[0].type)
+                    #print(children[1].type)
                     if (children[0].type == "int" or children[0].type == "float") and (
                             children[1].type == "int" or children[1].type == "float"):
                         #print("GRAAKTEM IER?")
@@ -117,6 +121,8 @@ class ASTOptimizer(Visitor):
                         currentNode.children = 0
                         currentNode.value = value
                         newnode = Constant(str(value))
+                        #print("We fold")
+                        #print(value)
                         if (children[0].type == "float") or (children[1].type == "float"):
                             newnode.type = "float"
                         else:
@@ -545,6 +551,10 @@ class ASTOptimizer(Visitor):
                     currentNode.children = 0
                     currentNode.value = value
                     node = Constant(str(value))
+                    if isinstance(value, int):
+                        node.type = "int"
+                    else:
+                        node.type = "float"
                     return node
                 else:
                     #print("Tis -, als genne constante is, gwn node terugegeven")
@@ -557,6 +567,10 @@ class ASTOptimizer(Visitor):
                         currentNode.children = 0
                         currentNode.value = value
                         node = Constant(str(value))
+                        if isinstance(value, int):
+                            node.type = "int"
+                        else:
+                            node.type = "float"
                         return node
                     else:
                         currentNode.children = 0
@@ -591,6 +605,10 @@ class ASTOptimizer(Visitor):
                     currentNode.children = 0
                     currentNode.value = value
                     node = Constant(str(value))
+                    if isinstance(value, int):
+                        node.type = "int"
+                    else:
+                        node.type = "float"
                     return node
                 else:
                     #print("Tis +, gewoon kund teruggeven")
@@ -775,6 +793,15 @@ class ASTOptimizer(Visitor):
             for child in currentNode.children:
                 if isinstance(child, Array):
                     currentNode.size = str(child.size.value)
+        if currentNode.value in self.vars:
+            #print(self.lvalue)
+            if not self.lvalue:
+                #print("Ja")
+                return self.vars.get(currentNode.value)
+            else:
+                '''
+                #print("Nee")
+                '''
         return currentNode
 
     def VisitJump(self, currentNode):
@@ -875,7 +902,10 @@ class ASTOptimizer(Visitor):
         newNode = copy.copy(currentNode)
         newNode.children = []
         #print(currentNode.lvalue)
+        self.lvalue = True
         newNode.lvalue = currentNode.lvalue.accept(self)
+        self.lvalue = False
+        #print(newNode.lvalue)
         if isinstance(newNode.lvalue, Array):
             '''
             print("ARAAAAAAAAAAAAAAAAAAAAAAAAY")
@@ -886,21 +916,16 @@ class ASTOptimizer(Visitor):
         newNode.adopt(newNode.lvalue)
         newNode.adopt(newNode.rvalue)
 
+        if isinstance(newNode.lvalue, Declaration):
+            if newNode.lvalue.attr == "const":
+                #print("Ja?????")
+                if isinstance(newNode.rvalue, Constant):
+                    #print("Adding to the dict")
+                    const = Constant(newNode.rvalue)
+                    self.vars[newNode.lvalue.var] = const.value
+        #print(self.vars)
         #print("Wa is dees na?")
         #newNode.rvalue.print()
-        if not newNode.rvalue.children:
-            #print('No kids')
-            #print(newNode.lvalue)
-            if isinstance(newNode.lvalue, Declaration):
-                #print("Invoegen?")
-                self.vars[newNode.lvalue.var] = newNode.rvalue.value
-                for key, value in self.vars.items():
-                    x = "test"
-                    #print(key + ': ' + value)
-            elif isinstance(newNode.lvalue, Variable):
-                #print("We are assigning a new value")
-                if self.vars.get(newNode.lvalue.value):
-                    self.vars.pop(newNode.lvalue.value)
 
 
         return newNode
@@ -920,10 +945,10 @@ class ASTOptimizer(Visitor):
     def VisitPrintf(self, currentNode):
         #print("DOETEM DEES FEITELIJK?????")
         #print("PrintF")
+        #print(self.vars)
         newNode = PrintF(currentNode.value)
         newNode.children = []
         newNode.args = []
-        self.propagation = False
         node = None
         format = currentNode.format
         newNode.format = format
@@ -934,7 +959,6 @@ class ASTOptimizer(Visitor):
             #print(node)
             newNode.children.append(node)
             newNode.args.append(node)
-        self.propagation = True
         #node = currentNode.args.accept(self)
         #newNode.args.append(node)
         #print(newNode.format)

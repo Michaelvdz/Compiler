@@ -16,7 +16,7 @@ class CreateSymbolTableVisitor(Visitor):
         self.lineNr = 0
         self.positionNr = 0
         self.scopeNr = 0
-        print("----------------Creating Symbol Table----------------")
+        #print("----------------Creating Symbol Table----------------")
         globaltable = SymbolTable()
         globaltable.children = []
         globaltable.name = "Global"
@@ -51,7 +51,7 @@ class CreateSymbolTableVisitor(Visitor):
         #print("Scope")
         # Creating Symbol Table for condition
         newtable = SymbolTable()
-        newtable.name = currentNode.value
+        newtable.name = currentNode.value+" if-scope"
         # Get current ST als parent table
         parenttable = self.table.peek()
         newtable.parent = parenttable
@@ -65,7 +65,7 @@ class CreateSymbolTableVisitor(Visitor):
         if currentNode.elsebody:
             # Creating Symbol Table for condition
             newtable = SymbolTable()
-            newtable.name = currentNode.value
+            newtable.name = currentNode.value+" else-scope"
             # Get current ST als parent table
             parenttable = self.table.peek()
             newtable.parent = parenttable
@@ -181,7 +181,7 @@ class CreateSymbolTableVisitor(Visitor):
                 else:
                     parms.append(node.type)
 
-            print(parms)
+            #print(parms)
 
 
             if currentNode.body:
@@ -198,11 +198,11 @@ class CreateSymbolTableVisitor(Visitor):
         else:
             params = []
             for param in currentNode.params:
-                print(param.type)
+                #print(param.type)
                 params.append(param.type)
             symbol = self.table.peek().lookupUnallocated(currentNode.value)
-            print("Symbol exists?")
-            print(symbol)
+            #print("Symbol exists?")
+            #print(symbol)
             if not symbol:
                 table = self.table.peek().insertFunction(currentNode.totalParams, currentNode.value, "", currentNode.returnType.value, "func")
                 table.params = params

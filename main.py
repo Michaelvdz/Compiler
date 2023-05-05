@@ -20,6 +20,7 @@ from SemanticAnalysis import *
 def main(argv):
 
     filename = argv[1]
+    orginal = argv[1]
     filename = os.path.splitext(filename)[0]
     if "/" in filename:
         split = filename.split("/")
@@ -41,12 +42,12 @@ def main(argv):
     tree = parser.prog()
     if parser.getNumberOfSyntaxErrors() == 0:
 
-        print("Creating AST")
+        #print("Creating AST")
         asttree = ASTTree()
         visitor = CSTVisitor(asttree)
         visitor.visit(tree)
 
-        print("Printing tree before optimization")
+        #print("Printing tree before optimization")
         astVisitor = ASTVisitor(filename+"_beforeOptimization",outputmap)
         asttree.root.accept(astVisitor)
         #print("ending")
@@ -60,7 +61,7 @@ def main(argv):
         #optimizedTree = asttree
 
 
-        print("Creating STS")
+        #print("Creating STS")
         #print("SymbolTable Part")
         STStack = SymbolTables()
         STCreator = CreateSymbolTableVisitor(STStack)
@@ -75,31 +76,34 @@ def main(argv):
 
         ErrorAnalyser = errorAnalyser(STStack.tables[0])
         optimizedTree.root.accept(ErrorAnalyser)
+        if ErrorAnalyser.errors == 0:
+            print("-------------- Generated Symbol tables -----------------")
+            STStack.tables[0].print()
+            print("--------------------------------------------------------")
 
-        print("-------------------------------")
-        print(STStack.tables[0].name)
-        print(len(STStack.tables[0].children))
-        STStack.tables[0].print()
-        print("-------------------------------")
-
-        #print("Printing tree")
-        astVisitor = ASTVisitor(filename, outputmap)
-        optimizedTree.root.accept(astVisitor)
-        #print("ending")
-        astVisitor.ast.view()
+            #print("Printing tree")
+            astVisitor = ASTVisitor(filename, outputmap)
+            optimizedTree.root.accept(astVisitor)
+            #print("ending")
+            astVisitor.ast.view()
 
 
-        print("------- Creating LLVM IR -------")
-        ST = copy.copy(STStack.tables[0])
-        llvm = ""
-        LLVMCreator = AST2LLVMVisitor(llvm, STStack.tables[0])
-        optimizedTree.root.accept(LLVMCreator)
-        #print(LLVMCreator.llvm)
-        if outputmap != "":
-            outputmap += "/"
-        llvm = open(outputmap + filename+".ll", "w")
-        llvm.write(LLVMCreator.llvm)
-        llvm.close()
+            #print("------- Creating LLVM IR -------")
+            ST = copy.copy(STStack.tables[0])
+            llvm = ""
+            LLVMCreator = AST2LLVMVisitor(llvm, STStack.tables[0])
+            optimizedTree.root.accept(LLVMCreator)
+            #print(LLVMCreator.llvm)
+            if outputmap != "":
+                outputmap += "/"
+            llvm = open(outputmap + filename+".ll", "w")
+            llvm.write(LLVMCreator.llvm)
+            llvm.close()
+            print(
+                "\n" + Fore.GREEN + "Compiler succeeded compiling " + filename + " with " + Fore.MAGENTA + str(ErrorAnalyser.warnings) + " warning(s)" + Fore.RESET + "\n")
+        else:
+            print(
+                "\n" + Fore.RED + "Compiler failed compiling " + filename + " with " + str(ErrorAnalyser.errors) + " error(s)" + Fore.RESET + "\n")
 
     else:
         print("Compiler interrupted after finding syntax errors")

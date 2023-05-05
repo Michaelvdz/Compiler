@@ -12,6 +12,12 @@ class Node:
     def __str__(self):
         return f'{self.type} and attr: {self.attr} and register: {self.register}'
 
+    def print(self, tab, key):
+        print(tab + "* " + key + " (Variable) with type: " + self.type)
+        if self.attr:
+            print(tab + "   " + self.attr)
+
+
 class Function(Node):
     def __init__(self, totalParams, constant, type, value, attr="", node="", params=[]):
         self.constant = constant
@@ -25,7 +31,16 @@ class Function(Node):
         self.defined = False
 
     def __str__(self):
-        return f'{self.type} and attr: {self.attr} and register: {self.register} and params:'
+        return f'function with returntype {self.type} and attr: {self.attr} and register: {self.register} and params:'
+
+    def print(self, tab, key):
+        print(tab + "* " + key + " (Function) with (return)type: " + self.type)
+        if self.params:
+            print(tab+"   "+"with parameters:")
+            for param in self.params:
+                print(tab+"   "+param)
+        else:
+            print(tab+"   "+"with no parameters")
 
 
 class Array(Node):
@@ -42,7 +57,7 @@ class Array(Node):
         self.defined = False
 
     def __str__(self):
-        return f'{self.type} and attr: {self.attr} and register: {self.register} and size {self.size}'
+        return f'= {self.type} and attr: {self.attr} and register: {self.register} and size {self.size}'
 
 
 
@@ -103,22 +118,31 @@ class SymbolTable:
         string.append("#Children: " + str(len(self.children)))
         return "".join(string)
 
-    def print(self):
-        print("Table with name: " + self.name + "\n")
-        '''
-        for key, value in self.vars.items():
-            #print(str(key) + ": " + str(value.type) + "attr: " + str(value.attr) + "register: " + str(value.register) +  "\n")
-            print("Children")
-        '''
+    def print(self, depth=0):
+        tab = ""
+        i = 0
+        while i != depth:
+            tab += "\t"
+            i += 1
+        tab2 = ""
+        i = 0
+        while i != depth+1:
+            tab2 += "\t"
+            i += 1
 
-        print("Printring vars:")
+        print(tab+"Table with name: " + self.name)
+        print(tab2+"Containing symbols:")
         for key, value in self.vars.items():
-            print(str(key) + ": " + str(value))
+            #print(tab2 + str(key) + ": " + str(value))
+            value.print(tab2, key)
 
-        print("With children: ")
+        print(tab2+"With childtabels: ")
+        newdepth = depth + 1
         for child in self.children:
-            child.print()
-        print("End of table: " + self.name)
+            child.print(newdepth)
+        if not self.children:
+            print(tab2+"None")
+        print(tab+"End of table: " + self.name)
 
     def insert(self, name, constant, type, attribute=""):
         self.vars[name] = Node(constant, type, "", attribute)
