@@ -66,8 +66,8 @@ def main(argv):
         STCreator = CreateSymbolTableVisitor(STStack)
         optimizedTree.root.accept(STCreator)
         
-        SACreator = SemanticAnalysisVisitor()
-        optimizedTree.root.accept(SACreator)
+        #SACreator = SemanticAnalysisVisitor()
+        #optimizedTree.root.accept(SACreator)
         
         #print("\n\nThe generated symbol table:")
         #print(table)
