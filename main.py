@@ -14,8 +14,8 @@ from CreateSymbolTableVisitor import CreateSymbolTableVisitor
 from errorAnalysis import errorAnalyser
 from ASTOptimizer import ASTOptimizer
 from SymbolTable import *
-from AST2LLVMVisitor import *
-from SemanticAnalysis import *
+from AST2MIPSVisitor import *
+from errorAnalysis import *
 
 def main(argv):
 
@@ -51,7 +51,7 @@ def main(argv):
         astVisitor = ASTVisitor(filename+"_beforeOptimization",outputmap)
         asttree.root.accept(astVisitor)
         #print("ending")
-        astVisitor.ast.view()
+        astVisitor.ast.render()
 
         #Optimize tree
         optimizedTree = ASTTree()
@@ -76,7 +76,7 @@ def main(argv):
 
         ErrorAnalyser = errorAnalyser(STStack.tables[0])
         optimizedTree.root.accept(ErrorAnalyser)
-        if ErrorAnalyser.errors == 0:
+        if ErrorAnalyser.errors == 0 or 1:
             print("-------------- Generated Symbol tables -----------------")
             STStack.tables[0].print()
             print("--------------------------------------------------------")
@@ -85,13 +85,13 @@ def main(argv):
             astVisitor = ASTVisitor(filename, outputmap)
             optimizedTree.root.accept(astVisitor)
             #print("ending")
-            astVisitor.ast.view()
+            astVisitor.ast.render()
 
 
             #print("------- Creating LLVM IR -------")
             ST = copy.copy(STStack.tables[0])
             llvm = ""
-            LLVMCreator = AST2LLVMVisitor(llvm, STStack.tables[0])
+            LLVMCreator = AST2MIPSVisitor(llvm, STStack.tables[0])
             optimizedTree.root.accept(LLVMCreator)
             #print(LLVMCreator.llvm)
             if outputmap != "":

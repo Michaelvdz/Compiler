@@ -252,3 +252,14 @@ class SymbolTable:
         else:
             return True
 
+    def getNumberOfVariables(self):
+        size = 0
+        size += len(self.vars.items())
+        if self.children:
+            for child in self.children:
+                size += child.getNumberOfVariables()
+            return size
+        else:
+            return size
+
+
