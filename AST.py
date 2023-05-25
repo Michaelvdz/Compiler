@@ -471,6 +471,30 @@ class String(ASTNode):
     def accept(self, visitor: Visitor):
         return visitor.VisitString(self)
 
+class PointerDeref(ASTNode):
+
+    name = ""
+    children = []
+    variable = ASTNode
+
+    rvalue = False
+
+    def __init__(self, value):
+        #print("___init-Variable__")
+        self.children = []
+        self.name = "PointerDeref"
+        self.value = value
+        #print("___Node-Created-With-Name:" + self.name + "___")
+
+    def adopt(self, node):
+        self.children.append(node)
+
+    def print(self):
+        print("Variable: " + str(self.value))
+
+    def accept(self, visitor: Visitor):
+        return visitor.VisitPointerDeref(self)
+
 class Variable(ASTNode):
 
     name = ""

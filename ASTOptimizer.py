@@ -15,6 +15,7 @@ class ASTOptimizer(Visitor):
     propagation = True
     returnType = ""
     lvalue = False
+    deref = False
 
     def __init__(self, tree):
         #self.ast = graphviz.Digraph('AST', filename='ast.gv')
@@ -688,12 +689,20 @@ class ASTOptimizer(Visitor):
 
     def VisitPointer(self, currentNode):
         #print("Pointer")
-        newNode = copy.copy(currentNode)
-        newNode.children = []
-        for child in currentNode.children:
-            node = child.accept(self)
-            newNode.children.append(node)
-        return newNode
+        if self.deref:
+            print("Deref")
+            newNode = UnaryOperation("*")
+            for child in currentNode.children:
+                node = child.accept(self)
+                newNode.children.append(node)
+            return newNode
+        else:
+            newNode = copy.copy(currentNode)
+            newNode.children = []
+            for child in currentNode.children:
+                node = child.accept(self)
+                newNode.children.append(node)
+            return newNode
 
     def VisitArrayVariable(self, currentNode):
         #print("Pointer")
@@ -903,7 +912,10 @@ class ASTOptimizer(Visitor):
         newNode.children = []
         #print(currentNode.lvalue)
         self.lvalue = True
+        if not isinstance(currentNode.lvalue, Declaration):
+            self.deref = True
         newNode.lvalue = currentNode.lvalue.accept(self)
+        self.deref = False
         self.lvalue = False
         #print(newNode.lvalue)
         if isinstance(newNode.lvalue, Array):
@@ -929,6 +941,17 @@ class ASTOptimizer(Visitor):
 
 
         return newNode
+
+    def VisitPointerDeref(self, currentNode):
+        last = self.getLastStar(currentNode.children[0])
+        last.adopt(currentNode.variable)
+        return currentNode.children[0]
+
+    def getLastStar(self, star):
+        if star.children:
+            return self.getLastStar(star.children[0])
+        else:
+            return star
 
     def VisitMLComment(self, currentNode):
         #print("MLComment")

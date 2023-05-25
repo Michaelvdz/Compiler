@@ -6,9 +6,12 @@ from AST import *
 
 class CSTVisitor(CGrammarVisitor):
 
+    deref = False
+
     def __init__(self, tree):
         self.tree = tree
         self.stack = []
+        self.deref = False
         #print("Visiting the program")
 
     def visitProg(self, ctx):
@@ -180,6 +183,14 @@ class CSTVisitor(CGrammarVisitor):
     # Visit a parse tree produced by CGrammarParser#reserved_word.
     def visitPointer(self, ctx:CGrammarParser.PointerContext):
         #print("Pointer")
+        if self.deref:
+            op = UnaryOperation("*")
+            if ctx.ptr:
+                ptr = self.visit(ctx.ptr)
+                op.adopt(ptr)
+                return op
+            else:
+                return op
         pointer = Pointer("*")
         if ctx.ptr:
             ptr = self.visit(ctx.ptr)
@@ -220,9 +231,16 @@ class CSTVisitor(CGrammarVisitor):
         else:
             # We are just in var assignment/definition
             if ctx.ptr:
-                op = UnaryOperation(self.visit(ctx.ptr).value)
+                self.deref = True
+                node = self.visit(ctx.ptr)
+                self.deref = False
+                op = PointerDeref("PtrDereference")
+                op.adopt(node)
+                #op = UnaryOperation(node.value)
+                #op.children = node.children
                 var = Variable(ctx.var.text)
-                op.adopt(var)
+                #op.adopt(var)
+                op.variable = var
                 return op
             elif ctx.arr:
                 #print("Creating array")
