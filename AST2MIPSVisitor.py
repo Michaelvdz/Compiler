@@ -455,8 +455,7 @@ class AST2MIPSVisitor(Visitor):
 
         # Visit condition to get code
         reg = cond.accept(self)
-
-        #print(reg)
+        print(reg)
         '''
         if reg[1] == "float":
             self.llvm += "%" + str(self.instr) + " = fcmp une float " + reg[0] + ", 0.0\n"
@@ -469,12 +468,13 @@ class AST2MIPSVisitor(Visitor):
         '''
 
         # Assign a label to the if body
-        iflabel = self.instr
-        self.instr += 1
+        #iflabel = self.instr
+        #self.instr += 1
 
         # If else body then add the label to the break instruction
         self.llvm += "addiu $at, $zero, 1\n"
         self.llvm += "beq $at, " + str(reg[0]) + ", IF" + str(id(context)) + "\n"
+
         if elsebody:
             #self.llvm += "br i1 " + str(reg[0]) + ", label %" + str(iflabel) + ", label %" + "ELSE" + str(id(currentNode)) + "\n"
             self.llvm += "j ELSE" + str(id(context)) + "\n"
@@ -1112,7 +1112,7 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "li $at, " + str(rightvalue) + "\n"
                         reg = self.FCStack.getFreeFTempReg()
                         self.llvm += "mtc1 $at, $f" + str(reg) + "\n"
-                        self.llvm += "c.eq.s " + str(storereg) + ", " + str(leftvalue) + ", $f" + str(reg) + "\n"
+                        self.llvm += "c.eq.s " + str(leftvalue) + ", $f" + str(reg) + "\n"
                     elif isinstance(currentNode.children[0], Constant):
                         packed = struct.pack("f", leftvalue)
                         unpacked = struct.unpack("<I", packed)[0]
@@ -1120,16 +1120,17 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "li $at, " + str(leftvalue) + "\n"
                         reg = self.FCStack.getFreeFTempReg()
                         self.llvm += "mtc1 $at, $f" + str(reg) + "\n"
-                        self.llvm += "c.eq.s " + str(storereg) + ", $f" + str(reg) + ", " + str(
+                        self.llvm += "c.eq.s $f" + str(reg) + ", " + str(
                             rightvalue) + "\n"
                     else:
-                        self.llvm += "c.eq.s " + str(storereg) + ", " + str(leftvalue) + ", " + str(rightvalue) + "\n"
+                        self.llvm += "c.eq.s " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                         self.FCStack.removeTempReg(str(rightvalue))
-                    #self.llvm += "%" + str(self.instr) + " = fcmp oeq float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
-                #self.instr += 1
-                #self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
-                #self.instr += 1
-                BinType = "bool"
+                    reg = self.FCStack.getFreeTempReg()
+                    self.llvm += "li $at, 0 \n"
+                    self.llvm += "li $at, 1\n"
+                    self.llvm += "movt $t" + str(reg) + ", $at\n"
+                    self.FCStack.addTempReg("$t" + str(reg))
+                return ("$t"+str(reg), BinType, "bool", "", "value")
             case "<":
                 if BinType == "int":
                     if isinstance(currentNode.children[0], Constant):
@@ -1158,7 +1159,7 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "li $at, " + str(rightvalue) + "\n"
                         reg = self.FCStack.getFreeFTempReg()
                         self.llvm += "mtc1 $at, $f" + str(reg) + "\n"
-                        self.llvm += "c.lt.s " + str(storereg) + ", " + str(leftvalue) + ", $f" + str(reg) + "\n"
+                        self.llvm += "c.lt.s " + str(leftvalue) + ", $f" + str(reg) + "\n"
                     elif isinstance(currentNode.children[0], Constant):
                         packed = struct.pack("f", leftvalue)
                         unpacked = struct.unpack("<I", packed)[0]
@@ -1166,13 +1167,17 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "li $at, " + str(leftvalue) + "\n"
                         reg = self.FCStack.getFreeFTempReg()
                         self.llvm += "mtc1 $at, $f" + str(reg) + "\n"
-                        self.llvm += "c.lt.s " + str(storereg) + ", $f" + str(reg) + ", " + str(
+                        self.llvm += "c.lt.s $f" + str(reg) + ", " + str(
                             rightvalue) + "\n"
                     else:
-                        self.llvm += "c.lt.s " + str(storereg) + ", " + str(leftvalue) + ", " + str(rightvalue) + "\n"
+                        self.llvm += "c.lt.s " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                         self.FCStack.removeTempReg(str(rightvalue))
-                    #self.llvm += "%" + str(self.instr) + " = fcmp oeq float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
-                BinType = "bool"
+                    reg = self.FCStack.getFreeTempReg()
+                    self.llvm += "li $at, 0 \n"
+                    self.llvm += "li $at, 1\n"
+                    self.llvm += "movt $t" + str(reg) + ", $at\n"
+                    self.FCStack.addTempReg("$t" + str(reg))
+                return ("$t" + str(reg), BinType, "bool", "", "value")
             case "<=":
                 if BinType == "int":
                     if isinstance(currentNode.children[0], Constant):
@@ -1201,7 +1206,7 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "li $at, " + str(rightvalue) + "\n"
                         reg = self.FCStack.getFreeFTempReg()
                         self.llvm += "mtc1 $at, $f" + str(reg) + "\n"
-                        self.llvm += "c.le.s " + str(storereg) + ", " + str(leftvalue) + ", $f" + str(reg) + "\n"
+                        self.llvm += "c.le.s " + str(leftvalue) + ", $f" + str(reg) + "\n"
                     elif isinstance(currentNode.children[0], Constant):
                         packed = struct.pack("f", leftvalue)
                         unpacked = struct.unpack("<I", packed)[0]
@@ -1209,13 +1214,17 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "li $at, " + str(leftvalue) + "\n"
                         reg = self.FCStack.getFreeFTempReg()
                         self.llvm += "mtc1 $at, $f" + str(reg) + "\n"
-                        self.llvm += "c.le.s " + str(storereg) + ", $f" + str(reg) + ", " + str(
+                        self.llvm += "c.le.s $f" + str(reg) + ", " + str(
                             rightvalue) + "\n"
                     else:
-                        self.llvm += "c.le.s " + str(storereg) + ", " + str(leftvalue) + ", " + str(rightvalue) + "\n"
+                        self.llvm += "c.le.s " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                         self.FCStack.removeTempReg(str(rightvalue))
-                    #self.llvm += "%" + str(self.instr) + " = fcmp oeq float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
-                BinType = "bool"
+                    reg = self.FCStack.getFreeTempReg()
+                    self.llvm += "li $at, 0 \n"
+                    self.llvm += "li $at, 1\n"
+                    self.llvm += "movt $t" + str(reg) + ", $at\n"
+                    self.FCStack.addTempReg("$t" + str(reg))
+                return ("$t" + str(reg), BinType, "bool", "", "value")
             case ">":
                 if BinType == "int":
                     if isinstance(currentNode.children[0], Constant):
@@ -1244,7 +1253,7 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "li $at, " + str(rightvalue) + "\n"
                         reg = self.FCStack.getFreeFTempReg()
                         self.llvm += "mtc1 $at, $f" + str(reg) + "\n"
-                        self.llvm += "c.lt.s " + str(storereg) + ", " + str(reg) + ", $f" + str(leftvalue) + "\n"
+                        self.llvm += "c.lt.s $f" + str(reg) + ", " + str(leftvalue) + "\n"
                     elif isinstance(currentNode.children[0], Constant):
                         packed = struct.pack("f", leftvalue)
                         unpacked = struct.unpack("<I", packed)[0]
@@ -1252,13 +1261,17 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "li $at, " + str(leftvalue) + "\n"
                         reg = self.FCStack.getFreeFTempReg()
                         self.llvm += "mtc1 $at, $f" + str(reg) + "\n"
-                        self.llvm += "c.lt.s " + str(storereg) + ", $f" + str(rightvalue) + ", " + str(
-                            leftvalue) + "\n"
+                        self.llvm += "c.lt.s " + str(rightvalue) + ", $f" + str(
+                            reg) + "\n"
                     else:
-                        self.llvm += "c.lt.s " + str(storereg) + ", " + str(rightvalue) + ", " + str(leftvalue) + "\n"
+                        self.llvm += "c.lt.s " + str(rightvalue) + ", " + str(leftvalue) + "\n"
                         self.FCStack.removeTempReg(str(leftvalue))
-                    #self.llvm += "%" + str(self.instr) + " = fcmp oeq float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
-                BinType = "bool"
+                    reg = self.FCStack.getFreeTempReg()
+                    self.llvm += "li $at, 0 \n"
+                    self.llvm += "li $at, 1\n"
+                    self.llvm += "movt $t" + str(reg) + ", $at\n"
+                    self.FCStack.addTempReg("$t" + str(reg))
+                return ("$t" + str(reg), BinType, "bool", "", "value")
             case ">=":
                 if BinType == "int":
                     if isinstance(currentNode.children[0], Constant):
@@ -1287,7 +1300,7 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "li $at, " + str(rightvalue) + "\n"
                         reg = self.FCStack.getFreeFTempReg()
                         self.llvm += "mtc1 $at, $f" + str(reg) + "\n"
-                        self.llvm += "c.le.s " + str(storereg) + ", " + str(reg) + ", $f" + str(leftvalue) + "\n"
+                        self.llvm += "c.le.s $f" + str(reg) + ", " + str(leftvalue) + "\n"
                     elif isinstance(currentNode.children[0], Constant):
                         packed = struct.pack("f", leftvalue)
                         unpacked = struct.unpack("<I", packed)[0]
@@ -1295,13 +1308,17 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "li $at, " + str(leftvalue) + "\n"
                         reg = self.FCStack.getFreeFTempReg()
                         self.llvm += "mtc1 $at, $f" + str(reg) + "\n"
-                        self.llvm += "c.le.s " + str(storereg) + ", $f" + str(rightvalue) + ", " + str(
-                            leftvalue) + "\n"
+                        self.llvm += "c.le.s " + str(rightvalue) + ", $f" + str(
+                            reg) + "\n"
                     else:
-                        self.llvm += "c.le.s " + str(storereg) + ", " + str(rightvalue) + ", " + str(leftvalue) + "\n"
+                        self.llvm += "c.le.s " + str(rightvalue) + ", " + str(leftvalue) + "\n"
                         self.FCStack.removeTempReg(str(rightvalue))
-                    #self.llvm += "%" + str(self.instr) + " = fcmp oeq float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
-                BinType = "bool"
+                    reg = self.FCStack.getFreeTempReg()
+                    self.llvm += "li $at, 0 \n"
+                    self.llvm += "li $at, 1\n"
+                    self.llvm += "movt $t" + str(reg) + ", $at\n"
+                    self.FCStack.addTempReg("$t" + str(reg))
+                return ("$t" + str(reg), BinType, "bool", "", "value")
             case "!=":
                 if BinType == "int":
                     if isinstance(currentNode.children[0], Constant):
@@ -1328,7 +1345,7 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "li $at, " + str(rightvalue) + "\n"
                         reg = self.FCStack.getFreeFTempReg()
                         self.llvm += "mtc1 $at, $f" + str(reg) + "\n"
-                        self.llvm += "c.eq.s " + str(storereg) + ", " + str(leftvalue) + ", $f" + str(reg) + "\n"
+                        self.llvm += "c.eq.s " + str(leftvalue) + ", $f" + str(reg) + "\n"
                     elif isinstance(currentNode.children[0], Constant):
                         packed = struct.pack("f", leftvalue)
                         unpacked = struct.unpack("<I", packed)[0]
@@ -1336,16 +1353,18 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "li $at, " + str(leftvalue) + "\n"
                         reg = self.FCStack.getFreeFTempReg()
                         self.llvm += "mtc1 $at, $f" + str(reg) + "\n"
-                        self.llvm += "c.eq.s " + str(storereg) + ", $f" + str(reg) + ", " + str(
+                        self.llvm += "c.eq.s $f" + str(reg) + ", " + str(
                             rightvalue) + "\n"
                     else:
-                        self.llvm += "c.eq.s " + str(storereg) + ", " + str(leftvalue) + ", " + str(rightvalue) + "\n"
+                        self.llvm += "c.eq.s " + str(leftvalue) + ", " + str(rightvalue) + "\n"
                         self.FCStack.removeTempReg(str(rightvalue))
-                    #self.llvm += "%" + str(self.instr) + " = fcmp oeq float " + str(leftvalue) + ", " + str(rightvalue) + "\n"
-                #self.instr += 1
-                #self.llvm += "%" + str(self.instr) + " = zext i1 %" + str(self.instr-1) + " to i32 \n"
-                #self.instr += 1
-                BinType = "bool"
+                    reg = self.FCStack.getFreeTempReg()
+                    self.llvm += "li $at, 0 \n"
+                    self.llvm += "li $at, 1\n"
+                    self.llvm += "movf $t" + str(reg) + ", $at\n"
+                    self.FCStack.addTempReg("$t" + str(reg))
+                return ("$t" + str(reg), BinType, "bool", "", "value")
+
 
         return (storereg, BinType, "reg", "", "value")
 
@@ -1496,23 +1515,40 @@ class AST2MIPSVisitor(Visitor):
                                 self.llvm += "store i32 %" + str(self.instr-1) + ", i32* " + str(var.register) + ", align 4\n"
                                 return ("%"+str(self.instr-2) , str(var.type), "reg", str(child.value))
             case "-":
+                print("Unary -")
                 for child in currentNode.children:
                     node = child.accept(self)
+                    print("node")
+                    print(node)
                     if isinstance(node, Variable) or isinstance(node, ArrayVariable):
                         var = self.currentTable.lookup(child.value)
+                        print(var)
                         match var.type:
                             case "int":
+                                '''
                                 self.llvm += "%" + str(self.instr) + " = load i32, i32* " + str(var.register) + ", align 4\n"
                                 self.instr += 1
                                 self.llvm += "%" + str(self.instr) + " = sub nsw i32 0 , %" + str(self.instr-1) + "\n"
                                 self.instr += 1
-                                return ("%"+str(self.instr-1) , str(var.type), "reg", str(child.value))
+                                '''
+                                reg = self.FCStack.getFreeFTempReg()
+                                print(reg)
+                                self.llvm += "lw $" + str(reg) + ", " + str(var.register) + "($fp) \n"
+                                self.llvm += "negu $" + str(reg) + ", $" + str(reg) + "\n"
+                                return ("$" + str(reg) , str(var.type), "reg", str(child.value))
                             case "float":
+                                '''
                                 self.llvm += "%" + str(self.instr) + " = load float, float* " + str(var.register) + ", align 4\n"
                                 self.instr += 1
                                 self.llvm += "%" + str(self.instr) + " = fneg float %" + str(self.instr-1) + "\n"
                                 self.instr += 1
                                 return ("%"+str(self.instr-1) , str(var.type), "reg", str(child.value))
+                                '''
+                                reg = self.FCStack.getFreeFTempReg()
+                                print(reg)
+                                self.llvm += "lw $" + str(reg) + ", " + str(var.register) + "($fp) \n"
+                                self.llvm += "negu $" + str(reg) + ", $" + str(reg) + "\n"
+                                return ("$" + str(reg), str(var.type), "reg", str(child.value))
                         if "int[]" in var.type:
                             value = child.accept(self)
                             self.llvm += "%" + str(self.instr) + " = add nsw i32 " + str(value[0]) + ", 1\n"
@@ -1524,14 +1560,23 @@ class AST2MIPSVisitor(Visitor):
                         #print("DEEES DAN?")
                         match node[1]:
                             case "int":
-                                self.llvm += "%" + str(self.instr) + " = sub nsw i32 0 , %" + str(self.instr-1) + "\n"
-                                self.instr += 1
+                                #self.llvm += "%" + str(self.instr) + " = sub nsw i32 0 , %" + str(self.instr-1) + "\n"
+                                #self.instr += 1
+                                self.llvm += "negu " + str(node[0]) + ", " + str(node[0]) + "\n"
+                                return (str(node[0]) , str(node[1]), "reg", str(child.value))
                                 #print("RETURN")
-                                return ("%"+str(self.instr-1) , str(node[1]), "reg", str(child.value))
+                                #return ("%"+str(self.instr-1) , str(node[1]), "reg", str(child.value))
                             case "float":
+                                '''
                                 self.llvm += "%" + str(self.instr) + " = fneg float %" + str(self.instr-1) + "\n"
                                 self.instr += 1
                                 return ("%"+str(self.instr-1) , str(node[1]), "reg", str(child.value))
+                                '''
+                                reg = self.FCStack.getFreeFTempReg()
+                                print(reg)
+                                self.llvm += "mtc1 $zero, $f" + str(reg) + "\n"
+                                self.llvm += "sub.s " + str(node[0]) + ", $f" + str(reg) + ", " + str(node[0]) + "\n"
+                                return (str(node[0]), str(node[1]), "reg", str(child.value))
 
             case "!":
                 for child in currentNode.children:
@@ -1825,10 +1870,16 @@ class AST2MIPSVisitor(Visitor):
         else:
             # Test if the left value is a declaration
             if isinstance(currentNode.lvalue, Declaration):
+                context = self.FCStack.peek()
+                print("Before assigning context offset is:" + str(context.offset))
+                # context.offset -= 4
                 currentNode.lvalue.accept(self)
+                context = self.FCStack.peek()
+                print("First after assigning context offset is:" + str(context.offset))
                 self.lvalue = False
                 value = currentNode.rvalue.accept(self)
                 self.lvalue = True
+                print(value)
                 node = self.currentTable.lookupUnallocated(currentNode.lvalue.var)
                 #print("What is the node")
                 #print(node)
@@ -1851,11 +1902,13 @@ class AST2MIPSVisitor(Visitor):
                             value = float(value[0])
                         if isinstance(value, float) or isinstance(value, int):
                             print(value)
+                            print("here")
                             #self.llvm += "store i32 " + str(value) + ", i32* " + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 4\n"
                             self.llvm += "addiu $at, $zero, " + str(value) + " \n"
-                            #context = self.FCStack.peek()
+                            context = self.FCStack.peek()
                             self.llvm += "sw $at, " + str(symbol.register) + "($sp) \n"
                             #context.offset -= 4
+                            print("After assigning context offset is:" + str(context.offset))
                     elif ltype == "float":
                         try:
                             value = float(value[0])
@@ -1899,21 +1952,22 @@ class AST2MIPSVisitor(Visitor):
                         print(value)
                         # self.llvm += "store i32 " + str(value) + ", i32* " + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 4\n"
                         context = self.FCStack.peek()
-                        self.llvm += "sw " + value[0] + ", " + str(context.offset) + "($sp) \n"
+                        self.llvm += "sw " + value[0] + ", " + str(symbol.register) + "($sp) \n"
                         #context.offset -= 4
+                        print("After assigning context offset is:" + str(context.offset))
                         self.FCStack.removeTempReg(value[0])
                     elif ltype == "float":
                         if value[1] == "int":
                             self.llvm += "%" + str(self.instr) + " = sitofp i32 " + str(value[0]) + " to float\n"
                             self.instr += 1
                         context = self.FCStack.peek()
-                        self.llvm += "swc1 " + value[0] + ", " + str(context.offset) + "($sp) \n"
+                        self.llvm += "swc1 " + value[0] + ", " + str(symbol.register) + "($sp) \n"
                         #context.offset -= 4
                         self.FCStack.removeTempReg(value[0])
                         #self.llvm += "store float %" + str(self.instr-1) + ", float* " + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                     elif ltype == "char":
                         context = self.FCStack.peek()
-                        self.llvm += "sw " + value[0] + ", " + str(context.offset) + "($sp) \n"
+                        self.llvm += "sw " + value[0] + ", " + str(symbol.register) + "($sp) \n"
                         #context.offset -= 4
                         self.FCStack.removeTempReg(value[0])
                         #self.llvm += "store i8 " + str(value[0]) + ", i8* " + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
