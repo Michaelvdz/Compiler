@@ -14,6 +14,7 @@ class Visitor:
 class AST2MIPSVisitor(Visitor):
 
     llvm = ""
+    data = ""
     symbolTable = 0
     instr = 0
     intprinting = False
@@ -28,12 +29,19 @@ class AST2MIPSVisitor(Visitor):
     printstr = []
     globalPosition = 0
     FCStack = 0
+    dataLine = 1
 
-    def __init__(self, llvm="", symbolTable=SymbolTable()):
+
+    def __init__(self, llvm="", data="", symbolTable=SymbolTable()):
         #print("----------------Converting AST 2 LLVM IR----------------")
 
         # The generated LLVM IR code
         self.llvm = llvm
+        self.data = data
+        self.data += ".data\n"
+        self.llvm += ".text\n"
+        self.llvm += ".globl main\n"
+
 
         #self.symbolTable = symbolTable
 
@@ -153,12 +161,14 @@ class AST2MIPSVisitor(Visitor):
         #print(currentNode.children)
 
         # Prepare arguments
+        argReg = 0
         for child in currentNode.children:
             #print(child)
             self.lvalue = False
             node = child.accept(self)
             #print("Prepared:")
-            #print(node)
+            print("PARAM NODE")
+            print(node)
             # When the arg is reference and no value
             if isinstance(child, UnaryOperation):
                 node = (node[0], node[1], node[2], node[3], "ref")
@@ -172,9 +182,13 @@ class AST2MIPSVisitor(Visitor):
                         symbol = self.currentTable.lookup(node[3])
                         type = symbol.type
                         if type == "int":
+                            '''
                             self.llvm += "%" + str(self.instr) + " = load i32, i32* " + str(
                                 symbol.register) + ", align 4\n"
                             self.instr += 1
+                            '''
+                            self.llvm += "move $a" + str(argReg) + ", " + str(node[0]) + "\n"
+                            argReg += 1
                         if type == "float":
                             self.llvm += "%" + str(self.instr) + " = load float, float* " + str(
                                 symbol.register) + ", align 4\n"
@@ -189,17 +203,32 @@ class AST2MIPSVisitor(Visitor):
                     type = symbol.type
                     if "*" not in type:
                         if type == "int":
+                            '''
                             self.llvm += "%" + str(self.instr) + " = load i32, i32* " + str(
                                 symbol.register) + ", align 4\n"
                             self.instr += 1
+                            '''
+                            self.llvm += "move $a" + str(argReg) + ", " + str(node[0]) + "\n"
+                            self.FCStack.removeTempReg(node[0])
+                            argReg += 1
                         if type == "float":
+                            '''
                             self.llvm += "%" + str(self.instr) + " = load float, float* " + str(
                                 symbol.register) + ", align 4\n"
                             self.instr += 1
+                            '''
+                            self.llvm += "mfc1 $a" + str(argReg) + ", " + str(node[0]) + "\n"
+                            self.FCStack.removeTempReg(node[0])
+                            argReg += 1
                         if type == "char":
+                            '''
                             self.llvm += "%" + str(self.instr) + " = load i8, i8* " + str(
                                 symbol.register) + ", align 1\n"
                             self.instr += 1
+                            '''
+                            self.llvm += "move $a" + str(argReg) + ", " + str(node[0]) + "\n"
+                            self.FCStack.removeTempReg(node[0])
+                            argReg += 1
                         newnode = ("%"+str(self.instr - 1), node[1], node[2], node[3], "value")
                     else:
                         newnode = (node[0], node[1], node[2], node[3], "ref")
@@ -226,10 +255,12 @@ class AST2MIPSVisitor(Visitor):
         #print(len(params))
 
         # Print function call
+        name = currentNode.value.replace("()","")
         func = self.currentTable.lookup(currentNode.value.replace("()",""))
-        #print(func)
+        print(name)
         #print(func.attr)
         if func and func.attr == "func":
+            '''
             if func.type == "int":
                 self.llvm += "%" + str(self.instr) + " = call i32" + " @" + currentNode.value.replace("()","")
             elif func.type == "float":
@@ -242,6 +273,9 @@ class AST2MIPSVisitor(Visitor):
             else:
                 self.llvm += "call void" + " @" + currentNode.value.replace("()", "")
                 self.instr -= 1
+            '''
+            self.llvm += "jal " + str(name) + "\n"
+            '''
             self.llvm += "("
             #print("Parameters:")
             i = 1
@@ -276,7 +310,25 @@ class AST2MIPSVisitor(Visitor):
             self.llvm += ")"
             self.llvm += "\n"
             self.instr +=1
-        return ("%" + str(self.instr-1), func.type, "reg", str(currentNode.value), "value")
+            '''
+            if func.type == "int":
+                reg = self.FCStack.getFreeTempReg()
+                self.llvm += "move $t" + str(reg) + ", $v0\n"
+                returnReg = "$t" + str(reg)
+                self.FCStack.addTempReg(returnReg)
+            elif func.type == "float":
+                reg = self.FCStack.getFreeFTempReg()
+                self.llvm += "mtc1 $v0, $f" + str(reg) + "\n"
+                returnReg = "$f" + str(reg)
+                self.FCStack.addTempReg(returnReg)
+            elif func.type == "char":
+                reg = self.FCStack.getFreeTempReg()
+                self.llvm += "move $t" + str(reg) + ", $v0\n"
+                returnReg = "$t" + str(reg)
+                self.FCStack.addTempReg(returnReg)
+            else:
+                returnReg = ""
+        return (returnReg, func.type, "reg", str(currentNode.value), "value")
 
     def VisitFunction(self, currentNode):
         #print("Function")
@@ -320,15 +372,22 @@ class AST2MIPSVisitor(Visitor):
             self.llvm += "move $fp, $sp \n"
             roffset = fcontext.offset+4
             fcontext.roffset = roffset
-            '''
+
+            paramReg = 0;
+            print("PARAMETERS")
             if currentNode.params:
+                print("This has params")
                 params = currentNode.params
                 for param in params:
                     param2 = self.currentTable.lookupInThisTable(param.var)
+                    print(param.var)
+                    print(param2)
                     node = param.accept(self)
                     paramtype = param2.type
                     reg = self.currentTable.lookupInThisTable(node.var).register
-            '''
+                    self.llvm += "sw $a" + str(paramReg) + ", " + str(reg) + "($fp)\n"
+                    paramReg += 1
+
 
             if currentNode.body:
                 node = currentNode.body.accept(self)
@@ -337,36 +396,39 @@ class AST2MIPSVisitor(Visitor):
             #print(context.hasReturn)
 
 
-            '''
-            if not context.hasReturn and context.returnRegister == -1:
-                self.llvm += "ret void\n"
-            elif not context.hasReturn:
+
+            if not context.hasReturn:
                 if "int" in context.returnType:
+                    '''
                     ret = context.returnType.replace("int", "i32")
                     self.llvm += "ret " + ret + " " + str(context.returnRegister) + "\n"
+                    '''
+                    self.llvm += "addiu $v0, $v0, 0\n"
                 elif "float" in context.returnType:
+                    '''
                     ret = context.returnType.replace("float", "float")
                     self.llvm += "ret " + ret + " " + str(context.returnRegister) + "\n"
+                    '''
+                    self.llvm += "addiu $v0, $v0, 0\n"
                 elif "char" in context.returnType:
+                    '''
                     ret = context.returnType.replace("char", "i8")
                     self.llvm += "ret " + ret + " " + str(context.returnRegister) + "\n"
-            '''
-
-
-
+                    '''
+                    self.llvm += "addiu $v0, $v0, 0\n"
 
             # Restore register in Callee
             offset = self.FCStack.getRestoreOffset()
-            self.llvm += "move $fp, $sp \n"
+            self.llvm += "move $sp, $fp \n"
             i = 0
             '''
             for var in self.currentTable.vars:
                 self.llvm += "sw $s" + str(i) + ", " + str(offset) + "($sp)" + "\n"
                 offset += 4
             '''
-            self.llvm += "sw $fp, " + str(offset) + "($sp)" + "\n"
+            self.llvm += "lw $fp, " + str(offset) + "($sp)" + "\n"
             offset += 4
-            self.llvm += "sw $ra, " + str(offset) + "($sp)" + "\n"
+            self.llvm += "lw $ra, " + str(offset) + "($sp)" + "\n"
             offset += 4
 
             self.llvm += "addiu $sp, $sp, " + str(offset) + "\n"
@@ -374,11 +436,14 @@ class AST2MIPSVisitor(Visitor):
             if(funcname == "main"):
                 self.llvm += "li $v0, 10 \n"
                 self.llvm += "syscall \n"
+            else:
+                self.llvm += "jr $ra\n"
             self.context.pop()
             # After visiting scope, delete the symbol table
             self.currentTable.parent.children.remove(self.currentTable)
             self.currentTable = parent
             #self.llvm += "}\n"
+            self.llvm += "\n"
         return currentNode
 
     def VisitJump(self, currentNode):
@@ -386,13 +451,13 @@ class AST2MIPSVisitor(Visitor):
         if currentNode.value == "break":
             currentid = self.currentLoop.pop()
             #print(currentid)
-            self.llvm += "br label %" + "CONTINUE" + currentid[0] + "            ;break\n"
+            self.llvm += "j $" + "CONT" + currentid[0] + "\n"
             self.llvm += "BREAK"
             self.currentLoop.append((currentid[0], "break"))
         elif currentNode.value == "continue":
             currentid = self.currentLoop.pop()
             #print(currentid)
-            self.llvm += "br label %" + "CONDITION" + currentid[0] + "            ;continue\n"
+            self.llvm += "j $" + "COND" + currentid[0] + "\n"
             self.llvm += "NEXTLOOP"
             self.currentLoop.append((currentid[0], "continue"))
         elif currentNode.value == "return":
@@ -406,25 +471,39 @@ class AST2MIPSVisitor(Visitor):
             #print(currentNode.type)
             if currentNode.type == "int":
                 if result[2] == "reg":
-                    reg = self.loadRegister(result[0])
+                    print(result)
+                    #reg = self.loadRegister(result[0])
+                    '''
                     self.llvm += "ret i32 " + str(reg) + "\n"
+                    '''
+                    self.llvm += "move $v0, " + str(result[0]) + "\n"
                 else:
-                    self.llvm += "ret i32 " + str(result[0]) + "\n"
+                    self.llvm += "lw $v0, " + str(result[0]) + "($fp)\n"
             if currentNode.type == "float":
+                print("RETURN")
+                print(result)
                 if result[2] == "reg":
+                    '''
                     reg = self.loadRegister(result[0])
                     self.llvm += "ret float " + str(reg) + "\n"
+                    '''
+                    self.llvm += "mfc1 $v0, " + str(result[0]) + "\n"
                 else:
-                    self.llvm += "ret float " + str(result[0]) + "\n"
+                    self.llvm += "lw $v0, " + str(result[0]) + "($fp)\n"
             if currentNode.type == "char":
                 if result[2] == "reg":
+                    '''
                     reg = self.loadRegister(result[0])
                     self.llvm += "ret i8 " + str(reg) + "\n"
+                    '''
+                    self.llvm += "move $v0, " + str(result[0]) + "\n"
                 else:
-                    self.llvm += "ret i8 " + str(result[0]) + "\n"
+                    self.llvm += "lw $v0, " + str(result[0]) + "($fp)\n"
             if currentNode.type == "void":
+                '''
                 self.llvm += "ret void\n"
-            self.instr += 1
+                '''
+            #self.instr += 1
             context = self.context.pop()
             context.hasReturn = True
             self.context.append(context)
@@ -668,12 +747,21 @@ class AST2MIPSVisitor(Visitor):
                 return currentNode
         else:
             symbol = self.currentTable.lookup(currentNode.value)
+            print(symbol)
             type = symbol.type
+            mem = "$fp"
+            print("RAAAAAAAAAAAAA")
+            print(symbol.register)
+            register = symbol.register
+            if symbol.register == "global":
+                self.llvm += "la $at, " + str(currentNode.value) + "\n"
+                mem = "$at"
+                register = "0"
             if type == "int":
                 reg = self.FCStack.getFreeTempReg()
                 print("reg: " + str(reg))
                 print("address:" + symbol.register)
-                self.llvm += "lw $t" + str(reg) + " , " + symbol.register + "($fp)\n"
+                self.llvm += "lw $t" + str(reg) + " , " + register + "(" + str(mem) + ")\n"
                 reg = "$t" + str(reg)
                 #self.llvm += "%" + str(self.instr) + " = load i32, i32* " + str(
                     #symbol.register) + ", align 4\n"
@@ -681,7 +769,7 @@ class AST2MIPSVisitor(Visitor):
                 self.FCStack.addTempReg(str(reg))
             if type == "float":
                 reg = self.FCStack.getFreeFTempReg()
-                self.llvm += "lwc1 $f" + str(reg) + " , " + symbol.register + "($fp)\n"
+                self.llvm += "lwc1 $f" + str(reg) + " , " + register + "(" + str(mem) + ")\n"
                 reg = "$f" + str(reg)
                 self.FCStack.addTempReg(str(reg))
                 #self.llvm += "%" + str(self.instr) + " = load float, float* " + str(
@@ -691,7 +779,7 @@ class AST2MIPSVisitor(Visitor):
                 reg = self.FCStack.getFreeTempReg()
                 print("reg: " + str(reg))
                 print("address:" + symbol.register)
-                self.llvm += "lw $t" + str(reg) + " , " + symbol.register + "($fp)\n"
+                self.llvm += "lw $t" + str(reg) + " , " + register + "(" + str(mem) + ")\n"
                 reg = "$t" + str(reg)
                 #self.llvm += "%" + str(self.instr) + " = load i32, i32* " + str(
                     #symbol.register) + ", align 4\n"
@@ -706,7 +794,7 @@ class AST2MIPSVisitor(Visitor):
                 self.instr += 1
                 '''
                 reg = self.FCStack.getFreeTempReg()
-                self.llvm += "lw $t" + str(reg) + " , " + symbol.register + "($fp)\n"
+                self.llvm += "lw $t" + str(reg) + " , " + register + "($fp)\n"
                 reg = "$t" + str(reg)
                 self.FCStack.addTempReg(str(reg))
                 return (str(reg), type, "reg", currentNode.value)
@@ -720,7 +808,7 @@ class AST2MIPSVisitor(Visitor):
                 return ("%"+str(self.instr - 1), type[:-1], "reg", currentNode.value)
                 '''
                 reg = self.FCStack.getFreeTempReg()
-                self.llvm += "lw $t" + str(reg) + " , " + symbol.register + "($fp)\n"
+                self.llvm += "lw $t" + str(reg) + " , " + register + "($fp)\n"
                 reg = "$t" + str(reg)
                 self.FCStack.addTempReg(str(reg))
                 return (str(reg), type, "reg", currentNode.value)
@@ -733,7 +821,7 @@ class AST2MIPSVisitor(Visitor):
                 return ("%"+str(self.instr - 1), type[:-1], "reg", currentNode.value)
                 '''
                 reg = self.FCStack.getFreeTempReg()
-                self.llvm += "lw $t" + str(reg) + " , " + symbol.register + "($fp)\n"
+                self.llvm += "lw $t" + str(reg) + " , " + register + "($fp)\n"
                 reg = "$t" + str(reg)
                 self.FCStack.addTempReg(str(reg))
                 return (str(reg), type, "reg", currentNode.value)
@@ -828,7 +916,9 @@ class AST2MIPSVisitor(Visitor):
 
         for child in currentNode.children:
             if isinstance(child, Variable):
-                symbol = self.currentTable.lookup(child.value)
+                print(child.value)
+                symbol = self.currentTable.lookupUnallocated(child.value)
+                print(symbol)
                 if symbol:
                     newType = symbol.type
                 if BinType is None:
@@ -837,7 +927,7 @@ class AST2MIPSVisitor(Visitor):
                     BinType = newType
                 #print("Variable")
             if isinstance(child, Variable):
-                newType = self.currentTable.lookup(child.value).type
+                newType = self.currentTable.lookupUnallocated(child.value).type
                 if BinType is None:
                     BinType = newType
                 elif newType == "float":
@@ -1191,6 +1281,7 @@ class AST2MIPSVisitor(Visitor):
                         self.llvm += "c.lt.s " + str(leftvalue) + ", $f" + str(reg) + "\n"
                     elif isinstance(currentNode.children[0], Constant):
                         packed = struct.pack("f", leftvalue)
+                        unpacked = struct.unpack("<I", packed)[0]
                         unpacked = struct.unpack("<I", packed)[0]
                         leftvalue = hex(unpacked)
                         self.llvm += "li $at, " + str(leftvalue) + "\n"
@@ -1822,23 +1913,35 @@ class AST2MIPSVisitor(Visitor):
                         value = int(value[0])
                     except ValueError:
                         print("Cannot be converted")
+                    '''
                     vartype = ltype.replace("int", "i32")
                     self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value) + ", align 4\n"
                     self.currentTable.insertRegister(var, "@"+str(var))
+                    '''
+                    self.data += str(var) + ": .word 0\n"
+                    self.currentTable.insertRegister(var, "global")
                 elif "float" in ltype:
                     try:
                         value = float(value[0])
                     except ValueError:
                         print("Cannot be converted")
+                    '''
                     packed = struct.pack("f", value)
                     unpacked = struct.unpack("f", packed)[0]
                     vartype = ltype.replace("float", "float")
                     self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value) + ", align 4\n"
                     self.currentTable.insertRegister(var, "@"+str(var))
+                    '''
+                    self.data += str(var) + ": .float 0.0\n"
+                    self.currentTable.insertRegister(var, "global")
                 elif "char" in ltype:
+                    '''
                     vartype = ltype.replace("char", "i8")
                     self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str("0") + ", align 1\n"
                     self.currentTable.insertRegister(var, "@"+str(var))
+                    '''
+                    self.data += str(var) + ": .byte 0\n"
+                    self.currentTable.insertRegister(var, "global")
         else:
             var = currentNode.var
             node = self.currentTable.lookupUnallocated(var)
@@ -1899,26 +2002,39 @@ class AST2MIPSVisitor(Visitor):
                         value = int(value[0])
                     except ValueError:
                         print("Cannot be converted")
+                    '''
                     vartype = ltype.replace("int", "i32")
                     self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value) + ", align 4\n"
                     self.currentTable.insertRegister(var, "@"+str(var))
+                    '''
+                    self.data += str(var) + ": .word " + str(value) + "\n"
+                    self.currentTable.insertRegister(var, "global")
                 elif "float" in ltype:
                     try:
                         value = float(value[0])
                     except ValueError:
                         print("Cannot be converted")
+
                     packed = struct.pack("f", value)
                     unpacked = struct.unpack("f", packed)[0]
+                    '''
                     vartype = ltype.replace("float", "float")
                     self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str(value) + ", align 4\n"
                     self.currentTable.insertRegister(var, "@"+str(var))
+                    '''
+                    self.data += str(var) + ": .float " + str(unpacked) + "\n"
+                    self.currentTable.insertRegister(var, "global")
                 elif "char" in ltype:
-                    value = value[0].replace("'", "")
-                    if len(value[0]) > 1:
-                        value = value[0].encode('utf-8').decode('unicode-escape')
+                    '''
                     vartype = ltype.replace("char", "i8")
                     self.llvm += "@" + str(var) + " = dso_local global " + str(vartype) + " " + str("0") + ", align 1\n"
                     self.currentTable.insertRegister(var, "@"+str(var))
+                    '''
+                    value = value[0].replace("'", "")
+                    if len(value) > 1:
+                        value = value.encode('utf-8').decode('unicode-escape')
+                    self.data += str(var) + ": .byte " + str(ord(value)) + "\n"
+                    self.currentTable.insertRegister(var, "global")
             '''
             # If we are assigning in global scope
             if self.currentTable.name == "Global":
@@ -1973,13 +2089,14 @@ class AST2MIPSVisitor(Visitor):
                 print(value)
                 print("Decl")
                 symbol = self.currentTable.lookup(currentNode.lvalue.var)
+                print(symbol)
                 print(symbol.register)
                 ltype = self.currentTable.lookup(currentNode.lvalue.var).type
+                print(ltype)
                 if value[1] == "address":
                     self.llvm += "addiu $at, $fp, " + str(value[0]) + " \n"
                     #context = self.FCStack.peek()
-                    self.llvm += "sw $at, " + str(symbol.register) + "($sp) \n"
-
+                    self.llvm += "sw $at, " + str(symbol.register) + "($fp) \n"
                 elif value[2] != "reg":
                     if ltype == "int":
                         try:
@@ -1992,7 +2109,7 @@ class AST2MIPSVisitor(Visitor):
                             #self.llvm += "store i32 " + str(value) + ", i32* " + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 4\n"
                             self.llvm += "addiu $at, $zero, " + str(value) + " \n"
                             context = self.FCStack.peek()
-                            self.llvm += "sw $at, " + str(symbol.register) + "($sp) \n"
+                            self.llvm += "sw $at, " + str(symbol.register) + "($fp) \n"
                             #context.offset -= 4
                             print("After assigning context offset is:" + str(context.offset))
                     elif ltype == "float":
@@ -2005,7 +2122,7 @@ class AST2MIPSVisitor(Visitor):
                         print(hex(unpacked))
                         self.llvm += "li $at, " + str(hex(unpacked)) + "\n"
                         #context = self.FCStack.peek()
-                        self.llvm += "sw $at, " + str(symbol.register) + "($sp) \n"
+                        self.llvm += "sw $at, " + str(symbol.register) + "($fp) \n"
                         #context.offset -= 4
                         #self.llvm += "store float " + str(unpacked) + ", float* " + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                     elif ltype == "char":
@@ -2014,7 +2131,7 @@ class AST2MIPSVisitor(Visitor):
                             value= value.encode('utf-8').decode('unicode-escape')
                         self.llvm += "li $at, " + str(ord(value)) + "\n"
                         #context = self.FCStack.peek()
-                        self.llvm += "sw $at, " + str(symbol.register) + "($sp) \n"
+                        self.llvm += "sw $at, " + str(symbol.register) + "($fp) \n"
                         #context.offset -= 4
                         #self.llvm += "store i8 " + str(ord(value)) + ", i8* " + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
                     elif ltype == "int*":
@@ -2038,7 +2155,7 @@ class AST2MIPSVisitor(Visitor):
                         print(value)
                         # self.llvm += "store i32 " + str(value) + ", i32* " + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 4\n"
                         context = self.FCStack.peek()
-                        self.llvm += "sw " + value[0] + ", " + str(symbol.register) + "($sp) \n"
+                        self.llvm += "sw " + value[0] + ", " + str(symbol.register) + "($fp) \n"
                         #context.offset -= 4
                         print("After assigning context offset is:" + str(context.offset))
                         self.FCStack.removeTempReg(value[0])
@@ -2047,13 +2164,13 @@ class AST2MIPSVisitor(Visitor):
                             self.llvm += "%" + str(self.instr) + " = sitofp i32 " + str(value[0]) + " to float\n"
                             self.instr += 1
                         context = self.FCStack.peek()
-                        self.llvm += "swc1 " + value[0] + ", " + str(symbol.register) + "($sp) \n"
+                        self.llvm += "swc1 " + value[0] + ", " + str(symbol.register) + "($fp) \n"
                         #context.offset -= 4
                         self.FCStack.removeTempReg(value[0])
                         #self.llvm += "store float %" + str(self.instr-1) + ", float* " + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                     elif ltype == "char":
                         context = self.FCStack.peek()
-                        self.llvm += "sw " + value[0] + ", " + str(symbol.register) + "($sp) \n"
+                        self.llvm += "sw " + value[0] + ", " + str(symbol.register) + "($fp) \n"
                         #context.offset -= 4
                         self.FCStack.removeTempReg(value[0])
                         #self.llvm += "store i8 " + str(value[0]) + ", i8* " + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 1\n"
@@ -2102,7 +2219,9 @@ class AST2MIPSVisitor(Visitor):
                 #print("Value")
                 #print(value)
                 #ltype = self.symbolTable.lookup(currentNode.lvalue.children[0].value).type
+                print(currentNode.lvalue.value)
                 symbol = self.currentTable.lookup(currentNode.lvalue.value)
+                print(symbol)
                 ltype = self.currentTable.lookup(currentNode.lvalue.value).type
                 #print(ltype)
                 #self.instr += 1
@@ -2114,11 +2233,19 @@ class AST2MIPSVisitor(Visitor):
                 if ltype == "char*":
                     self.llvm += "store i8* " + str(value[0]) + ", i8** " + str(reg[0]) + ", align 1\n"
                 '''
-
+                mem = "$fp"
+                glob = False
+                if reg[0] == "global":
+                    glob = True
+                    reg = self.FCStack.getFreeTempReg()
+                    self.FCStack.addTempReg("$t" + str(reg))
+                    mem = "$t" + str(reg)
+                    self.llvm += "la $t" + str(reg) + ", " + str(currentNode.lvalue.value) + "\n"
+                    reg = ("0")
                 if value[1] == "address":
                     self.llvm += "addiu $at, $fp, " + str(value[0]) + " \n"
                     context = self.FCStack.peek()
-                    self.llvm += "sw $at, " + str(reg[0]) + "($sp) \n"
+                    self.llvm += "sw $at, " + str(reg[0]) + "(" + str(mem) + ") \n"
                 elif value[2] != "reg":
                     if ltype == "int":
                         try:
@@ -2130,7 +2257,7 @@ class AST2MIPSVisitor(Visitor):
                             #self.llvm += "store i32 " + str(value) + ", i32* " + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 4\n"
                             self.llvm += "addiu $at, $zero, " + str(value) + " \n"
                             context = self.FCStack.peek()
-                            self.llvm += "sw $at, " + str(reg[0]) + "($sp) \n"
+                            self.llvm += "sw $at, " + str(reg[0]) + "(" + str(mem) + ") \n"
                     elif ltype == "float":
                         try:
                             value = float(value[0])
@@ -2141,7 +2268,7 @@ class AST2MIPSVisitor(Visitor):
                         print(hex(unpacked))
                         self.llvm += "li $at, " + str(hex(unpacked)) + "\n"
                         context = self.FCStack.peek()
-                        self.llvm += "sw $at, " + str(reg[0]) + "($sp) \n"
+                        self.llvm += "sw $at, " + str(reg[0]) + "(" + str(mem) + ") \n"
                         #self.llvm += "store float " + str(unpacked) + ", float* " + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                     elif ltype == "char":
                         value = value[0].replace("'", "")
@@ -2149,7 +2276,7 @@ class AST2MIPSVisitor(Visitor):
                             value= value.encode('utf-8').decode('unicode-escape')
                         self.llvm += "li $at, " + str(ord(value)) + "\n"
                         context = self.FCStack.peek()
-                        self.llvm += "sw $at, " + str(reg[0]) + "($sp) \n"
+                        self.llvm += "sw $at, " + str(reg[0]) + "(" + str(mem) + ") \n"
                     if ltype == "int[]":
                         llvmtype = ltype.replace("int", "i32")
                         llvmtype = llvmtype.replace("[]", "")
@@ -2224,13 +2351,13 @@ class AST2MIPSVisitor(Visitor):
                         #print("test")
                 else:
                     if "int*" in ltype:
-                        self.llvm += "sw " + value[0] + ", " + str(reg[0]) + "($sp) \n"
+                        self.llvm += "sw " + value[0] + ", " + str(reg[0]) + "(" + str(mem) + ") \n"
                         self.FCStack.removeTempReg(value[0])
                     elif "float*" in ltype:
-                        self.llvm += "sw " + value[0] + ", " + str(reg[0]) + "($sp) \n"
+                        self.llvm += "sw " + value[0] + ", " + str(reg[0]) + "(" + str(mem) + ") \n"
                         self.FCStack.removeTempReg(value[0])
                     elif "char*" in ltype:
-                        self.llvm += "sw " + value[0] + ", " + str(reg[0]) + "($sp) \n"
+                        self.llvm += "sw " + value[0] + ", " + str(reg[0]) + "(" + str(mem) + ") \n"
                         self.FCStack.removeTempReg(value[0])
                     elif ltype == "int":
                         '''
@@ -2244,19 +2371,19 @@ class AST2MIPSVisitor(Visitor):
                         print(reg[0])
                         # self.llvm += "store i32 " + str(value) + ", i32* " + str(self.currentTable.lookup(currentNode.lvalue.var).register) + ", align 4\n"
                         context = self.FCStack.peek()
-                        self.llvm += "sw " + value[0] + ", " + str(reg[0]) + "($sp) \n"
+                        self.llvm += "sw " + value[0] + ", " + str(reg[0]) + "($fp) \n"
                         self.FCStack.removeTempReg(value[0])
                     elif ltype == "float":
                         if value[1] == "int":
                             self.llvm += "%" + str(self.instr) + " = sitofp i32 " + str(reg[0]) + " to float\n"
                             self.instr += 1
                         context = self.FCStack.peek()
-                        self.llvm += "swc1 " + value[0] + ", " + str(reg[0]) + "($sp) \n"
+                        self.llvm += "swc1 " + value[0] + ", " + str(reg[0]) + "($fp) \n"
                         self.FCStack.removeTempReg(value[0])
                         #self.llvm += "store float %" + str(self.instr-1) + ", float* " + self.currentTable.lookup(currentNode.lvalue.var).register + ", align 4\n"
                     elif ltype == "char":
                         context = self.FCStack.peek()
-                        self.llvm += "sw " + value[0] + ", " + str(reg[0]) + "($sp) \n"
+                        self.llvm += "sw " + value[0] + ", " + str(reg[0]) + "($fp) \n"
                         self.FCStack.removeTempReg(value[0])
                     if ltype == "int[]":
                         llvmtype = ltype.replace("int", "i32")
@@ -2280,7 +2407,8 @@ class AST2MIPSVisitor(Visitor):
                         llvmtype = ltype.replace("char", "i8")
                         llvmtype = llvmtype.replace("[]", "")
                         self.llvm += "store i8 " + str(value) + ", i8* %" + str(self.instr - 1) + ", align 4\n"
-
+                if glob:
+                    self.FCStack.removeTempReg(mem)
             else:
                 # In this case the lvalue is a pointer dereference
                 value = currentNode.rvalue.accept(self)

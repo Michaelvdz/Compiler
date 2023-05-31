@@ -91,13 +91,15 @@ def main(argv):
             #print("------- Creating LLVM IR -------")
             ST = copy.copy(STStack.tables[0])
             llvm = ""
-            LLVMCreator = AST2MIPSVisitor(llvm, STStack.tables[0])
+            data = ""
+            LLVMCreator = AST2MIPSVisitor(llvm, data, STStack.tables[0])
             optimizedTree.root.accept(LLVMCreator)
             #print(LLVMCreator.llvm)
             if outputmap != "":
                 outputmap += "/"
+            llvm = data + llvm
             llvm = open(outputmap + filename+".ll", "w")
-            llvm.write(LLVMCreator.llvm)
+            llvm.write(LLVMCreator.data+LLVMCreator.llvm)
             llvm.close()
             print(
                 "\n" + Fore.GREEN + "Compiler succeeded compiling " + filename + " with " + Fore.MAGENTA + str(ErrorAnalyser.warnings) + " warning(s)" + Fore.RESET + "\n")
