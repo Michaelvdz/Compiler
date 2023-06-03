@@ -34,6 +34,10 @@ class FCStack:
         function = self.functions.pop()
         self.functions.append(function)
         return function.getFreeTempReg()
+    def getFreeSReg(self):
+        function = self.functions.pop()
+        self.functions.append(function)
+        return function.getFreeSReg()
 
     def getFreeFTempReg(self):
         function = self.functions.pop()
@@ -70,12 +74,20 @@ class FunctionContext:
         self.regs[reg] = "used"
 
     def removeTempReg(self, reg):
-        self.regs.pop(reg)
+        try:
+            self.regs.pop(reg)
+        except:
+            print("nope")
 
     def getFreeFTempReg(self):
         print("Finding free F")
         for i in range(0, 31):
             if not self.regs.get("$f"+str(i)):
+                return i
+    def getFreeSReg(self):
+        print("Finding free S")
+        for i in range(0, 7):
+            if not self.regs.get("$s"+str(i)):
                 return i
 
 
