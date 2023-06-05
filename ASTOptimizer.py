@@ -93,11 +93,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -131,11 +135,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -174,11 +182,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -214,11 +226,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -248,11 +264,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -280,11 +300,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -312,11 +336,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -344,11 +372,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -376,11 +408,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -408,11 +444,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -440,11 +480,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -480,11 +524,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -520,11 +568,15 @@ class ASTOptimizer(Visitor):
                         return newnode
                     else:
                         newnode = BinaryOperation(currentNode.value)
+                        newnode.line = currentNode.line
+                        newnode.column = currentNode.column
                         for child in children:
                             newnode.adopt(child)
                         return newnode
                 else:
                     newnode = BinaryOperation(currentNode.value)
+                    newnode.line = currentNode.line
+                    newnode.column = currentNode.column
                     for child in children:
                         newnode.adopt(child)
                     return newnode
@@ -981,6 +1033,8 @@ class ASTOptimizer(Visitor):
         #print("PrintF")
         #print(self.vars)
         newNode = PrintF(currentNode.value)
+        newNode.line = currentNode.line
+        newNode.column = currentNode.column
         newNode.children = []
         newNode.args = []
         node = None

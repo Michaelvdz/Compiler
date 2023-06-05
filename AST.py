@@ -23,6 +23,8 @@ class ASTNode:
     value = ""
     children = []
     type = ""
+    line = 0
+    column = 0
     def __init__(self, name="Free"):
         #print("___init-ASTNode___");
         self.children = []
@@ -61,6 +63,8 @@ class Array(ASTNode):
     value = ""
     children = []
     size = ""
+    line = 0
+    column = 0
     def __init__(self, name="Free"):
         #print("___init-ASTNode___");
         self.children = []
@@ -97,6 +101,8 @@ class BinaryOperation(ASTNode):
     children = []
     value = ""
     type = ""
+    line = 0
+    column = 0
 
     def __init__(self, name):
         #print("___init-BinaryOperation___");
@@ -126,6 +132,8 @@ class Scope(ASTNode):
     name = ""
     children = []
     value = ""
+    line = 0
+    column = 0
 
     def __init__(self, name):
         #print("___init-BinaryOperation___");
@@ -155,6 +163,8 @@ class ExprLoop(ASTNode):
     name = ""
     children = []
     value = ""
+    line = 0
+    column = 0
 
     def __init__(self, name):
         #print("___init-BinaryOperation___");
@@ -187,6 +197,8 @@ class Conditional(ASTNode):
     condition = 0
     ifbody = 0
     elsebody = 0
+    line = 0
+    column = 0
 
 
     def __init__(self, name):
@@ -221,6 +233,8 @@ class While(ASTNode):
     body = 0
     beforeLoop = 0
     afterLoop = 0
+    line = 0
+    column = 0
 
 
     def __init__(self, name):
@@ -252,6 +266,8 @@ class Jump(ASTNode):
     value = ""
     children = []
     type = ""
+    line = 0
+    column = 0
     
     def __init__(self, name="Free"):
         #print("___init-ASTNode___");
@@ -295,6 +311,8 @@ class Function(ASTNode):
     params = []
     children = []
     totalParams = 0
+    line = 0
+    column = 0
     
     def __init__(self, name="Free"):
         #print("___init-ASTNode___");
@@ -333,6 +351,8 @@ class UnaryOperation(ASTNode):
     name = ""
     children = []
     value = ""
+    line = 0
+    column = 0
 
     def __init__(self, name):
         #print("___init-UnaryOperation___");
@@ -367,6 +387,8 @@ class Declaration(ASTNode):
     attr = ASTNode
     pointer = ASTNode
     array = 0
+    line = 0
+    column = 0
 
 
     def __init__(self, name):
@@ -404,6 +426,8 @@ class Pointer(ASTNode):
     type = ASTNode
     var = ASTNode
     attr = ASTNode
+    line = 0
+    column = 0
 
 
     def __init__(self, name):
@@ -438,6 +462,8 @@ class Constant(ASTNode):
     varName = ""
     varType = ""
     type = ""
+    line = 0
+    column = 0
 
     def __init__(self, value):
         #print("___init-Constant__");
@@ -457,6 +483,8 @@ class String(ASTNode):
     name = ""
     children = []
     value = ""
+    line = 0
+    column = 0
 
     def __init__(self, value):
         #print("___init-Constant__");
@@ -478,6 +506,8 @@ class PointerDeref(ASTNode):
     variable = ASTNode
 
     rvalue = False
+    line = 0
+    column = 0
 
     def __init__(self, value):
         #print("___init-Variable__")
@@ -503,6 +533,8 @@ class Variable(ASTNode):
     type = ""
     attr = ""
     rvalue = False
+    line = 0
+    column = 0
 
     def __init__(self, value):
         #print("___init-Variable__")
@@ -530,6 +562,8 @@ class ArrayVariable(ASTNode):
     lvalue = False
     index = ""
     size = ""
+    line = 0
+    column = 0
 
     def __init__(self, value):
         #print("___init-Variable__")
@@ -552,6 +586,8 @@ class Call(ASTNode):
     name = ""
     children = []
     value = ""
+    line = 0
+    column = 0
 
     def __init__(self, value):
         #print("___init-Variable__")
@@ -574,6 +610,8 @@ class UnaryOperator(ASTNode):
     name = ""
     children = []
     value = ""
+    line = 0
+    column = 0
 
     def __init__(self, value):
         #print("___init-UnaryOperator__");
@@ -598,6 +636,8 @@ class Assigment(ASTNode):
     value = ""
     lvalue = ASTNode
     rvalue = ASTNode
+    line = 0
+    column = 0
 
     def __init__(self, name):
         #print("___init-Assigment___");
@@ -626,6 +666,8 @@ class MLComment(ASTNode):
 
     value = ""
     name = ""
+    line = 0
+    column = 0
 
     def __init__(self, value):
         #print("___init-MLComment__");
@@ -644,6 +686,8 @@ class SLComment(ASTNode):
 
     value = ""
     name = ""
+    line = 0
+    column = 0
 
     def __init__(self, value):
         #print("___init-SLComment__");
@@ -662,6 +706,8 @@ class Include(ASTNode):
 
     value = ""
     name = ""
+    line = 0
+    column = 0
 
     def __init__(self, value):
         #print("___init-SLComment__");
@@ -683,6 +729,8 @@ class PrintF(ASTNode):
     children = []
     format = ""
     args = []
+    line = 0
+    column = 0
 
     def __init__(self, value):
         #print("___init-Printf__");
@@ -709,6 +757,8 @@ class ScanF(ASTNode):
     children = []
     format = ""
     args = []
+    line = 0
+    column = 0
 
     def __init__(self, value):
         #print("___init-Scanf__");

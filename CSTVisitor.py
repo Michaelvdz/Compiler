@@ -18,6 +18,9 @@ class CSTVisitor(CGrammarVisitor):
         #print("Prog")
         self.tree.Name = "Prog" + str(ctx.getRuleIndex())
         prog = ASTNode("Prog")
+        start = ctx.start
+        prog.line = start.line
+        prog.column = start.column
         for child in ctx.children:
             node = self.visit(child)
             if isinstance(node, ASTNode):
@@ -29,9 +32,15 @@ class CSTVisitor(CGrammarVisitor):
     def visitInstr(self, ctx):
         #print("Inst")
         instr = ASTNode("Inst")
+        start = ctx.start
+        instr.line = start.line
+        instr.column = start.column
         if ctx.stdio:
             #print(ctx.stdio.text)
             instr = Include("Inst")
+            start = ctx.start
+            instr.line = start.line
+            instr.column = start.column
             instr.value = ctx.stdio.text
             instr.name = ctx.stdio.text
             return instr
@@ -45,6 +54,9 @@ class CSTVisitor(CGrammarVisitor):
     def visitUnary_operator(self, ctx: CGrammarParser.Unary_operatorContext):
         #print("UnaryOperator")
         op = UnaryOperator(ctx.getText())
+        start = ctx.start
+        op.line = start.line
+        op.column = start.column
         return op
 
     # Visit a parse tree produced by CGrammarParser#unary_operator.
@@ -53,6 +65,9 @@ class CSTVisitor(CGrammarVisitor):
         if ctx.ass:
             #op = UnaryOperator("[]")
             array = ArrayVariable("[]")
+            start = ctx.start
+            array.line = start.line
+            array.column = start.column
             node = self.visit(ctx.ass)
             array.adopt(node)
             return array
@@ -64,6 +79,9 @@ class CSTVisitor(CGrammarVisitor):
     def visitFunction_call(self, ctx: CGrammarParser.Function_callContext):
         #print("Call")
         node = Call(ctx.iden.text+"()")
+        start = ctx.start
+        node.line = start.line
+        node.column = start.column
         if ctx.args:
             children = self.visit(ctx.args)
             node.children = children.children
@@ -106,6 +124,9 @@ class CSTVisitor(CGrammarVisitor):
                         newnode.adopt(node)
                 elif node is None:
                     newvar = Variable(ctx.iden.text)
+                    start = ctx.start
+                    newvar.line = start.line
+                    newvar.column = start.column
                     newnode.adopt(newvar)
                 else:
                     #print("DEEEEEEEEEEEEEES")
@@ -115,6 +136,9 @@ class CSTVisitor(CGrammarVisitor):
         else:
             if ctx.iden:
                 var = Variable(ctx.getText())
+                start = ctx.start
+                var.line = start.line
+                var.column = start.column
                 return var
         return self.visitChildren(ctx)
 
@@ -123,6 +147,9 @@ class CSTVisitor(CGrammarVisitor):
         #print("MulDivExpression")
         if ctx.getChildCount() > 1:
             binOp = BinaryOperation(ctx.op.text)
+            start = ctx.start
+            binOp.line = start.line
+            binOp.column = start.column
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, ASTNode):
@@ -136,6 +163,9 @@ class CSTVisitor(CGrammarVisitor):
         #print("AddSubExpression")
         if ctx.getChildCount() > 1:
             binOp = BinaryOperation(ctx.op.text)
+            start = ctx.start
+            binOp.line = start.line
+            binOp.column = start.column
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, ASTNode):
@@ -149,6 +179,9 @@ class CSTVisitor(CGrammarVisitor):
         #print("RelationalExpression")
         if ctx.getChildCount() > 1:
             relOp = BinaryOperation(ctx.op.text)
+            start = ctx.start
+            relOp.line = start.line
+            relOp.column = start.column
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, ASTNode):
@@ -162,6 +195,9 @@ class CSTVisitor(CGrammarVisitor):
         #print("LogicalExpression")
         if ctx.getChildCount() > 1:
             logOp = BinaryOperation(ctx.op.text)
+            start = ctx.start
+            logOp.line = start.line
+            logOp.column = start.column
             for child in ctx.children:
                 node = self.visit(child)
                 if isinstance(node, ASTNode):
@@ -173,6 +209,9 @@ class CSTVisitor(CGrammarVisitor):
     def visitAssignment_expression(self, ctx:CGrammarParser.Assignment_expressionContext):
         if ctx.assign:
             assign = Assigment(ctx.assign.text)
+            start = ctx.start
+            assign.line = start.line
+            assign.column = start.column
             assign.rvalue = self.visit(ctx.rvalue)
             assign.lvalue = self.visit(ctx.lvalue)
             assign.adopt(assign.lvalue)
@@ -185,6 +224,9 @@ class CSTVisitor(CGrammarVisitor):
         #print("Pointer")
         if self.deref:
             op = UnaryOperation("*")
+            start = ctx.start
+            op.line = start.line
+            op.column = start.column
             if ctx.ptr:
                 ptr = self.visit(ctx.ptr)
                 op.adopt(ptr)
@@ -192,6 +234,9 @@ class CSTVisitor(CGrammarVisitor):
             else:
                 return op
         pointer = Pointer("*")
+        start = ctx.start
+        pointer.line = start.line
+        pointer.column = start.column
         if ctx.ptr:
             ptr = self.visit(ctx.ptr)
             pointer.adopt(ptr)
@@ -200,6 +245,9 @@ class CSTVisitor(CGrammarVisitor):
     def visitDeclaration_specification(self, ctx:CGrammarParser.Declaration_specificationContext):
         #print("DeclarationSpecifier")
         decl = Declaration("VariableDeclartion")
+        start = ctx.start
+        decl.line = start.line
+        decl.column = start.column
         decl.attr = ""
         # Test for declaration/definition or just var assignment
         if ctx.typ:
@@ -226,6 +274,9 @@ class CSTVisitor(CGrammarVisitor):
                 else:
                     #print("En dees?")
                     var = ASTNode(ctx.var.text)
+                    start = ctx.start
+                    var.line = start.line
+                    var.column = start.column
                     decl.adopt(var)
                     decl.var = var.value
         else:
@@ -235,10 +286,16 @@ class CSTVisitor(CGrammarVisitor):
                 node = self.visit(ctx.ptr)
                 self.deref = False
                 op = PointerDeref("PtrDereference")
+                start = ctx.start
+                op.line = start.line
+                op.column = start.column
                 op.adopt(node)
                 #op = UnaryOperation(node.value)
                 #op.children = node.children
                 var = Variable(ctx.var.text)
+                start = ctx.start
+                var.line = start.line
+                var.column = start.column
                 #op.adopt(var)
                 op.variable = var
                 return op
@@ -246,6 +303,9 @@ class CSTVisitor(CGrammarVisitor):
                 #print("Creating array")
                 index = self.visit(ctx.arr)
                 node = ArrayVariable(ctx.var.text)
+                start = ctx.start
+                node.line = start.line
+                node.column = start.column
                 node.lvalue = True
                 node.index = index
                 return node
@@ -253,6 +313,9 @@ class CSTVisitor(CGrammarVisitor):
                 for child in ctx.children:
                     node = self.visit(child)
                     var = Variable(ctx.var.text)
+                    start = ctx.start
+                    var.line = start.line
+                    var.column = start.column
                     return var
         # We return decl if we have a declaration
         return decl
@@ -283,6 +346,9 @@ class CSTVisitor(CGrammarVisitor):
     def visitConditional_statement(self, ctx:CGrammarParser.Conditional_statementContext):
         #print("Conditional")
         node = Conditional("Conditional")
+        start = ctx.start
+        node.line = start.line
+        node.column = start.column
         condition = self.visit(ctx.condition)
         node.adopt(condition)
         node.condition = condition
@@ -298,6 +364,9 @@ class CSTVisitor(CGrammarVisitor):
     def visitExpr_loop(self, ctx:CGrammarParser.Expr_loopContext):
         #print("Looping expressions")
         loop = ExprLoop("Loop Expr")
+        start = ctx.start
+        loop.line = start.line
+        loop.column = start.column
         if ctx.children:
             for child in ctx.children:
                 node = self.visit(child)
@@ -313,6 +382,9 @@ class CSTVisitor(CGrammarVisitor):
             case "while":
                 #print("This is a while-loop")
                 node = While("Loop")
+                start = ctx.start
+                node.line = start.line
+                node.column = start.column
                 condition = self.visit(ctx.condition)
                 node.condition = condition
                 #node.adopt(condition)
@@ -324,6 +396,9 @@ class CSTVisitor(CGrammarVisitor):
             case "for":
                 #print("This is a for-loop")
                 node = While("Loop")
+                start = ctx.start
+                node.line = start.line
+                node.column = start.column
                 condition = self.visit(ctx.condition)
                 after = self.visit(ctx.after)
                 before = self.visit(ctx.before)
@@ -348,14 +423,23 @@ class CSTVisitor(CGrammarVisitor):
             case "break":
                 #print("This is a break")
                 node = Jump("break")
+                start = ctx.start
+                node.line = start.line
+                node.column = start.column
                 return node
             case "continue":
                 #print("This is a continue")
                 node = Jump("continue")
+                start = ctx.start
+                node.line = start.line
+                node.column = start.column
                 return node
             case "return":
                 #print("This is a return")
                 node = Jump("return")
+                start = ctx.start
+                node.line = start.line
+                node.column = start.column
                 if ctx.beforereturn:
                     beforereturn = self.visit(ctx.beforereturn)
                     node.adopt(beforereturn)
@@ -368,6 +452,9 @@ class CSTVisitor(CGrammarVisitor):
     def visitScope(self, ctx:CGrammarParser.ScopeContext):
         #print("Scope")
         node = Scope("UnnamedScope")
+        start = ctx.start
+        node.line = start.line
+        node.column = start.column
         for child in ctx.children:
             if not child.getText() == "{" and not child.getText() == "}":
                 childnode = self.visit(child)
@@ -381,6 +468,9 @@ class CSTVisitor(CGrammarVisitor):
     def visitParameterlist(self, ctx:CGrammarParser.ParameterlistContext):
         #print("Parameters")
         params = ASTNode("Params")
+        start = ctx.start
+        params.line = start.line
+        params.column = start.column
         if ctx.typ:
             typ = self.visit(ctx.typ)
             params.adopt(typ)
@@ -399,6 +489,9 @@ class CSTVisitor(CGrammarVisitor):
         #print("TEEEEEEEEEEEEEEEEEEEEEEEST")
         #print("Arguments")
         args = ASTNode("Arguments")
+        start = ctx.start
+        args.line = start.line
+        args.column = start.column
         if ctx.ass:
             ass = self.visit(ctx.ass)
             args.adopt(ass)
@@ -413,6 +506,9 @@ class CSTVisitor(CGrammarVisitor):
     def visitPrintfArgslist(self, ctx:CGrammarParser.PrintfArgslistContext):
         #print("TEEEEEEEEEEEEEEEEEEEEEEEST")
         args = ASTNode("Arguments")
+        start = ctx.start
+        args.line = start.line
+        args.column = start.column
         if ctx.string:
             node = String(ctx.string.text)
             #print(node.value)
@@ -440,6 +536,9 @@ class CSTVisitor(CGrammarVisitor):
         funcname = ctx.funcname.text
         #print(funcname)
         function = Function(str(funcname))
+        start = ctx.start
+        function.line = start.line
+        function.column = start.column
         function.returnType = returntype
         if ctx.param:
             #print("Function param:")
@@ -464,12 +563,18 @@ class CSTVisitor(CGrammarVisitor):
     def visitConstant(self, ctx: CGrammarParser.ConstantContext):
         #print("Constant")
         const = Constant(ctx.getText())
+        start = ctx.start
+        const.line = start.line
+        const.column = start.column
         return const
 
     # Visit a parse tree produced by CGrammarParser#type.
     def visitType(self, ctx:CGrammarParser.TypeContext):
         #print("Type")
         type = Variable("Variable")
+        start = ctx.start
+        type.line = start.line
+        type.column = start.column
         for child in ctx.children:
             node = self.visit(child)
             if isinstance(node, ASTNode):
@@ -488,6 +593,9 @@ class CSTVisitor(CGrammarVisitor):
         #print("Type")
         #print(ctx.typ.text)
         type = ASTNode(ctx.typ.text)
+        start = ctx.start
+        type.line = start.line
+        type.column = start.column
         type.type = "type"
         #print("EndOfTypeSpecifier")
         return type
@@ -496,6 +604,9 @@ class CSTVisitor(CGrammarVisitor):
     def visitReserved_word(self, ctx:CGrammarParser.Reserved_wordContext):
         #print("ReservedWord")
         word = ASTNode(ctx.getText())
+        start = ctx.start
+        word.line = start.line
+        word.column = start.column
         word.type = "reserved_word"
         return word
 
@@ -505,16 +616,28 @@ class CSTVisitor(CGrammarVisitor):
         #print("Comment--------------------------")
         if ctx.block:
             comment = MLComment(ctx.block.text)
+            start = ctx.start
+            comment.line = start.line
+            comment.column = start.column
         elif ctx.sl:
             comment = SLComment(ctx.sl.text)
+            start = ctx.start
+            comment.line = start.line
+            comment.column = start.column
         return comment
 
     def visitPrintf(self, ctx: CGrammarParser.PrintfContext):
         #print("Printf")
         printf = PrintF("Printf()")
+        start = ctx.start
+        printf.line = start.line
+        printf.column = start.column
         if ctx.form:
             form = ctx.form.text
             format = ASTNode(form)
+            start = ctx.start
+            format.line = start.line
+            format.column = start.column
             format.value = format.value.replace("\"", "")
             printf.format = format
             #print(ctx.form.text)
@@ -532,9 +655,15 @@ class CSTVisitor(CGrammarVisitor):
     def visitScanf(self, ctx: CGrammarParser.ScanfContext):
         #print("ScanF")
         printf = ScanF("Scanf()")
+        start = ctx.start
+        printf.line = start.line
+        printf.column = start.column
         if ctx.form:
             form = ctx.form.text
             format = ASTNode(form)
+            start = ctx.start
+            format.line = start.line
+            format.column = start.column
             printf.format = format
             #print(ctx.form.text)
         if ctx.args:

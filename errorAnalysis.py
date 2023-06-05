@@ -34,11 +34,11 @@ class errorAnalyser(Visitor):
         self.errors = 0
         self.warnings = 0
         self.include = False
+        self.currentFunction = 0
         main = self.currentTable.lookupAnalysis("main")
         if main == 0:
             print(
-                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
-                    self.lineNr) + ": main function not found \n")
+                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str("0") + ": main function not found \n")
             self.errors += 1
 
     def VisitASTNode(self, currentNode):
@@ -71,7 +71,7 @@ class errorAnalyser(Visitor):
         if file[0] != "stdio.h":
             print(
                 "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
-                    self.lineNr) + ": file not found '" + file[0] + "'\n")
+                    currentNode.line) + " column " + str(currentNode.column) +  ": file not found '" + file[0] + "'\n")
             self.errors += 1
         else:
             self.include = True
@@ -172,31 +172,32 @@ class errorAnalyser(Visitor):
             returnType = currentNode.returnType.value
             params = currentNode.params
             symbol = self.currentTable.lookupAnalysis(name)
+            self.currentFunction = name
             #print(symbol)
             #print(returnType)
 
             if symbol.defined == True:
                 print(
-                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
-                        self.lineNr) + ": function redefinition is not allowed '" + name + "'\n")
+                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + "line " + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": function redefinition is not allowed '" + name + "'\n")
                 self.errors += 1
 
             if self.currentTable.name != "Global":
                 print(
-                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
-                        self.lineNr) + ": function definition is not allowed in local scope '" + name + "'\n")
+                    "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + "line " + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": function definition is not allowed in local scope '" + name + "'\n")
                 self.errors += 1
             if symbol:
                 if returnType != symbol.type:
                     print(
-                        "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
-                            self.lineNr) + ": conflicting return types for definition of '" + name + "' '" + returnType + "' and '" + symbol.type + "'\n")
+                        "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + "line " + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": conflicting return types for definition of '" + name + "' '" + returnType + "' and '" + symbol.type + "'\n")
                     self.errors += 1
 
             if len(params) != len(symbol.params):
                 print(
                     "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
-                        self.lineNr) + ": conflicting amount of parameter of '" + name + "' '" + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": conflicting amount of parameter of '" + name + "' '" + str(
                         len(params)) + "' and '" + str(len(symbol.params)) + "'\n")
                 self.errors += 1
             else:
@@ -207,8 +208,8 @@ class errorAnalyser(Visitor):
                     parmType = self.getType(param)
                     if parmType != par:
                         print(
-                            "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
-                                self.lineNr) + ": conflicting parameter types for declaration of '" + name + "' '" + parmType + "' and '" + par + "'\n")
+                            "\n" + Fore.RED + "[ERROR]" + Fore.RESET  + "line " + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": conflicting parameter types for declaration of '" + name + "' '" + parmType + "' and '" + par + "'\n")
                         self.errors += 1
                     symbol.params.insert(i, par)
                     i += 1
@@ -225,7 +226,7 @@ class errorAnalyser(Visitor):
                     # Visit body
                     if currentNode.body:
                         currentNode.body.accept(self)
-
+            self.currentFunction = 0
             self.currentTable.analysisDone = True
             self.currentTable = self.currentTable.parent
         else:
@@ -244,13 +245,13 @@ class errorAnalyser(Visitor):
                     if returnType != symbol.type:
                         print(
                             "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
-                                self.lineNr) + ": conflicting return types for declaration of '" + name + "' '" + returnType + "' and '" + symbol.type + "'\n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": conflicting return types for declaration of '" + name + "' '" + returnType + "' and '" + symbol.type + "'\n")
                         self.errors += 1
 
                 if len(params) != len(symbol.params):
                     print(
                         "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
-                            self.lineNr) + ": conflicting amount of parameter of '" + name + "' '" + str(len(params)) + "' and '" + str(len(symbol.params)) + "'\n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": conflicting amount of parameter of '" + name + "' '" + str(len(params)) + "' and '" + str(len(symbol.params)) + "'\n")
                     self.errors += 1
                 else:
                     i = 0
@@ -259,7 +260,7 @@ class errorAnalyser(Visitor):
                         if param.type != par:
                             print(
                                 "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
-                                    self.lineNr) + ": conflicting parameter types for declaration of '" + name + "' '" + param.type + "' and '" + par + "'\n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": conflicting parameter types for declaration of '" + name + "' '" + param.type + "' and '" + par + "'\n")
                             self.errors += 1
                         symbol.params.insert(i, par)
                         i += 1
@@ -269,8 +270,8 @@ class errorAnalyser(Visitor):
                     if isinstance(param, Declaration):
                         if param.var in parameters:
                             print(
-                                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + str(
-                                    self.lineNr) + ": parameter redefinition in function '" + name + "', parameter '" + param.var + "'\n")
+                                "\n" + Fore.RED + "[ERROR]" + Fore.RESET + "line " + "line " + str(
+                                currentNode.line) + " column " + str(currentNode.column) +  ": parameter redefinition in function '" + name + "', parameter '" + param.var + "'\n")
                             self.errors += 1
                         else:
                             parameters.append(param.var)
@@ -310,25 +311,25 @@ class errorAnalyser(Visitor):
         if type1 == None or type2 == None:
             if type2 == None:
                 print(
-                    "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": use of undeclared identifier '" + currentNode.children[1].value + "'\n")
+                    "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + "line " + str(
+                        currentNode.children[1].line) + " column " + str(currentNode.children[1].column) +  ": use of undeclared identifier '" + currentNode.children[1].value + "'\n")
                 self.errors += 1
             if type1 == None:
                 print(
-                    "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": use of undeclared identifier '" + currentNode.children[0].value + "'\n")
+                    "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line "  + "line " + str(
+                            currentNode.children[0].line) + " column " + str(currentNode.children[0].column) +  ": use of undeclared identifier '" + currentNode.children[0].value + "'\n")
                 self.errors += 1
         else:
             if (("[]" in type1) and isinstance(currentNode.children[0], Variable)) or ("[]" in type2 and isinstance(currentNode.children[1], Variable)):
                 print(
                     "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": invalid operands(array) to binary expression: \n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": invalid operands(array) to binary expression: \n")
                 self.errors += 1
             else:
                 if (type1 != type2) and ((type2 != "Unknown") and (type1 != "Unknown")):
                     print(
                         "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": operation of incompatible types: " + str(type1) + " and " + str(type2) + "\n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": operation of incompatible types: " + str(type1) + " and " + str(type2) + "\n")
                     self.errors += 1
                 else:
                     currentNode.type = currentNode.children[0].type
@@ -411,19 +412,19 @@ class errorAnalyser(Visitor):
             if isinstance(currentNode.children[0], Constant) or isinstance(currentNode.children[0], BinaryOperation):
                 print(
                     "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": Dereference requires pointer operand \n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": Dereference requires pointer operand \n")
                 self.errors += 1
         if currentNode.value == "&":
             if isinstance(currentNode.children[0], Constant) or isinstance(currentNode.children[0], BinaryOperation):
                 print(
                     "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": Cannot take the address of a literal\n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": Cannot take the address of a literal\n")
                 self.errors += 1
         if currentNode.value == "++" or currentNode.value == "--":
             if isinstance(currentNode.children[0], Constant):
                 print(
                     "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": invalid unary operation on literal\n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": invalid unary operation on literal\n")
                 self.errors += 1
         for child in currentNode.children:
             node = child.accept(self)
@@ -447,24 +448,41 @@ class errorAnalyser(Visitor):
 
     def VisitJump(self, currentNode):
         # print("Jump")
+        if self.currentFunction != 0:
+            symbol = self.currentTable.lookupAnalysis(self.currentFunction)
         if currentNode.value == "continue":
             if not self.currentTable.loopInScopes():
                 print(
                     "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": continue statement not in loop statement\n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": continue statement not in loop statement\n")
                 self.errors += 1
         if currentNode.value == "break":
             if not self.currentTable.loopInScopes():
                 print(
                     "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": break statement not in loop statement\n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": break statement not in loop statement\n")
                 self.errors += 1
         if currentNode.value == "return":
             #print(self.currentTable.functionInScopes())
+            if currentNode.children:
+                if isinstance(currentNode.children[0], Constant):
+                    if self.getType(currentNode.children[0]) != symbol.type:
+                        print(
+                            "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
+                                currentNode.line) + " column " + str(
+                                currentNode.column) + ": return type mismatch expecting: '" + str(symbol.type) + "' and got: '" + self.getType(currentNode.children[0]) + "'\n")
+                        self.errors += 1
+                elif isinstance(currentNode.children[0], Variable):
+                    if self.getType(currentNode.children[0]) != symbol.type:
+                        print(
+                            "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
+                                currentNode.line) + " column " + str(
+                                currentNode.column) + ": return type mismatch expecting: '" + str(symbol.type) + "' and got: '" + self.getType(currentNode.children[0]) + "'\n")
+                        self.errors += 1
             if not self.currentTable.functionInScopes():
                 print(
-                    "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": return statement not in function statement\n")
+                    "\n" + Fore.RED + "[ERROR] " + Fore.RESET  + "line " + str(
+                            currentNode.line) + " column " + str(currentNode.column) +   ": return statement not in function statement\n")
                 self.errors += 1
         return currentNode
 
@@ -491,13 +509,13 @@ class errorAnalyser(Visitor):
 
                 if symbol.type == currType:
                     print(
-                        "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": redefinition of '" + currentNode.var + "'\n")
+                        "\n" + Fore.RED + "[ERROR] " + Fore.RESET  + "line " + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": redefinition of '" + currentNode.var + "'\n")
                     self.errors += 1
                 else:
                     print(
-                        "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": redefinition of '" + currentNode.var + "' with a different type: '" + currType + "' vs '" + symbol.type + "'\n")
+                        "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + "line " + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": redefinition of '" + currentNode.var + "' with a different type: '" + currType + "' vs '" + symbol.type + "'\n")
                     self.errors += 1
             else:
                 if "[]" in symbol.type:
@@ -505,7 +523,7 @@ class errorAnalyser(Visitor):
                     if arraySizeType != "int":
                         print(
                             "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                                self.lineNr) + ": size of array has non-integer type '" + arraySizeType + "'\n")
+                            currentNode.line) + " column " + str(currentNode.column) +   ": size of array has non-integer type '" + arraySizeType + "'\n")
                         self.errors += 1
                     else:
                         symbol.declared = True
@@ -551,41 +569,48 @@ class errorAnalyser(Visitor):
             self.lvalue = False
             currentNode.rvalue.accept(self)
             type2 = self.getType(currentNode.rvalue)
-            #print("Types")
-            #print(type1)
-            #print(type2)
+            print("Types")
+            print(type1)
+            print(type2)
             symbol = self.currentTable.lookupAnalysis(currentNode.lvalue.value)
             if type1 == None:
                 print(
                     "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": use of undeclared identifier '" + currentNode.lvalue.value + "'\n")
+                            currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": use of undeclared identifier '" + currentNode.lvalue.value + "'\n")
                 self.errors += 1
             if type1 != None and (type2 != None or type2 != "Unknown"):
                 if ("*" not in type1) and (type2 == "Address"):
                     print(
                         "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": Assignment of incompatible types: " + type1 + " and " + type2 + "\n")
+                            currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": Assignment of incompatible types: " + type1 + " and " + type2 + "\n")
                     self.errors += 1
                 elif (type1 != type2) and (type1 == "int" and type2 == "float"):
-                    print(
-                        "\n" + Fore.MAGENTA + "[WARNING] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": Possible information loss: " + type2 + " conversion to " + type1 + "\n")
-                    self.warnings += 1
+                    if self.errors == 0:
+                        print(
+                            "\n" + Fore.MAGENTA + "[WARNING] " + Fore.RESET + "line " + str(
+                                currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": Possible information loss: " + type2 + " conversion to " + type1 + "\n")
+                        self.warnings += 1
                 elif (type1 != type2) and (type1 == "char" and type2 == "int"):
-                    print(
-                        "\n" + Fore.MAGENTA + "[WARNING] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": Possible information loss: " + type2 + " conversion to " + type1 + "\n")
-                    self.warnings += 1
+                    if self.errors == 0:
+                        print(
+                            "\n" + Fore.MAGENTA + "[WARNING] " + Fore.RESET + "line " + str(
+                                currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": Possible information loss: " + type2 + " conversion to " + type1 + "\n")
+                        self.warnings += 1
                 elif (("*" not in type1) and (type2 == "Address")) and (type1 != type2):
                     print(
                         "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": Assignment of incompatible types: " + type1 + " and " + type2 + "\n")
+                            currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": Assignment of incompatible types: " + type1 + " and " + type2 + "\n")
+                    self.errors += 1
+                elif (type1 != type2) and (type2 == "void"):
+                    print(
+                        "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
+                            currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": Assignment of incompatible types: " + type1 + " and " + type2 + "\n")
                     self.errors += 1
             if symbol:
                 if symbol.attr == "const":
                     print(
                         "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": Cannot reassign constant: '" + currentNode.lvalue.value + "'\n")
+                            currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": Cannot reassign constant: '" + currentNode.lvalue.value + "'\n")
                     self.errors += 1
         elif isinstance(currentNode.lvalue, Declaration):
             #print("leftside, declaration")
@@ -599,12 +624,12 @@ class errorAnalyser(Visitor):
                 if symbol.type == currentNode.lvalue.type:
                     print(
                         "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": redefinition of '" + currentNode.lvalue.var + "'\n")
+                            currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": redefinition of '" + currentNode.lvalue.var + "'\n")
                     self.errors += 1
                 else:
                     print(
                         "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": redefinition of '" + currentNode.lvalue.var + "' with a different type: '" + currentNode.lvalue.type + "' vs '" + symbol.type + "'\n")
+                            currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": redefinition of '" + currentNode.lvalue.var + "' with a different type: '" + currentNode.lvalue.type + "' vs '" + symbol.type + "'\n")
                     self.errors += 1
             else:
                 symbol.defined = True
@@ -614,28 +639,30 @@ class errorAnalyser(Visitor):
             if type1 == None:
                 print(
                     "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": use of undeclared identifier '" + currentNode.lvalue.value + "'\n")
+                            currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": use of undeclared identifier '" + currentNode.lvalue.value + "'\n")
                 self.errors += 1
             if type1 != None and type2 != None:
                 if ("*" not in type1) and (type2 == "Address"):
                     print(
                         "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": Assignment of incompatible types: " + type1 + " and " + type2 + "\n")
+                            currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": Assignment of incompatible types: " + type1 + " and " + type2 + "\n")
                     self.errors += 1
                 elif (type1 != type2) and (type1 == "int" and type2 == "float"):
-                    print(
-                        "\n" + Fore.MAGENTA + "[WARNING] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": Possible information loss: " + type2 + " conversion to " + type1 + "\n")
-                    self.warnings += 1
+                    if self.errors == 0:
+                        print(
+                            "\n" + Fore.MAGENTA + "[WARNING] " + Fore.RESET  + "line " + str(
+                                currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": Possible information loss: " + type2 + " conversion to " + type1 + "\n")
+                        self.warnings += 1
                 elif (type1 != type2) and (type1 == "char" and type2 == "int"):
-                    print(
-                        "\n" + Fore.MAGENTA + "[WARNING] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": Possible information loss: " + type2 + " conversion to " + type1 + "\n")
-                    self.warnings += 1
+                    if self.errors == 0:
+                        print(
+                            "\n" + Fore.MAGENTA + "[WARNING] " + Fore.RESET + "line " + str(
+                                currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": Possible information loss: " + type2 + " conversion to " + type1 + "\n")
+                        self.warnings += 1
                 elif (("*" not in type1) and (type2 == "Address")) and (type1 != type2):
                     print(
                         "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": Assignment of incompatible types: " + type1 + " and " + type2 + "\n")
+                            currentNode.lvalue.line) + " column " + str(currentNode.lvalue.column) + ": Assignment of incompatible types: " + type1 + " and " + type2 + "\n")
                     self.errors += 1
         else:
             #print("Hier dan?")
@@ -657,13 +684,13 @@ class errorAnalyser(Visitor):
         if "[]" not in symbol.type:
             print(
                 "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                    self.lineNr) + ": subscripted value is not an array \n")
+                            currentNode.line) + " column " + str(currentNode.column) + ": subscripted value is not an array \n")
             self.errors += 1
         else:
             if indexType != "int" and indexType != "Unknown":
                 print(
                     "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": array index is not an integer \n")
+                            currentNode.line) + " column " + str(currentNode.column) + ": array index is not an integer \n")
                 self.errors += 1
 
         return currentNode
@@ -676,7 +703,7 @@ class errorAnalyser(Visitor):
             if not symbol:
                 print(
                     "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                        self.lineNr) + ": use of undeclared identifier '" + currentNode.value + "'\n")
+                            currentNode.line) + " column " + str(currentNode.column) + ": use of undeclared identifier '" + currentNode.value + "'\n")
                 self.errors += 1
         return currentNode
 
@@ -687,19 +714,19 @@ class errorAnalyser(Visitor):
         if not symbol:
             print(
                 "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                    self.lineNr) + ": undefined reference to function '" + currentNode.value + "'\n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": undefined reference to function '" + currentNode.value + "'\n")
             self.errors += 1
         else:
             if len(currentNode.children) != len(symbol.params):
                 if len(currentNode.children) < len(symbol.params):
                     print(
                         "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": too few arguments to function call '" + currentNode.value + "', expected '"+ str(len(symbol.params)) + "', have '" + str(len(currentNode.children)) + "'\n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": too few arguments to function call '" + currentNode.value + "', expected '"+ str(len(symbol.params)) + "', have '" + str(len(currentNode.children)) + "'\n")
                     self.errors += 1
                 if len(currentNode.children) > len(symbol.params):
                     print(
                         "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": too many arguments to function call '" + currentNode.value + "', expected '"+ str(len(symbol.params)) + "', have '" + str(len(currentNode.children)) + "'\n")
+                            currentNode.line) + " column " + str(currentNode.column) +  ": too many arguments to function call '" + currentNode.value + "', expected '"+ str(len(symbol.params)) + "', have '" + str(len(currentNode.children)) + "'\n")
                     self.errors += 1
             else:
                 if currentNode.children:
@@ -714,14 +741,14 @@ class errorAnalyser(Visitor):
                             if (type != paramtype) and (("*" not in paramtype) and (type == "address")):
                                 print(
                                     "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                                        self.lineNr) + ": incompatible types for function call '" + currentNode.value + "', expected '" + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": incompatible types for function call '" + currentNode.value + "', expected '" + str(
                                         paramtype) + "', have '" + str(type) + "'\n")
                                 self.errors += 1
                         else:
                             if (type != paramtype):
                                 print(
                                     "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                                        self.lineNr) + ": incompatible types for function call '" + currentNode.value + "', expected '" + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": incompatible types for function call '" + currentNode.value + "', expected '" + str(
                                         paramtype) + "', have '" + str(type) + "'\n")
                                 self.errors += 1
                         i += 1
@@ -741,8 +768,8 @@ class errorAnalyser(Visitor):
         #print("SEMANTIC ON PRINTING")
         if not self.include:
             print(
-                "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                    self.lineNr) + ": stdio.h not included \n")
+                "\n" + Fore.RED + "[ERROR] " + Fore.RESET  + "line " + str(
+                            currentNode.line) + " column " + str(currentNode.column) + ": stdio.h not included \n")
             self.errors += 1
             return currentNode
         else:
@@ -754,14 +781,14 @@ class errorAnalyser(Visitor):
             if len(args) != len(currentNode.args):
                 if len(args) > len(currentNode.args):
                     print(
-                        "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": too few arguments to printf function call, expected '" + str(
+                        "\n" + Fore.RED + "[ERROR] " + Fore.RESET  + "line " + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": too few arguments to printf function call, expected '" + str(
                             len(args)) + "', have '" + str(len(currentNode.args)) + "'\n")
                     self.errors += 1
                 if len(args) < len(currentNode.args):
                     print(
                         "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                            self.lineNr) + ": too many arguments to printf function call, expected '" + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": too many arguments to printf function call, expected '" + str(
                             len(args)) + "', have '" + str(len(currentNode.args)) + "'\n")
                     self.errors += 1
             #print(args)
@@ -772,21 +799,21 @@ class errorAnalyser(Visitor):
                     if type != None:
                         if (type == "int") and (("s" in args[i]) or ("c" in args[i]) or ("f" in args[i])):
                             print(
-                                "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                                    self.lineNr) + ": incompatible types for printf function call, expected '" + str(
+                                "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + "line " + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": incompatible types for printf function call, expected '" + str(
                                     args[i]) + "', have '" + str(type) + "'\n")
                             self.errors += 1
 
                         if (type == "float") and (("s" in args[i]) or ("c" in args[i]) or ("i" in args[i]) or ("d" in args[i])):
                             print(
-                                "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                                    self.lineNr) + ": incompatible types for printf function call, expected '" + str(
+                                "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + "line " + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": incompatible types for printf function call, expected '" + str(
                                     args[i]) + "', have '" + str(type) + "'\n")
                             self.errors += 1
                         if (type == "char") and (("i" in args[i]) or ("d" in args[i]) or ("f" in args[i])):
                             print(
-                                "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                                    self.lineNr) + ": incompatible types for printf function call, expected '" + str(
+                                "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + "line " + str(
+                            currentNode.line) + " column " + str(currentNode.column) +  ": incompatible types for printf function call, expected '" + str(
                                     args[i]) + "', have '" + str(type) + "'\n")
                             self.errors += 1
                     i += 1
@@ -802,7 +829,7 @@ class errorAnalyser(Visitor):
         if not self.include:
             print(
                 "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
-                    self.lineNr) + ": stdio.h not included \n")
+                            currentNode.line) + " column " + str(currentNode.column) + ": stdio.h not included \n")
             self.errors += 1
             return currentNode
         else:
