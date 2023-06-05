@@ -837,13 +837,22 @@ class ASTOptimizer(Visitor):
         #print(len(currentNode.children))
         #print(len(newNode.children))
         condition = currentNode.condition.accept(self)
+        neverTrue = False
+        if isinstance(condition, Constant):
+            if condition.value == "0":
+                neverTrue = True
         newNode.condition = condition
 
         ifbody = currentNode.ifbody.accept(self)
+        print(ifbody)
         newNode.ifbody = ifbody
         if currentNode.elsebody:
             elsebody = currentNode.elsebody.accept(self)
             newNode.elsebody = elsebody
+            if neverTrue:
+                return elsebody
+        if neverTrue:
+            return False
 
         return newNode
 
@@ -853,9 +862,11 @@ class ASTOptimizer(Visitor):
         newNode.children = []
         for child in currentNode.children:
             node = child.accept(self)
+            print(node)
             #print("Recieved node")
             #print(node.children)
-            newNode.children.append(node)
+            if node is not False:
+                newNode.children.append(node)
             if isinstance(node, Jump):
                 if node.value == "return":
                     #print("We zen hier")

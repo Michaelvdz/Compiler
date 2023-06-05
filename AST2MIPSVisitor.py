@@ -196,13 +196,21 @@ class AST2MIPSVisitor(Visitor):
                             self.llvm += "move $a" + str(argReg) + ", " + str(node[0]) + "\n"
                             argReg += 1
                         if type == "float":
+                            '''
                             self.llvm += "%" + str(self.instr) + " = load float, float* " + str(
                                 symbol.register) + ", align 4\n"
                             self.instr += 1
+                            '''
+                            self.llvm += "move $a" + str(argReg) + ", " + str(node[0]) + "\n"
+                            argReg += 1
                         if type == "char":
+                            '''
                             self.llvm += "%" + str(self.instr) + " = load i8, i8* " + str(
                                 symbol.register) + ", align 1\n"
                             self.instr += 1
+                            '''
+                            self.llvm += "move $a" + str(argReg) + ", " + str(node[0]) + "\n"
+                            argReg += 1
                     else:
                         if node[1] == "int":
                             '''
@@ -861,6 +869,7 @@ class AST2MIPSVisitor(Visitor):
                 return (str(reg), type, "reg", currentNode.value)
 
             if "int[]" in type:
+                '''
                 llvmtype = type.replace("int", "i32")
                 llvmtype = llvmtype.replace("[]", "")
                 size = symbol.size
@@ -869,7 +878,11 @@ class AST2MIPSVisitor(Visitor):
                     size) + " x " + llvmtype + "], [" + str(
                     size) + " x " + llvmtype + "]* " + register + ", i32 0, i32 0" + "\n"
                 self.instr += 1
+                '''
+                register = symbol.register
+                return (str(register), type, "address", currentNode.value)
             if "float[]" in type:
+                '''
                 llvmtype = type.replace("float", "float")
                 llvmtype = llvmtype.replace("[]", "")
                 size = symbol.size
@@ -878,6 +891,9 @@ class AST2MIPSVisitor(Visitor):
                     size) + " x " + llvmtype + "], [" + str(
                     size) + " x " + llvmtype + "]* " + register + ", i32 0, i32 0" + "\n"
                 self.instr += 1
+                '''
+                register = symbol.register
+                return (str(register), type, "address", currentNode.value)
             if "char[]" in type:
 
                 '''

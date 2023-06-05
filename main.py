@@ -76,7 +76,7 @@ def main(argv):
 
         ErrorAnalyser = errorAnalyser(STStack.tables[0])
         optimizedTree.root.accept(ErrorAnalyser)
-        if ErrorAnalyser.errors == 0 or 1:
+        if ErrorAnalyser.errors == 0:
             print("-------------- Generated Symbol tables -----------------")
             STStack.tables[0].print()
             print("--------------------------------------------------------")
@@ -98,7 +98,7 @@ def main(argv):
             if outputmap != "":
                 outputmap += "/"
             llvm = data + llvm
-            llvm = open(outputmap + filename+".ll", "w")
+            llvm = open(outputmap + filename+".asm", "w")
             llvm.write(LLVMCreator.data+LLVMCreator.llvm)
             llvm.close()
             print(
