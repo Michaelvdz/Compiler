@@ -6,8 +6,8 @@ int main() {
     int y = 1;
     float z = 3.0;
     char ch = 'x';
-    printf("%d", x);
-    printf("%d", y);
+    printf("%d, ", x);
+    printf("%d, ", y);
     printf("%f", z);
     return 0;
     //Should not print after return

@@ -465,14 +465,14 @@ class errorAnalyser(Visitor):
         if currentNode.value == "return":
             #print(self.currentTable.functionInScopes())
             if currentNode.children:
-                if isinstance(currentNode.children[0], Constant):
+                if isinstance(currentNode.children[0], Constant) and (self.currentFunction != 0):
                     if self.getType(currentNode.children[0]) != symbol.type:
                         print(
                             "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(
                                 currentNode.line) + " column " + str(
                                 currentNode.column) + ": return type mismatch expecting: '" + str(symbol.type) + "' and got: '" + self.getType(currentNode.children[0]) + "'\n")
                         self.errors += 1
-                elif isinstance(currentNode.children[0], Variable):
+                elif isinstance(currentNode.children[0], Variable) and (self.currentFunction != 0):
                     if self.getType(currentNode.children[0]) != symbol.type:
                         print(
                             "\n" + Fore.RED + "[ERROR] " + Fore.RESET + "line " + str(

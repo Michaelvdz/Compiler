@@ -25,6 +25,7 @@ class FCStack:
         self.functions.append(function)
         return function.offset
 
+
     def getRestoreOffset(self):
         function = self.functions.pop()
         self.functions.append(function)
@@ -32,6 +33,7 @@ class FCStack:
 
     def getFreeTempReg(self):
         function = self.functions.pop()
+        print(function)
         self.functions.append(function)
         return function.getFreeTempReg()
     def getFreeSReg(self):
@@ -54,6 +56,10 @@ class FCStack:
         self.functions.append(function)
         return function.removeTempReg(reg)
 
+    def empty(self):
+        for child in self.functions:
+            self.functions.remove(child)
+
 class FunctionContext:
 
     offset = 0
@@ -64,6 +70,7 @@ class FunctionContext:
     def __init__(self):
         offset = 0
         roffset = 0
+        self.regs = dict()
 
     def getFreeTempReg(self):
         for i in range(0, 7):
@@ -91,5 +98,8 @@ class FunctionContext:
         for i in range(0, 7):
             if not self.regs.get("$s"+str(i)):
                 return i
+
+    def empty(self):
+        self.regs.clear()
 
 

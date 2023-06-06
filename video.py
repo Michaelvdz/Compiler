@@ -26,7 +26,7 @@ for file in files:
         visitor = CSTVisitor(asttree)
         visitor.visit(tree)
 
-        print("Printing tree before optimization")
+        #print("Printing tree before optimization")
         astVisitor = ASTVisitor(filename + "_beforeOptimization", "videocompiled/dot/")
         asttree.root.accept(astVisitor)
         astVisitor.ast.render()
@@ -69,11 +69,13 @@ for file in files:
             # print("------- Creating LLVM IR -------")
             ST = copy.copy(STStack.tables[0])
             llvm = ""
-            LLVMCreator = AST2LLVMVisitor(llvm, STStack.tables[0])
+            data = ""
+            LLVMCreator = AST2MIPSVisitor(llvm, data, STStack.tables[0])
             optimizedTree.root.accept(LLVMCreator)
             # print(LLVMCreator.llvm)
-            llvm = open("videocompiled/" + filename + ".ll", "w")
-            llvm.write(LLVMCreator.llvm)
+            llvm = data + llvm
+            llvm = open("videocompiled/" + filename + ".asm", "w")
+            llvm.write(LLVMCreator.data+LLVMCreator.llvm)
             llvm.close()
             print(
                 "\n" + Fore.GREEN + "Compiler succeeded compiling " + filename + " with " + Fore.MAGENTA + str(

@@ -53,6 +53,7 @@ class AST2MIPSVisitor(Visitor):
 
         self.printstr.clear()
         self.FCStack = FCStack()
+        self.FCStack.empty()
 
     def allocateRegister(self, table, name, var):
         type = var.type
