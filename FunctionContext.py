@@ -33,7 +33,6 @@ class FCStack:
 
     def getFreeTempReg(self):
         function = self.functions.pop()
-        print(function)
         self.functions.append(function)
         return function.getFreeTempReg()
     def getFreeSReg(self):
