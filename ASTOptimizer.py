@@ -742,7 +742,7 @@ class ASTOptimizer(Visitor):
     def VisitPointer(self, currentNode):
         #print("Pointer")
         if self.deref:
-            print("Deref")
+            #print("Deref")
             newNode = UnaryOperation("*")
             for child in currentNode.children:
                 node = child.accept(self)
@@ -896,7 +896,7 @@ class ASTOptimizer(Visitor):
         newNode.condition = condition
 
         ifbody = currentNode.ifbody.accept(self)
-        print(ifbody)
+        #print(ifbody)
         newNode.ifbody = ifbody
         if currentNode.elsebody:
             elsebody = currentNode.elsebody.accept(self)
@@ -914,7 +914,7 @@ class ASTOptimizer(Visitor):
         newNode.children = []
         for child in currentNode.children:
             node = child.accept(self)
-            print(node)
+            #print(node)
             #print("Recieved node")
             #print(node.children)
             if node is not False:

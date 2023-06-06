@@ -237,7 +237,7 @@ class SymbolTable:
         return self
 
     def loopInScopes(self):
-        print(self.name)
+        #print(self.name)
         if "While" in self.name:
             return True
         else:

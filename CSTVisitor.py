@@ -480,7 +480,7 @@ class CSTVisitor(CGrammarVisitor):
         if ctx.param:
             param = self.visit(ctx.param)
             if isinstance(param, ASTNode):
-                print(len(param.children))
+                #print(len(param.children))
                 for child in param.children:
                     params.adopt(child)
         return params

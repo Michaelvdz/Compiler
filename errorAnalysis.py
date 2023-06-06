@@ -569,9 +569,9 @@ class errorAnalyser(Visitor):
             self.lvalue = False
             currentNode.rvalue.accept(self)
             type2 = self.getType(currentNode.rvalue)
-            print("Types")
-            print(type1)
-            print(type2)
+            #print("Types")
+            #print(type1)
+            #print(type2)
             symbol = self.currentTable.lookupAnalysis(currentNode.lvalue.value)
             if type1 == None:
                 print(
